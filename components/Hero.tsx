@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Calendar } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Locale } from '@/i18n/dictionaries';
 import Image from 'next/image';
 
@@ -16,8 +16,8 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Futuramente, este URL virá do Supabase (Admin)
-  const bannerImage = 'https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format&fit=crop'; 
+  // Banner temporário vibrante. Depois virá do admin.
+  const bannerImage = 'https://images.unsplash.com/photo-1583499871882-53e780b9a470?q=80&w=1920&auto=format&fit=crop'; 
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,61 +27,51 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
   };
 
   return (
-    <section className="relative h-[500px] md:h-[600px] flex items-center justify-center">
-      {/* Imagem de Fundo (Banner) */}
+    <section className="relative h-[550px] lg:h-[700px] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Image
           src={bannerImage}
-          alt="Cataratas do Iguaçu"
+          alt="Foz do Iguaçu"
           fill
-          className="object-cover"
+          className="object-cover scale-105 animate-pulse-slow-fade" // Leve movimento na imagem
           priority
         />
-        {/* Overlay gradiente para melhorar leitura do texto */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
+        {/* Gradiente mais rico usando as cores da marca */}
+        <div className="absolute inset-0 bg-gradient-to-r from-foz-azul-escuro/80 via-foz-azul-escuro/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foz-azul-escuro/90 via-transparent to-transparent" />
       </div>
 
-      {/* Conteúdo Central */}
-      <div className="relative z-10 w-full max-w-4xl px-4 text-center">
-        <span className="inline-block py-1 px-3 rounded-full bg-azul-foz/80 text-white text-sm font-bold mb-4 uppercase tracking-wider backdrop-blur-md">
-           Descubra Foz do Iguaçu
+      <div className="relative z-10 w-full max-w-5xl px-4 flex flex-col items-start lg:items-center lg:text-center">
+        <span className="inline-block py-1.5 px-4 rounded-full bg-foz-amarelo/90 text-foz-azul-escuro text-sm font-extrabold uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg animate-float">
+           ✨ Bem-vindo ao Paraíso
         </span>
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 font-serif leading-tight drop-shadow-lg">
+        <h1 className="text-5xl lg:text-7xl font-extrabold text-white mb-8 font-serif leading-tight drop-shadow-2xl max-w-4xl">
           {t.title}
         </h1>
-        <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto drop-shadow-md">
+        <p className="text-xl text-white/90 mb-12 max-w-2xl font-medium leading-relaxed drop-shadow-md hidden md:block">
           {t.subtitle}
         </p>
 
-        {/* Barra de Busca Estilo "Routes" */}
-        <form onSubmit={handleSearch} className="bg-white p-2 rounded-full shadow-2xl flex items-center max-w-2xl mx-auto transform hover:scale-[1.02] transition-all">
-           <div className="flex-1 flex items-center px-4 border-r border-gray-200">
-             <Search className="text-gray-400 w-5 h-5 flex-shrink-0 mr-3" />
+        {/* Barra de Busca Poderosa */}
+        <form onSubmit={handleSearch} className="w-full max-w-3xl bg-white p-2.5 rounded-full shadow-2xl flex items-center transform hover:scale-[1.01] transition-all duration-300 border-4 border-white/10 backdrop-blur-sm">
+           <div className="flex-1 flex items-center px-6">
+             <Search className="text-foz-azul-claro w-6 h-6 flex-shrink-0 mr-4" />
              <input 
                type="text"
-               placeholder={t.searchPlaceholder || "Pesquise por passeios, ingressos..."}
+               placeholder={t.searchPlaceholder || "Qual será sua próxima aventura?"}
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
+               className="w-full py-4 bg-transparent focus:outline-none text-foz-azul-escuro placeholder-foz-cinza/50 text-lg font-medium"
              />
            </div>
-           {/* Opcional: Adicionar DatePicker aqui no futuro se quiser igual à referência completa */}
            <button 
              type="submit"
-             className="bg-verde-principal hover:bg-verde-secundario text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 transition-colors"
+             className="bg-gradient-to-r from-foz-verde to-[#00b344] hover:from-foz-azul-escuro hover:to-foz-azul-claro text-white px-10 py-4 rounded-full font-bold text-lg flex items-center gap-3 transition-all duration-500 shadow-lg hover:shadow-xl"
            >
              <span className="hidden md:inline">{t.searchButton}</span>
-             <Search className="w-5 h-5 md:hidden" />
+             <Search className="w-6 h-6 md:hidden" />
            </button>
         </form>
-
-        {/* Tags Rápidas abaixo da busca */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2 text-sm text-white/80">
-           <span>Populares:</span>
-           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=cataratas`)} className="hover:text-white hover:underline">Cataratas</button> •
-           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=itaipu`)} className="hover:text-white hover:underline">Itaipu</button> •
-           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=parque-das-aves`)} className="hover:text-white hover:underline">Parque das Aves</button>
-        </div>
       </div>
     </section>
   );

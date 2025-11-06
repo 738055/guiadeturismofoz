@@ -4,20 +4,20 @@
 
 @layer base {
   body {
-    @apply bg-off-white text-cinza-texto font-sans;
+    @apply bg-foz-bege text-foz-cinza font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-azul-profundo;
+    @apply font-serif text-foz-azul-escuro font-bold;
   }
 }
 
-/* Scrollbar personalizada e mais bonita */
+/* Scrollbar moderna e colorida */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-foz-bege;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-azul-vibrante/50 hover:bg-azul-vibrante rounded-full;
+  @apply bg-foz-azul-claro/50 hover:bg-foz-azul-claro rounded-full border-2 border-foz-bege;
 }

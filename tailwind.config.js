@@ -10,28 +10,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // PALETA VIBRANTE BASEADA NA LOGO
-        'azul-profundo': '#0B3D91', // Azul escuro para textos principais e contrastes (mantido, mas usado com menos peso)
-        'azul-vibrante': '#00AEEF', // COR PRINCIPAL DE AÇÃO: Azul claro do pin. Usar em botões, links ativos, ícones.
+        // PALETA VIBRANTE "GUIA FOZ"
+        'foz-azul-escuro': '#002F6C', // Azul institucional forte (texto principal, headers)
+        'foz-azul-claro': '#00A3E0',  // Azul ciano vibrante (ícones, detalhes, links)
+        'foz-verde': '#009739',       // Verde bandeira (natureza, confirmações, preços)
+        'foz-amarelo': '#FFD100',     // Amarelo sol (CTAs, destaques, estrelas)
         
-        'verde-destaque': '#009B3A', // Verde bandeira para chamar atenção (preços, botões secundários, ícones de natureza)
-        'amarelo-sol': '#FFD700',    // Amarelo bandeira/sol para CTAs fortes, estrelas, ofertas.
-        
-        // Neutros mais quentes para evitar o "cinza morto"
-        'cinza-texto': '#2D3748',    // Um cinza azulado mais escuro e legível
-        'off-white': '#F7FAFC',      // Fundo levemente azulado/frio, melhor que cinza puro
+        // Neutros mais quentes para fundo
+        'foz-bege': '#F8F9FA',        // Fundo quase branco, mais acolhedor que cinza
+        'foz-cinza': '#4A5568',       // Texto secundário legível
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
         serif: ['var(--font-merriweather)', 'serif'],
       },
       boxShadow: {
-        'card': '0 4px 20px -2px rgba(0, 0, 0, 0.1)', // Sombra mais suave e moderna
-        'card-hover': '0 10px 30px -5px rgba(11, 61, 145, 0.2)', // Sombra colorida ao passar o mouse (azul-profundo)
+        'card': '0 8px 24px -4px rgba(0, 47, 108, 0.08)', // Sombra levemente azulada
+        'card-hover': '0 15px 40px -8px rgba(0, 163, 224, 0.25)', // Sombra vibrante ao passar o mouse
       },
       animation: {
-        'bounce-slow': 'bounce 3s infinite',
         'pulse-vibrant': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 3s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        }
       }
     },
   },
