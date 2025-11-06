@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Home",
+    "tours": "Tours",
+    "about": "About Us",
+    "contact": "Contact",
+    "faq": "FAQ"
+  },
+  "hero": {
+    "title": "When will you be in Foz do Iguaçu?",
+    "subtitle": "Discover unique experiences and build your personalized itinerary",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "searchButton": "Search Tours",
+    "selectDates": "Select your dates"
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "step1Title": "Choose your dates",
+    "step1Desc": "Tell us when you'll be in Foz do Iguaçu",
+    "step2Title": "Build your itinerary",
+    "step2Desc": "Add the tours that best suit you",
+    "step3Title": "Confirm on WhatsApp",
+    "step3Desc": "Complete your booking directly with our team"
+  },
+  "tours": {
+    "popular": "Popular Tours",
+    "from": "from",
+    "duration": "Duration",
+    "hours": "hours",
+    "addToCart": "Add to Itinerary",
+    "viewDetails": "View Details",
+    "availability": "Availability",
+    "selectDate": "Select a date",
+    "whatsIncluded": "What's included",
+    "whatsExcluded": "What's not included",
+    "gallery": "Gallery",
+    "category": "Category",
+    "location": "Location"
+  },
+  "filters": {
+    "title": "Filters",
+    "category": "Category",
+    "price": "Price",
+    "duration": "Duration",
+    "clear": "Clear Filters",
+    "apply": "Apply"
+  },
+  "cart": {
+    "title": "My Itinerary",
+    "empty": "Your itinerary is empty",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "adults": "Adults",
+    "children": "Children",
+    "date": "Date",
+    "people": "People",
+    "checkoutWhatsapp": "Complete Order via WhatsApp",
+    "continueShopping": "Continue Shopping",
+    "name": "Name",
+    "email": "Email",
+    "required": "Please fill in your name and email."
+  },
+  "tripadvisor": {
+    "title": "What our customers say",
+    "viewMore": "View more reviews on TripAdvisor"
+  },
+  "categories": {
+    "all": "All",
+    "adventure": "Adventure",
+    "nature": "Nature",
+    "shopping": "Shopping",
+    "culture": "Culture"
+  },
+  "footer": {
+    "about": "About Araucária Tourism",
+    "description": "Unique experiences in Foz do Iguaçu since 2010.",
+    "contact": "Contact",
+    "followUs": "Follow Us",
+    "rights": "All rights reserved"
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "subtitle": "We're here to help you plan your perfect trip",
+    "sendMessage": "Send Message",
+    "message": "Message",
+    "whatsappDirect": "Chat on WhatsApp"
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Your Foz do Iguaçu experience starts here"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error loading data. Please try again.",
+    "noResults": "No tours found for the selected criteria.",
+    "search": "Search",
+    "back": "Back"
+  }
+}

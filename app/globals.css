@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* Define as variáveis de fonte */
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-merriweather: 'Merriweather', serif;
+}
+
+/* Aplica as fontes via classes para o Tailwind */
+.font-sans {
+  font-family: var(--font-inter);
+}
+
+.font-serif {
+  font-family: var(--font-merriweather);
+}

@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "home": "Início",
+    "tours": "Passeios",
+    "about": "Sobre Nós",
+    "contact": "Contato",
+    "faq": "FAQ"
+  },
+  "hero": {
+    "title": "Quando você estará em Foz do Iguaçu?",
+    "subtitle": "Descubra experiências únicas e monte seu roteiro personalizado",
+    "startDate": "Data de Início",
+    "endDate": "Data de Fim",
+    "searchRoteiroButton": "Sugerir Roteiro",
+    "searchAllButton": "Ver todos os passeios",
+    "selectDates": "Selecione suas datas"
+  },
+  "howItWorks": {
+    "title": "Como Funciona",
+    "step1Title": "Escolha suas datas",
+    "step1Desc": "Informe quando você estará em Foz do Iguaçu",
+    "step2Title": "Monte seu roteiro",
+    "step2Desc": "Adicione os passeios que mais combinam com você",
+    "step3Title": "Confirme no WhatsApp",
+    "step3Desc": "Finalize sua reserva direto com nossa equipe"
+  },
+  "tours": {
+    "popular": "Passeios Populares",
+    "from": "a partir de",
+    "duration": "Duração",
+    "hours": "horas",
+    "addToCart": "Adicionar ao Roteiro",
+    "viewDetails": "Ver Detalhes",
+    "availability": "Disponibilidade",
+    "selectDate": "Selecione uma data",
+    "whatsIncluded": "O que está incluído",
+    "whatsExcluded": "O que não está incluído",
+    "gallery": "Galeria",
+    "category": "Categoria",
+    "location": "Localização"
+  },
+  "filters": {
+    "title": "Filtros",
+    "category": "Categoria",
+    "price": "Preço",
+    "duration": "Duração",
+    "clear": "Limpar Filtros",
+    "apply": "Aplicar"
+  },
+  "cart": {
+    "title": "Meu Roteiro",
+    "empty": "Seu roteiro está vazio",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "adults": "Adultos",
+    "children": "Crianças",
+    "date": "Data",
+    "people": "Pessoas",
+    "checkoutWhatsapp": "Finalizar Pedido via WhatsApp",
+    "continueShopping": "Continuar Comprando",
+    "name": "Nome",
+    "email": "Email",
+    "required": "Por favor, preencha seu nome e email."
+  },
+  "tripadvisor": {
+    "title": "O que nossos clientes dizem",
+    "viewMore": "Ver mais avaliações no TripAdvisor"
+  },
+  "categories": {
+    "all": "Todos",
+    "adventure": "Aventura",
+    "nature": "Natureza",
+    "shopping": "Compras",
+    "culture": "Cultura"
+  },
+  "footer": {
+    "about": "Sobre a Araucária Turismo",
+    "description": "Experiências únicas em Foz do Iguaçu desde 2010.",
+    "contact": "Contato",
+    "followUs": "Siga-nos",
+    "rights": "Todos os direitos reservados"
+  },
+  "contact": {
+    "title": "Entre em Contato",
+    "subtitle": "Estamos aqui para ajudar você a planejar sua viagem perfeita",
+    "sendMessage": "Enviar Mensagem",
+    "message": "Mensagem",
+    "whatsappDirect": "Falar no WhatsApp"
+  },
+  "about": {
+    "title": "Sobre Nós",
+    "subtitle": "Sua experiência em Foz do Iguaçu começa aqui"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro ao carregar dados. Tente novamente.",
+    "noResults": "Nenhum passeio encontrado para os critérios selecionados.",
+    "search": "Buscar",
+    "back": "Voltar"
+  }
+}
