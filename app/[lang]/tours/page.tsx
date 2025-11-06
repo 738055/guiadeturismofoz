@@ -1,13 +1,15 @@
-'use client'; // Esta página agora é interativa (filtros)
+// app/[lang]/tours/page.tsx
+'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { TourCard } from '@/components/TourCard';
+import { PageBanner } from '@/components/PageBanner';
 import { supabase } from '@/lib/supabase';
 import { Locale } from '@/i18n/dictionaries';
 import { Search, Loader2 } from 'lucide-react';
-import { Category, CategoryTranslation, Tour } from '@/lib/supabase'; // Importa tipos
+import { Category, Tour } from '@/lib/supabase';
 
-// Tipos combinados para o estado
+// Tipos auxiliares
 type TourWithDetails = Tour & {
   title: string;
   description: string;
@@ -17,9 +19,8 @@ type CategoryWithDetails = Category & {
   name: string;
   slug: string;
 };
-type Dictionary = any; // Tipo para o dicionário (simplificado)
+type Dictionary = any;
 
-// Props da Página
 interface ToursPageProps {
   params: { lang: Locale };
 }
@@ -29,44 +30,40 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
   const [categories, setCategories] = useState<CategoryWithDetails[]>([]);
   const [dict, setDict] = useState<Dictionary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bannerUrl, setBannerUrl] = useState('');
 
-  // Estados dos Filtros
+  // Estados de Filtro
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Carrega dados (passeios, categorias e traduções)
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Carrega o dicionário de traduções (pode ser otimizado)
+        // 1. Carrega Dicionário
         const dictionaryModule = await import(`@/i18n/locales/${lang}.json`);
-        const dictionary = dictionaryModule.default;
-        setDict(dictionary);
+        setDict(dictionaryModule.default);
 
-        // 1. Carrega Categorias (CORRIGIDO com fallback)
-        const { data: categoriesData, error: categoriesError } = await supabase
+        // 2. Carrega Banner Personalizado
+        const { data: bannerData } = await supabase
+          .from('site_settings')
+          .select('setting_value')
+          .eq('setting_key', 'banner_tours')
+          .single();
+        if (bannerData) {
+            setBannerUrl(bannerData.setting_value);
+        }
+
+        // 3. Carrega Categorias
+        const { data: categoriesData } = await supabase
           .from('categories')
-          .select(`
-            id,
-            category_translations!left(
-              name,
-              slug,
-              language_code
-            )
-          `);
-          // REMOVIDO: .eq('category_translations.language_code', lang);
+          .select('id, category_translations!left(name, slug, language_code)');
 
-        if (categoriesError) throw categoriesError;
-        
         const formattedCategories = (categoriesData || [])
           .map((cat: any) => {
-            const currentTranslation = cat.category_translations.find((t: any) => t.language_code === lang);
-            const fallbackTranslation = cat.category_translations.find((t: any) => t.language_code === 'pt_BR');
-            const translation = currentTranslation || fallbackTranslation;
-            
+            const translation = cat.category_translations.find((t: any) => t.language_code === lang) ||
+                                cat.category_translations.find((t: any) => t.language_code === 'pt_BR');
             if (!translation) return null;
-
             return {
               id: cat.id,
               name: translation.name,
@@ -76,8 +73,8 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
           .filter(Boolean) as CategoryWithDetails[];
         setCategories(formattedCategories);
 
-        // 2. Carrega Passeios (CORRIGIDO com fallback)
-        const { data: toursData, error: toursError } = await supabase
+        // 4. Carrega Passeios Ativos
+        const { data: toursData } = await supabase
           .from('tours')
           .select(`
             id,
@@ -85,47 +82,37 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
             duration_hours,
             location,
             category_id,
-            tour_translations!left(
-              title,
-              description,
-              language_code
-            ),
-            tour_images (
-              image_url,
-              display_order
-            )
+            is_active,
+            tour_translations!left(title, description, language_code),
+            tour_images(image_url, display_order)
           `)
           .eq('is_active', true)
-          // REMOVIDO: .eq('tour_translations.language_code', lang)
           .order('display_order', { referencedTable: 'tour_images', ascending: true });
 
-        if (toursError) throw toursError;
-
-        // --- LÓGICA DE FALLBACK ADICIONADA ---
         const formattedTours = (toursData || [])
           .map((tour: any) => {
-            const currentTranslation = tour.tour_translations.find((t: any) => t.language_code === lang);
-            const fallbackTranslation = tour.tour_translations.find((t: any) => t.language_code === 'pt_BR');
-            const translation = currentTranslation || fallbackTranslation;
+             // Lógica de Fallback de Idioma
+             const translation = tour.tour_translations.find((t: any) => t.language_code === lang) ||
+                                 tour.tour_translations.find((t: any) => t.language_code === 'pt_BR');
+             
+             if (!translation) return null;
 
-            if (!translation) return null;
-
-            return {
-              id: tour.id,
-              base_price: tour.base_price,
-              duration_hours: tour.duration_hours,
-              location: tour.location,
-              category_id: tour.category_id,
-              title: translation.title || '',
-              description: translation.description || '',
-              imageUrl: tour.tour_images.find((img: any) => img.display_order === 1 || img.display_order === 0)?.image_url || tour.tour_images[0]?.image_url
-            };
+             return {
+               id: tour.id,
+               base_price: tour.base_price,
+               duration_hours: tour.duration_hours,
+               location: tour.location,
+               category_id: tour.category_id,
+               title: translation.title,
+               description: translation.description,
+               imageUrl: tour.tour_images?.[0]?.image_url
+             };
           })
           .filter(Boolean) as TourWithDetails[];
         setTours(formattedTours);
 
       } catch (error) {
-        console.error('Error loading tours or categories:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
@@ -134,118 +121,117 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
     loadData();
   }, [lang]);
 
-  // Lógica de Filtro
+  // Lógica de Filtragem (Memoizada para performance)
   const filteredTours = useMemo(() => {
     return tours.filter(tour => {
-      // 1. Filtro de Categoria
+      // Filtro por Categoria
       const categoryMatch = selectedCategory === 'all' || tour.category_id === selectedCategory;
-
-      // 2. Filtro de Busca (Título ou Descrição)
+      
+      // Filtro por Busca (Título ou Descrição)
       const query = searchQuery.toLowerCase();
-      const searchMatch = query === '' ||
-        tour.title.toLowerCase().includes(query) ||
-        tour.description.toLowerCase().includes(query);
+      const searchMatch = query === '' || 
+                          tour.title.toLowerCase().includes(query) || 
+                          tour.description.toLowerCase().includes(query);
 
       return categoryMatch && searchMatch;
     });
   }, [tours, searchQuery, selectedCategory]);
 
-
   if (loading || !dict) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-verde-principal" />
       </div>
     );
   }
 
-  // Textos do dicionário
-  const tNav = dict.nav;
+  // Atalhos para traduções
   const tCat = dict.categories;
   const tCommon = dict.common;
   const tTours = dict.tours;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-[60vh]">
-      {/* Header da Página */}
-      <div className="mb-8">
-        <h1
-          className="text-3xl md:text-4xl font-bold text-verde-principal mb-2"
-          style={{ fontFamily: 'var(--font-merriweather)' }}
-        >
-          {tNav.tours}
-        </h1>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      
+      {/* Banner da Página */}
+      <PageBanner 
+        title={tTours.title} 
+        subtitle={tTours.subtitle}
+        // Usa o banner do banco ou um fallback padrão do Unsplash
+        image={bannerUrl || "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format&fit=crop"}
+      />
 
-      {/* Barra de Filtros */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        {/* Barra de Busca */}
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder={tCommon.search + '...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         
-      {/* Filtros de Categoria */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-4 py-2 rounded-full font-medium transition-colors ${
-            selectedCategory === 'all'
-              ? 'bg-verde-principal text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          {tCat.all}
-        </button>
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-full font-medium transition-colors ${
-              selectedCategory === cat.id
-                ? 'bg-verde-principal text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+        {/* Barra de Filtros (Sobreposta ao Banner) */}
+        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg mb-12 -mt-20 relative z-20">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            
+            {/* Campo de Busca */}
+            <div className="relative w-full md:flex-1">
+              <input
+                type="text"
+                placeholder={tCommon.search + '...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-100 rounded-xl focus:ring-0 focus:border-verde-principal transition-all text-gray-700 font-medium"
+              />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
+
+            {/* Botões de Categoria (Scroll horizontal no mobile) */}
+             <div className="w-full md:w-auto flex overflow-x-auto pb-2 md:pb-0 gap-3 scrollbar-hide">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
+                    selectedCategory === 'all' 
+                      ? 'bg-verde-principal text-white shadow-md transform scale-105' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {tCat.all}
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
+                      selectedCategory === cat.id 
+                        ? 'bg-verde-principal text-white shadow-md transform scale-105' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Grid de Resultados */}
+        {filteredTours.length === 0 ? (
+          <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <p className="text-gray-500 text-xl font-medium">{tCommon.noResults}</p>
+            <button 
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                className="mt-4 text-verde-principal hover:underline font-semibold"
+            >
+                Limpar filtros
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredTours.map(tour => (
+              <TourCard
+                key={tour.id}
+                tour={tour}
+                dict={tTours}
+                lang={lang}
+              />
+            ))}
+          </div>
+        )}
       </div>
-
-
-      {/* Grid de Passeios */}
-      {filteredTours.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-500 text-lg">{tCommon.noResults}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredTours.map(tour => (
-            <TourCard
-              key={tour.id}
-              tour={{
-                id: tour.id,
-                title: tour.title,
-                description: tour.description,
-                price: tour.base_price,
-                duration: tour.duration_hours,
-                location: tour.location,
-                imageUrl: tour.imageUrl
-              }}
-              dict={tTours}
-              lang={lang}
-              query="" // Sem query de data, pois esta é a página de "todos"
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -1,101 +1,136 @@
 {
   "nav": {
     "home": "Início",
-    "tours": "Passeios",
+    "products": "Passeios",
+    "combos": "Combos",
+    "blog": "Dicas",
     "about": "Sobre Nós",
-    "contact": "Contato",
-    "faq": "FAQ"
+    "contact": "Contato"
   },
   "hero": {
-    "title": "Quando você estará em Foz do Iguaçu?",
-    "subtitle": "Descubra experiências únicas e monte seu roteiro personalizado",
+    "title": "Sua aventura perfeita em Foz começa aqui",
+    "subtitle": "Explore as melhores experiências nas Cataratas e região",
     "startDate": "Data de Início",
     "endDate": "Data de Fim",
     "searchRoteiroButton": "Sugerir Roteiro",
     "searchAllButton": "Ver todos os passeios",
-    "selectDates": "Selecione suas datas"
+    "searchPlaceholder": "O que você quer viver em Foz?",
+    "searchButton": "Buscar"
   },
-  "howItWorks": {
-    "title": "Como Funciona",
-    "step1Title": "Escolha suas datas",
-    "step1Desc": "Informe quando você estará em Foz do Iguaçu",
-    "step2Title": "Monte seu roteiro",
-    "step2Desc": "Adicione os passeios que mais combinam com você",
-    "step3Title": "Confirme no WhatsApp",
-    "step3Desc": "Finalize sua reserva direto com nossa equipe"
+  "categoriesSection": {
+    "title": "Explore por Experiência",
+    "subtitle": "Navegue pelas principais atrações e encontre seu estilo de viagem",
+    "falls": "Cataratas",
+    "nature": "Natureza & Animais",
+    "adventure": "Aventura",
+    "shopping": "Compras",
+    "cultural": "Cultural & Itaipu"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "apply": "Aplicar",
+    "clear": "Limpar",
+    "noResults": "Nenhum resultado encontrado.",
+    "error": "Ocorreu um erro ao carregar os dados.",
+    "whatsapp": "Falar no WhatsApp",
+    "readMore": "Leia Mais"
   },
   "tours": {
-    "popular": "Passeios Populares",
+    "title": "Passeios & Ingressos",
+    "subtitle": "As melhores atrações de Foz do Iguaçu",
     "from": "a partir de",
     "duration": "Duração",
     "hours": "horas",
-    "addToCart": "Adicionar ao Roteiro",
     "viewDetails": "Ver Detalhes",
-    "availability": "Disponibilidade",
-    "selectDate": "Selecione uma data",
     "whatsIncluded": "O que está incluído",
     "whatsExcluded": "O que não está incluído",
-    "gallery": "Galeria",
-    "category": "Categoria",
-    "location": "Localização"
-  },
-  "filters": {
-    "title": "Filtros",
-    "category": "Categoria",
-    "price": "Preço",
-    "duration": "Duração",
-    "clear": "Limpar Filtros",
-    "apply": "Aplicar"
-  },
-  "cart": {
-    "title": "Meu Roteiro",
-    "empty": "Seu roteiro está vazio",
-    "subtotal": "Subtotal",
-    "total": "Total",
-    "adults": "Adultos",
-    "children": "Crianças",
-    "date": "Data",
-    "people": "Pessoas",
-    "checkoutWhatsapp": "Finalizar Pedido via WhatsApp",
-    "continueShopping": "Continuar Comprando",
-    "name": "Nome",
-    "email": "Email",
-    "required": "Por favor, preencha seu nome e email."
-  },
-  "tripadvisor": {
-    "title": "O que nossos clientes dizem",
-    "viewMore": "Ver mais avaliações no TripAdvisor"
+    "availability": "Disponibilidade",
+    "selectDate": "Selecione uma data",
+    "addToCart": "Adicionar ao Roteiro"
   },
   "categories": {
     "all": "Todos",
     "adventure": "Aventura",
     "nature": "Natureza",
     "shopping": "Compras",
-    "culture": "Cultura"
+    "cultural": "Cultura"
   },
-  "footer": {
-    "about": "Sobre a Araucária Turismo",
-    "description": "Experiências únicas em Foz do Iguaçu desde 2010.",
-    "contact": "Contato",
-    "followUs": "Siga-nos",
-    "rights": "Todos os direitos reservados"
+  "combos": {
+    "title": "Combos Especiais",
+    "subtitle": "Economize aproveitando o melhor de Foz em pacotes exclusivos",
+    "noCombos": "Nenhum combo disponível no momento."
   },
-  "contact": {
-    "title": "Entre em Contato",
-    "subtitle": "Estamos aqui para ajudar você a planejar sua viagem perfeita",
-    "sendMessage": "Enviar Mensagem",
-    "message": "Mensagem",
-    "whatsappDirect": "Falar no WhatsApp"
+  "blog": {
+    "title": "Dicas & Curiosidades",
+    "subtitle": "Tudo o que você precisa saber para aproveitar Foz ao máximo",
+    "noPosts": "Em breve, muitas dicas por aqui!"
   },
   "about": {
-    "title": "Sobre Nós",
-    "subtitle": "Sua experiência em Foz do Iguaçu começa aqui"
+    "title": "Sobre a Guia de Turismo Foz",
+    "subtitle": "Paixão por receber bem e mostrar o melhor da nossa terra",
+    "mission": "Nossa Missão",
+    "missionText": "Proporcionar experiências inesquecíveis em Foz do Iguaçu com segurança, conforto e um atendimento personalizado que faz você se sentir em casa.",
+    "whyUs": "Por que nos escolher?",
+    "reason1Title": "Especialistas Locais",
+    "reason1Text": "Conhecemos cada cantinho de Foz e te levamos além do óbvio.",
+    "reason2Title": "Atendimento Personalizado",
+    "reason2Text": "Seu roteiro é montado de acordo com seu perfil e ritmo.",
+    "reason3Title": "Segurança e Conforto",
+    "reason3Text": "Trabalhamos apenas com parceiros certificados e veículos de qualidade."
   },
-  "common": {
-    "loading": "Carregando...",
-    "error": "Erro ao carregar dados. Tente novamente.",
-    "noResults": "Nenhum passeio encontrado para os critérios selecionados.",
-    "search": "Buscar",
-    "back": "Voltar"
+  "contact": {
+    "title": "Fale Conosco",
+    "subtitle": "Estamos prontos para tirar suas dúvidas e ajudar no seu planejamento",
+    "formName": "Seu Nome",
+    "formEmail": "Seu E-mail",
+    "formPhone": "Seu WhatsApp",
+    "formMessage": "Como podemos ajudar?",
+    "send": "Enviar Mensagem",
+    "success": "Mensagem enviada com sucesso! Entraremos em contato em breve."
+  },
+  "cart": {
+    "title": "Meu Roteiro",
+    "empty": "Seu roteiro está vazio. Que tal adicionar algumas aventuras?",
+    "date": "Data",
+    "adults": "Adultos",
+    "children": "Crianças",
+    "subtotal": "Subtotal",
+    "total": "Total Estimado",
+    "checkoutWhatsapp": "Solicitar Reserva via WhatsApp",
+    "required": "Por favor, preencha seus dados para continuarmos."
+  },
+  "footer": {
+    "description": "Especialistas em receptivo em Foz do Iguaçu. Transformando sua viagem em memórias inesquecíveis.",
+    "quickLinks": "Links Rápidos",
+    "contact": "Contato",
+    "rights": "Todos os direitos reservados",
+    "followUs": "Siga-nos"
+  },
+  "tripadvisor": {
+    "title": "O que dizem nossos clientes",
+    "viewMore": "Ver mais no TripAdvisor"
+  },
+  "umbrellaSection": {
+    "title": "Você sabe o que significa o guarda-chuva para os guias?",
+    "subtitle": "Um símbolo de tradição, união e carinho com o visitante.",
+    "text1": "Em Foz do Iguaçu, o guarda-chuva se tornou um ícone. Ele não é apenas um item para se proteger da chuva ou do sol forte.",
+    "text2": "Para os guias, o guarda-chuva colorido é um ponto de referência, um sinal de que ali está seu guia, pronto para te conduzir e cuidar de você. É um símbolo de boas-vindas e um elo de conexão em meio à multidão.",
+    "text3": "Ele representa a união da nossa classe e o carinho com que recebemos cada visitante, garantindo que ninguém se perca e que todos aproveitem a experiência ao máximo. Um abraço em forma de guarda-chuva!"
+  },
+  "socialFeed": {
+    "title": "Acompanhe nossa aventura!",
+    "subtitle": "Momentos inesquecíveis compartilhados em nossas redes sociais.",
+    "followUs": "Siga-nos no Instagram & TikTok"
+  },
+  "howItWorks": {
+    "title": "Como planejar sua viagem",
+    "step1Title": "Escolha as datas",
+    "step1Desc": "Defina quando você vem para Foz.",
+    "step2Title": "Monte seu roteiro",
+    "step2Desc": "Adicione os passeios que mais te interessam.",
+    "step3Title": "Finalize no WhatsApp",
+    "step3Desc": "Nossa equipe confirma tudo com você."
   }
 }

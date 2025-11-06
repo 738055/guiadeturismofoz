@@ -1,18 +1,21 @@
-'use client'; // Usa hooks (useState, useCart, usePathname, useParams)
+// components/Header.tsx
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
-import { ShoppingCart, Menu, X, MapPin } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ShoppingCart, Menu, X, MapPin, Phone } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Locale } from '@/i18n/dictionaries';
 
 interface HeaderProps {
   onCartClick: () => void;
   lang: Locale;
-  navText: { // Recebe as traduções como prop
+  navText: {
     home: string;
-    tours: string;
+    products: string;
+    combos: string;
+    blog: string;
     about: string;
     contact: string;
   };
@@ -21,131 +24,153 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t }) => {
   const { items } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  // CORREÇÃO ESTÁ AQUI
-  // usePathname() quando usado dentro de app/[lang] retorna o caminho SEM o lang.
-  // Ex: /tours (para a URL .../pt-BR/tours)
-  // Ex: / (para a URL .../pt-BR)
-  const pathname = usePathname(); 
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const languages = [
-    { code: 'pt_BR' as const, label: 'PT', flag: '🇧🇷' },
-    { code: 'en_US' as const, label: 'EN', flag: '🇺🇸' },
-    { code: 'es_ES' as const, label: 'ES', flag: '🇪🇸' }
+    { code: 'pt_BR' as const, label: 'BR' },
+    { code: 'en_US' as const, label: 'EN' },
+    { code: 'es_ES' as const, label: 'ES' }
   ];
 
-  // --- FUNÇÃO CORRIGIDA ---
-  // Função para trocar o locale na URL, mantendo o resto do caminho
   const getLocalizedPath = (locale: Locale) => {
     if (!pathname) return `/${locale}`;
-
-    // Se estivermos na homepage, o pathname é "/"
-    if (pathname === '/') {
-      return `/${locale}`;
+    const segments = pathname.split('/');
+    if (segments.length > 1 && ['pt-BR', 'en-US', 'es-ES'].includes(segments[1])) {
+      segments[1] = locale;
+      return segments.join('/');
     }
-
-    // Se estivermos em outra página (ex: /tours),
-    // o resultado deve ser /novo-locale/tours
     return `/${locale}${pathname}`;
   };
-  // --- FIM DA CORREÇÃO ---
+
+  // Lista completa de links
+  const navLinks = [
+    { href: `/${lang}`, label: t?.home || 'Home' },
+    { href: `/${lang}/tours`, label: t?.products || 'Tours' },
+    { href: `/${lang}/combos`, label: t?.combos || 'Combos' },
+    { href: `/${lang}/blog`, label: t?.blog || 'Blog' },
+    { href: `/${lang}/about`, label: t?.about || 'About' },
+    { href: `/${lang}/contact`, label: t?.contact || 'Contact' },
+  ];
+
+  const isActive = (path: string) => {
+      if (path === `/${lang}` && pathname === `/${lang}`) return true;
+      if (path !== `/${lang}` && pathname?.startsWith(path)) return true;
+      return false;
+  }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <>
+      {/* Barra Superior */}
+      <div className="bg-verde-principal text-white py-2 px-4 text-xs hidden md:block transition-colors duration-300">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+             <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Foz do Iguaçu, Brasil</span>
+             <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> +55 45 9999-9999</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            {languages.map(l => (
+               <Link key={l.code} href={getLocalizedPath(l.code)} className={`font-semibold hover:text-azul-foz transition-colors ${lang === l.code ? 'text-azul-foz' : 'opacity-80'}`}>
+                 {l.label}
+               </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Header Principal */}
+      <header className={`sticky top-0 z-50 transition-all duration-300 border-b ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3 border-gray-200' : 'bg-white py-5 border-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          
           {/* Logo */}
-          <Link href={`/${lang}`} className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-verde-principal to-verde-secundario rounded-full flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-white" />
+          <Link href={`/${lang}`} className="flex items-center gap-2 group">
+            <div className="bg-gradient-to-tr from-verde-principal to-azul-foz p-2.5 rounded-xl shadow-sm transform group-hover:rotate-3 transition-all duration-300">
+               <MapPin className="w-7 h-7 text-white" />
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-verde-principal font-serif">
-                ARAUCÁRIA
-              </h1>
-              <p className="text-xs text-acento-dourado tracking-wider">TURISMO RECEPTIVO</p>
+            <div className="leading-none">
+              <h1 className="text-xl font-extrabold text-verde-principal font-serif tracking-tight">GUIA DE TURISMO</h1>
+              <p className="text-[10px] font-bold text-azul-foz tracking-[0.35em] uppercase mt-0.5">Foz do Iguaçu</p>
             </div>
           </Link>
 
-          {/* Navegação Principal (Desktop) */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href={`/${lang}`} className="text-gray-700 hover:text-verde-principal transition-colors font-medium">
-              {t.home}
-            </Link>
-            <Link href={`/${lang}/tours`} className="text-gray-700 hover:text-verde-principal transition-colors font-medium">
-              {t.tours}
-            </Link>
-            <Link href={`/${lang}/about`} className="text-gray-700 hover:text-verde-principal transition-colors font-medium">
-              {t.about}
-            </Link>
-            <Link href={`/${lang}/contact`} className="text-gray-700 hover:text-verde-principal transition-colors font-medium">
-              {t.contact}
-            </Link>
+          {/* Nav Desktop (CORRIGIDO) */}
+          <nav className="hidden lg:flex items-center gap-1 bg-gray-50/80 p-1.5 rounded-full border border-gray-100 backdrop-blur-sm">
+            {navLinks.map(link => (
+              <Link 
+                key={link.href} 
+                href={link.href}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                  isActive(link.href)
+                    ? 'bg-white text-verde-principal shadow-sm scale-[1.02]' 
+                    : 'text-gray-600 hover:text-verde-principal hover:bg-white/50'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
-          {/* Ações (Idiomas, Carrinho, Menu Mobile) */}
-          <div className="flex items-center space-x-4">
-            {/* Seletor de Idioma */}
-            <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
-              {languages.map(langItem => (
-                <Link
-                  key={langItem.code}
-                  href={getLocalizedPath(langItem.code)} // Agora usa a função corrigida
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    lang === langItem.code
-                      ? 'bg-verde-principal text-white'
-                      : 'text-gray-600 hover:bg-gray-200'
-                  }`}
-                  aria-label={`Mudar para ${langItem.label}`}
-                >
-                  {langItem.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Botão do Carrinho */}
+          {/* Ações */}
+          <div className="flex items-center gap-2 sm:gap-3">
+             {/* Botão Carrinho */}
             <button
               onClick={onCartClick}
-              className="relative p-2 text-gray-700 hover:text-verde-principal transition-colors"
-              aria-label="Abrir carrinho"
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-full font-bold transition-all duration-300 group ${items.length > 0 ? 'bg-gradient-to-r from-acento-dourado to-yellow-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
             >
-              <ShoppingCart className="w-6 h-6" />
+              <ShoppingCart className={`w-5 h-5 ${items.length > 0 ? 'animate-bounce-slow' : ''}`} />
+              <span className="hidden sm:inline text-sm">Roteiro</span>
               {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-acento-dourado text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="bg-white text-acento-dourado text-xs font-extrabold rounded-full w-5 h-5 flex items-center justify-center">
                   {items.length}
                 </span>
               )}
             </button>
 
-            {/* Botão do Menu Mobile */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-700"
-              aria-label="Abrir menu"
+            {/* Mobile Toggle */}
+            <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+                className="lg:hidden p-2.5 text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Menu Mobile (Dropdown) */}
+        {/* Menu Mobile */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t">
-            <Link href={`/${lang}`} className="block py-2 text-gray-700 hover:text-verde-principal" onClick={() => setMobileMenuOpen(false)}>
-              {t.home}
-            </Link>
-            <Link href={`/${lang}/tours`} className="block py-2 text-gray-700 hover:text-verde-principal" onClick={() => setMobileMenuOpen(false)}>
-              {t.tours}
-            </Link>
-            <Link href={`/${lang}/about`} className="block py-2 text-gray-700 hover:text-verde-principal" onClick={() => setMobileMenuOpen(false)}>
-              {t.about}
-            </Link>
-            <Link href={`/${lang}/contact`} className="block py-2 text-gray-700 hover:text-verde-principal" onClick={() => setMobileMenuOpen(false)}>
-              {t.contact}
-            </Link>
-          </nav>
+          <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-xl p-4 flex flex-col gap-2 animate-in slide-in-from-top-5">
+            {navLinks.map(link => (
+              <Link 
+                key={link.href} 
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`p-4 rounded-2xl text-base font-bold flex items-center justify-between ${isActive(link.href) ? 'bg-verde-principal/5 text-verde-principal' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                {link.label}
+                {isActive(link.href) && <div className="w-1.5 h-1.5 rounded-full bg-verde-principal"></div>}
+              </Link>
+            ))}
+             <div className="flex gap-3 pt-4 border-t border-gray-100 mt-2 justify-center">
+                {languages.map(l => (
+                   <Link 
+                     key={l.code} 
+                     href={getLocalizedPath(l.code)} 
+                     className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${lang === l.code ? 'border-verde-principal bg-verde-principal/5 text-verde-principal' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                   >
+                     {l.label}
+                   </Link>
+                ))}
+             </div>
+          </div>
         )}
-      </div>
-    </header>
+      </header>
+    </>
   );
 };

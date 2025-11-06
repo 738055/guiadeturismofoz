@@ -1,69 +1,54 @@
 {
   "nav": {
     "home": "Home",
-    "tours": "Tours",
+    "products": "Tours",
+    "combos": "Bundles",
+    "blog": "Tips",
     "about": "About Us",
-    "contact": "Contact",
-    "faq": "FAQ"
+    "contact": "Contact"
   },
   "hero": {
-    "title": "When will you be in Foz do Iguaçu?",
-    "subtitle": "Discover unique experiences and build your personalized itinerary",
+    "title": "Your perfect adventure in Foz starts here",
+    "subtitle": "Explore the best experiences at the Falls and region",
     "startDate": "Start Date",
     "endDate": "End Date",
-    "searchButton": "Search Tours",
-    "selectDates": "Select your dates"
+    "searchRoteiroButton": "Suggest Itinerary",
+    "searchAllButton": "See all tours",
+    "searchPlaceholder": "What do you want to experience in Foz?",
+    "searchButton": "Search"
   },
-  "howItWorks": {
-    "title": "How It Works",
-    "step1Title": "Choose your dates",
-    "step1Desc": "Tell us when you'll be in Foz do Iguaçu",
-    "step2Title": "Build your itinerary",
-    "step2Desc": "Add the tours that best suit you",
-    "step3Title": "Confirm on WhatsApp",
-    "step3Desc": "Complete your booking directly with our team"
+  "categoriesSection": {
+    "title": "Explore by Experience",
+    "subtitle": "Browse top attractions and find your travel style",
+    "falls": "Falls",
+    "nature": "Nature & Wildlife",
+    "adventure": "Adventure",
+    "shopping": "Shopping",
+    "cultural": "Cultural & Itaipu"
+  },
+  "common": {
+    "loading": "Loading...",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "clear": "Clear",
+    "noResults": "No results found.",
+    "error": "An error occurred while loading data.",
+    "whatsapp": "Chat on WhatsApp",
+    "readMore": "Read More"
   },
   "tours": {
-    "popular": "Popular Tours",
+    "title": "Tours & Tickets",
+    "subtitle": "The best attractions in Foz do Iguaçu",
     "from": "from",
     "duration": "Duration",
     "hours": "hours",
-    "addToCart": "Add to Itinerary",
     "viewDetails": "View Details",
-    "availability": "Availability",
-    "selectDate": "Select a date",
     "whatsIncluded": "What's included",
     "whatsExcluded": "What's not included",
-    "gallery": "Gallery",
-    "category": "Category",
-    "location": "Location"
-  },
-  "filters": {
-    "title": "Filters",
-    "category": "Category",
-    "price": "Price",
-    "duration": "Duration",
-    "clear": "Clear Filters",
-    "apply": "Apply"
-  },
-  "cart": {
-    "title": "My Itinerary",
-    "empty": "Your itinerary is empty",
-    "subtotal": "Subtotal",
-    "total": "Total",
-    "adults": "Adults",
-    "children": "Children",
-    "date": "Date",
-    "people": "People",
-    "checkoutWhatsapp": "Complete Order via WhatsApp",
-    "continueShopping": "Continue Shopping",
-    "name": "Name",
-    "email": "Email",
-    "required": "Please fill in your name and email."
-  },
-  "tripadvisor": {
-    "title": "What our customers say",
-    "viewMore": "View more reviews on TripAdvisor"
+    "availability": "Availability",
+    "selectDate": "Select a date",
+    "addToCart": "Add to Itinerary"
   },
   "categories": {
     "all": "All",
@@ -72,29 +57,80 @@
     "shopping": "Shopping",
     "culture": "Culture"
   },
-  "footer": {
-    "about": "About Araucária Tourism",
-    "description": "Unique experiences in Foz do Iguaçu since 2010.",
-    "contact": "Contact",
-    "followUs": "Follow Us",
-    "rights": "All rights reserved"
+  "combos": {
+    "title": "Special Bundles",
+    "subtitle": "Save money by enjoying the best of Foz in exclusive packages",
+    "noCombos": "No bundles available at the moment."
   },
-  "contact": {
-    "title": "Get in Touch",
-    "subtitle": "We're here to help you plan your perfect trip",
-    "sendMessage": "Send Message",
-    "message": "Message",
-    "whatsappDirect": "Chat on WhatsApp"
+  "blog": {
+    "title": "Tips & Curiosities",
+    "subtitle": "Everything you need to know to make the most of Foz",
+    "noPosts": "More tips coming soon!"
   },
   "about": {
-    "title": "About Us",
-    "subtitle": "Your Foz do Iguaçu experience starts here"
+    "title": "About Guia de Turismo Foz",
+    "subtitle": "Passion for welcoming and showing the best of our land",
+    "mission": "Our Mission",
+    "missionText": "To provide unforgettable experiences in Foz do Iguaçu with safety, comfort, and personalized service that makes you feel at home.",
+    "whyUs": "Why choose us?",
+    "reason1Title": "Local Experts",
+    "reason1Text": "We know every corner of Foz and take you beyond the obvious.",
+    "reason2Title": "Personalized Service",
+    "reason2Text": "Your itinerary is tailored to your profile and pace.",
+    "reason3Title": "Safety and Comfort",
+    "reason3Text": "We only work with certified partners and quality vehicles."
   },
-  "common": {
-    "loading": "Loading...",
-    "error": "Error loading data. Please try again.",
-    "noResults": "No tours found for the selected criteria.",
-    "search": "Search",
-    "back": "Back"
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We are ready to answer your questions and help with your planning",
+    "formName": "Your Name",
+    "formEmail": "Your Email",
+    "formPhone": "Your WhatsApp",
+    "formMessage": "How can we help?",
+    "send": "Send Message",
+    "success": "Message sent successfully! We will be in touch soon."
+  },
+  "cart": {
+    "title": "My Itinerary",
+    "empty": "Your itinerary is empty. How about adding some adventures?",
+    "date": "Date",
+    "adults": "Adults",
+    "children": "Children",
+    "subtotal": "Subtotal",
+    "total": "Estimated Total",
+    "checkoutWhatsapp": "Request Booking via WhatsApp",
+    "required": "Please fill in your details to continue."
+  },
+  "footer": {
+    "description": "Receptive experts in Foz do Iguaçu. Turning your trip into unforgettable memories.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "rights": "All rights reserved",
+    "followUs": "Follow us"
+  },
+  "tripadvisor": {
+    "title": "What our clients say",
+    "viewMore": "See more on TripAdvisor"
+  },
+  "umbrellaSection": {
+    "title": "Do you know what the umbrella means for guides?",
+    "subtitle": "A symbol of tradition, unity, and care for the visitor.",
+    "text1": "In Foz do Iguaçu, the umbrella has become an icon. It is not just an item to protect against rain or strong sun.",
+    "text2": "For guides, the colorful umbrella is a reference point, a sign that your guide is there, ready to lead and take care of you. It is a symbol of welcome and a link of connection amidst the crowd.",
+    "text3": "It represents the union of our class and the care with which we receive each visitor, ensuring that no one gets lost and that everyone enjoys the experience to the fullest. A hug in the form of an umbrella!"
+  },
+  "socialFeed": {
+    "title": "Follow our adventure!",
+    "subtitle": "Unforgettable moments shared on our social networks.",
+    "followUs": "Follow us on Instagram & TikTok"
+  },
+  "howItWorks": {
+    "title": "How to plan your trip",
+    "step1Title": "Choose dates",
+    "step1Desc": "Define when you are coming to Foz.",
+    "step2Title": "Build your itinerary",
+    "step2Desc": "Add the tours that interest you most.",
+    "step3Title": "Finalize on WhatsApp",
+    "step3Desc": "Our team confirms everything with you."
   }
 }

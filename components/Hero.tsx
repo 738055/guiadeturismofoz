@@ -1,118 +1,88 @@
-'use client'; // Usa hooks (useState, useRouter)
+// components/Hero.tsx
+'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Hook de navegação do Next.js
-import { Calendar, Search, Route } from 'lucide-react'; // Adicionado Route
-import { AraucariaBackground } from './AraucariaBackground';
-import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { Search, Calendar } from 'lucide-react';
 import { Locale } from '@/i18n/dictionaries';
-import Link from 'next/link'; // Importar Link
+import Image from 'next/image';
 
 interface HeroProps {
-  dict: { // Recebe as traduções como prop
-    title: string;
-    subtitle: string;
-    startDate: string;
-    endDate: string;
-    searchRoteiroButton: string; // Atualizado
-    searchAllButton: string; // Adicionado
-  };
+  dict: any;
   lang: Locale;
 }
 
 export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
-  const router = useRouter(); // Novo hook de navegação
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = () => {
-    if (startDate && endDate) {
-      // ATUALIZADO: Navega para a nova página de roteiro
-      router.push(`/${lang}/roteiro?start=${startDate}&end=${endDate}`);
+  // Futuramente, este URL virá do Supabase (Admin)
+  const bannerImage = 'https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format&fit=crop'; 
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/${lang}/tours?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  const today = format(new Date(), 'yyyy-MM-dd'); // Formato ISO para o <input type="date">
-
   return (
-    <section className="relative bg-gradient-to-br from-[#f9f9f9] to-white overflow-hidden">
-      <AraucariaBackground />
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1
-            className="text-4xl md:text-6xl font-bold text-verde-principal mb-6 leading-tight font-serif"
-          >
-            {t.title}
-          </h1>
-
-          <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-            {t.subtitle}
-          </p>
-
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto border border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2 text-left">
-                  {t.startDate}
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="startDate"
-                    type="date"
-                    min={today}
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2 text-left">
-                  {t.endDate}
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="endDate"
-                    type="date"
-                    min={startDate || today}
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent transition-all"
-                    disabled={!startDate}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleSearch}
-              disabled={!startDate || !endDate}
-              className="w-full bg-gradient-to-r from-verde-principal to-verde-secundario text-white py-4 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
-            >
-              {/* ATUALIZADO: Ícone e Texto */}
-              <Route className="w-5 h-5" />
-              <span>{t.searchRoteiroButton}</span>
-            </button>
-            
-            {/* NOVO LINK: Ver todos os passeios */}
-            <div className="text-center mt-6">
-              <Link
-                href={`/${lang}/tours`}
-                className="text-gray-600 hover:text-verde-principal font-medium transition-colors"
-              >
-                {t.searchAllButton}
-              </Link>
-            </div>
-            
-          </div>
-        </div>
+    <section className="relative h-[500px] md:h-[600px] flex items-center justify-center">
+      {/* Imagem de Fundo (Banner) */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={bannerImage}
+          alt="Cataratas do Iguaçu"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Overlay gradiente para melhorar leitura do texto */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
+      {/* Conteúdo Central */}
+      <div className="relative z-10 w-full max-w-4xl px-4 text-center">
+        <span className="inline-block py-1 px-3 rounded-full bg-azul-foz/80 text-white text-sm font-bold mb-4 uppercase tracking-wider backdrop-blur-md">
+           Descubra Foz do Iguaçu
+        </span>
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 font-serif leading-tight drop-shadow-lg">
+          {t.title}
+        </h1>
+        <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto drop-shadow-md">
+          {t.subtitle}
+        </p>
+
+        {/* Barra de Busca Estilo "Routes" */}
+        <form onSubmit={handleSearch} className="bg-white p-2 rounded-full shadow-2xl flex items-center max-w-2xl mx-auto transform hover:scale-[1.02] transition-all">
+           <div className="flex-1 flex items-center px-4 border-r border-gray-200">
+             <Search className="text-gray-400 w-5 h-5 flex-shrink-0 mr-3" />
+             <input 
+               type="text"
+               placeholder={t.searchPlaceholder || "Pesquise por passeios, ingressos..."}
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+               className="w-full py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
+             />
+           </div>
+           {/* Opcional: Adicionar DatePicker aqui no futuro se quiser igual à referência completa */}
+           <button 
+             type="submit"
+             className="bg-verde-principal hover:bg-verde-secundario text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 transition-colors"
+           >
+             <span className="hidden md:inline">{t.searchButton}</span>
+             <Search className="w-5 h-5 md:hidden" />
+           </button>
+        </form>
+
+        {/* Tags Rápidas abaixo da busca */}
+        <div className="mt-6 flex flex-wrap justify-center gap-2 text-sm text-white/80">
+           <span>Populares:</span>
+           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=cataratas`)} className="hover:text-white hover:underline">Cataratas</button> •
+           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=itaipu`)} className="hover:text-white hover:underline">Itaipu</button> •
+           <button type="button" onClick={() => router.push(`/${lang}/tours?cat=parque-das-aves`)} className="hover:text-white hover:underline">Parque das Aves</button>
+        </div>
+      </div>
     </section>
   );
 };

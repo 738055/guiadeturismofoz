@@ -1,94 +1,113 @@
-'use client'; // Usa Link e props do layout cliente
+// components/Footer.tsx
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Mail, Phone, Facebook, Instagram, Twitter } from 'lucide-react';
+import { MapPin, Mail, Phone, Facebook, Instagram, Twitter, ShieldCheck, CreditCard, Headphones } from 'lucide-react';
 import { Locale } from '@/i18n/dictionaries';
 
 interface FooterProps {
   lang: Locale;
-  footerText: {
-    description: string;
-    contact: string;
-    rights: string;
-    tours: string;
-  };
+  footerText: any;
 }
 
 export const Footer: React.FC<FooterProps> = ({ lang, footerText: t }) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-verde-principal text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Logo e Descrição */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                {/* Ícone do Logo */}
-                <svg className="w-6 h-6 text-verde-principal" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M50 90 L50 60 M50 60 Q 30 50 20 45 M50 60 Q 70 50 80 45 M50 50 Q 35 40 25 35 M50 50 Q 65 40 75 35 M50 40 Q 40 30 30 25 M50 40 Q 60 30 70 25" stroke="currentColor" strokeWidth="5" fill="none" />
-                  <circle cx="50" cy="20" r="15" fill="currentColor" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold font-serif">
-                  ARAUCÁRIA
-                </h3>
-                <p className="text-xs text-acento-dourado tracking-wider">TURISMO RECEPTIVO</p>
-              </div>
+    <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Seção de Confiança (Diferencial) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-12 border-b border-gray-800">
+            <div className="flex items-center gap-4">
+                <div className="bg-verde-principal/20 p-3 rounded-full">
+                    <ShieldCheck className="w-8 h-8 text-verde-principal" />
+                </div>
+                <div>
+                    <h5 className="text-white font-bold">Compra Segura</h5>
+                    <p className="text-sm">Seus dados protegidos sempre</p>
+                </div>
             </div>
-            <p className="text-gray-300 mb-4 leading-relaxed">
+             <div className="flex items-center gap-4">
+                <div className="bg-azul-foz/20 p-3 rounded-full">
+                    <CreditCard className="w-8 h-8 text-azul-foz" />
+                </div>
+                <div>
+                    <h5 className="text-white font-bold">Parcele sua viagem</h5>
+                    <p className="text-sm">Melhores condições de pagamento</p>
+                </div>
+            </div>
+             <div className="flex items-center gap-4">
+                <div className="bg-acento-dourado/20 p-3 rounded-full">
+                    <Headphones className="w-8 h-8 text-acento-dourado" />
+                </div>
+                <div>
+                    <h5 className="text-white font-bold">Atendimento Local</h5>
+                    <p className="text-sm">Especialistas em Foz te ajudam</p>
+                </div>
+            </div>
+        </div>
+
+        {/* Links Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-12">
+          <div className="col-span-1 md:col-span-2">
+            <Link href={`/${lang}`} className="inline-block mb-6">
+               <div className="flex flex-col leading-none">
+                  <h2 className="text-2xl font-bold text-white font-serif">GUIA DE TURISMO</h2>
+                  <span className="text-sm font-bold text-azul-foz tracking-[0.3em]">FOZ DO IGUAÇU</span>
+                </div>
+            </Link>
+            <p className="mb-6 max-w-md text-gray-400 leading-relaxed">
               {t.description}
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors" aria-label="Facebook">
-                <Facebook className="w-6 h-6" />
-              </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors" aria-label="Instagram">
-                <Instagram className="w-6 h-6" />
-              </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors" aria-label="Twitter">
-                <Twitter className="w-6 h-6" />
-              </a>
+            <div className="flex gap-4">
+               {/* Ícones sociais */}
+               <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-verde-principal text-white transition-colors"><Instagram className="w-5 h-5"/></a>
+               <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-azul-foz text-white transition-colors"><Facebook className="w-5 h-5"/></a>
+               <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-acento-dourado text-white transition-colors"><Twitter className="w-5 h-5"/></a>
             </div>
           </div>
 
-          {/* Links de Passeios */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">{t.tours}</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href={`/${lang}/tours`} className="hover:text-white transition-colors">Aventura</Link></li>
-              <li><Link href={`/${lang}/tours`} className="hover:text-white transition-colors">Natureza</Link></li>
-              <li><Link href={`/${lang}/tours`} className="hover:text-white transition-colors">Compras</Link></li>
-              <li><Link href={`/${lang}/tours`} className="hover:text-white transition-colors">Cultura</Link></li>
+            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">{t.quickLinks}</h4>
+            <ul className="space-y-3">
+              <li><Link href={`/${lang}/tours`} className="hover:text-verde-secundario transition-colors">Passeios & Ingressos</Link></li>
+              <li><Link href={`/${lang}/combos`} className="hover:text-verde-secundario transition-colors">Combos Especiais</Link></li>
+              <li><Link href={`/${lang}/blog`} className="hover:text-verde-secundario transition-colors">Dicas de Foz</Link></li>
+              <li><Link href={`/${lang}/about`} className="hover:text-verde-secundario transition-colors">Quem Somos</Link></li>
             </ul>
           </div>
 
-          {/* Contato */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">{t.contact}</h4>
-            <ul className="space-y-3 text-gray-300">
-              <li className="flex items-start space-x-2">
-                <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>Foz do Iguaçu, PR</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>+55 45 0000-0000</span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>contato@araucaria.com</span>
-              </li>
+            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">{t.contact}</h4>
+            <ul className="space-y-4">
+               <li className="flex items-start gap-3">
+                 <Phone className="w-5 h-5 text-verde-principal flex-shrink-0" />
+                 <div>
+                    <p className="text-white font-medium">+55 45 9999-9999</p>
+                    <p className="text-xs">Seg a Sex: 8h às 18h</p>
+                 </div>
+               </li>
+               <li className="flex items-center gap-3">
+                 <Mail className="w-5 h-5 text-azul-foz flex-shrink-0" />
+                 <a href="mailto:contato@guiafoz.com" className="hover:text-white transition-colors">contato@guiafoz.com</a>
+               </li>
+               <li className="flex items-start gap-3">
+                 <MapPin className="w-5 h-5 text-acento-dourado flex-shrink-0" />
+                 <span className="text-sm">Av. Brasil, 1234 - Centro, Foz do Iguaçu - PR</span>
+               </li>
             </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-verde-secundario pt-8 text-center text-gray-300 text-sm">
-          <p>© {currentYear} Araucária Turismo Receptivo. {t.rights}</p>
+        {/* Copyright e Selos */}
+        <div className="border-t border-gray-800 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-sm">
+          <p>© {currentYear} Guia de Turismo Foz. {t.rights}. CNPJ: 00.000.000/0001-00</p>
+          <div className="flex gap-6 mt-4 md:mt-0">
+             <Link href="/termos" className="hover:text-white transition-colors">Termos de Uso</Link>
+             <Link href="/privacidade" className="hover:text-white transition-colors">Política de Privacidade</Link>
+          </div>
         </div>
       </div>
     </footer>

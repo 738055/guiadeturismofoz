@@ -127,12 +127,12 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => alert('Ainda não implementado')}
+           onClick={() => router.push('/admin/settings')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
           >
             <Settings className="w-12 h-12 text-acento-dourado mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">Configurações</h3>
-            <p className="text-gray-600 text-sm">WhatsApp, TripAdvisor e mais</p>
+            <p className="text-gray-600 text-sm">Banners, contatos e mais</p>
           </button>
         </div>
       </div>

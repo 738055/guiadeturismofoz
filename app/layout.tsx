@@ -1,6 +1,8 @@
+// app/layout.tsx
 import './globals.css';
 import { Inter, Merriweather } from 'next/font/google';
 import { CartProvider } from '@/contexts/CartContext';
+import { WhatsAppWidget } from '@/components/WhatsAppWidget'; // Importe o widget
 
 const inter = Inter({
   subsets: ['latin'],
@@ -9,16 +11,15 @@ const inter = Inter({
 });
 
 const merriweather = Merriweather({
-  weight: ['400', '700'],
+  weight: ['400', '700', '900'], // Adicionei peso 900 para títulos mais fortes
   subsets: ['latin'],
   variable: '--font-merriweather',
   display: 'swap',
 });
 
-// Metadados Padrão (Fallback)
 export const metadata = {
-  title: 'Araucária Turismo Receptivo',
-  description: 'Descubra experiências únicas e monte seu roteiro personalizado em Foz do Iguaçu',
+  title: 'Guia de Turismo Foz do Iguaçu',
+  description: 'As melhores experiências e passeios em Foz do Iguaçu.',
 };
 
 export default function RootLayout({
@@ -27,9 +28,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${merriweather.variable}`}>
-      <body className="font-sans">
-        <CartProvider>{children}</CartProvider>
+    // Adicionei 'scroll-smooth' para navegação mais fluida
+    <html lang="pt-BR" className={`${inter.variable} ${merriweather.variable} scroll-smooth`}>
+      <body className="font-sans bg-gray-50">
+        <CartProvider>
+          {children}
+          <WhatsAppWidget /> {/* Widget fixo em todas as páginas */}
+        </CartProvider>
       </body>
     </html>
   );
