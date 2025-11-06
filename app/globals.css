@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  line-height: 1.6;
+@layer base {
+  body {
+    @apply bg-off-white text-cinza-texto font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-azul-profundo;
+  }
 }
 
-/* Define as variáveis de fonte */
-:root {
-  --font-inter: 'Inter', sans-serif;
-  --font-merriweather: 'Merriweather', serif;
+/* Scrollbar personalizada e mais bonita */
+::-webkit-scrollbar {
+  width: 8px;
 }
-
-/* Aplica as fontes via classes para o Tailwind */
-.font-sans {
-  font-family: var(--font-inter);
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
-
-.font-serif {
-  font-family: var(--font-merriweather);
+::-webkit-scrollbar-thumb {
+  @apply bg-azul-vibrante/50 hover:bg-azul-vibrante rounded-full;
 }
