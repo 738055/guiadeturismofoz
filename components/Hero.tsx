@@ -17,7 +17,7 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Banner temporário vibrante. Depois virá do admin.
-  const bannerImage = 'https://images.unsplash.com/photo-1583499871882-53e780b9a470?q=80&w=1920&auto=format&fit=crop'; 
+  const bannerImage = '/54.jpg'; 
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

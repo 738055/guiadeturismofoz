@@ -44,7 +44,7 @@ export default function CombosPage({ params: { lang } }: { params: { lang: Local
       <PageBanner 
         title={dict.combos.title} 
         subtitle={dict.combos.subtitle}
-        image={bannerUrl || "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1920&auto=format&fit=crop"}
+        image={bannerUrl || "/54.jpg"}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">

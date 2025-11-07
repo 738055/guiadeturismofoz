@@ -158,7 +158,7 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
         title={tTours.title} 
         subtitle={tTours.subtitle}
         // Usa o banner do banco ou um fallback padrão do Unsplash
-        image={bannerUrl || "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format=fit=crop"}
+        image={bannerUrl || "/54.jpg"}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
