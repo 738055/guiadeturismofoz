@@ -158,7 +158,7 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
         title={tTours.title} 
         subtitle={tTours.subtitle}
         // Usa o banner do banco ou um fallback padrão do Unsplash
-        image={bannerUrl || "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format&fit=crop"}
+        image={bannerUrl || "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920&auto=format=fit=crop"}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
@@ -221,10 +221,20 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            {/* --- ESTA É A CORREÇÃO --- */}
             {filteredTours.map(tour => (
               <TourCard
                 key={tour.id}
-                tour={tour}
+                tour={{
+                  id: tour.id,
+                  title: tour.title,
+                  description: tour.description,
+                  price: tour.base_price, // Mapeia 'base_price' para 'price'
+                  duration: tour.duration_hours, // Mapeia 'duration_hours' para 'duration'
+                  location: tour.location,
+                  imageUrl: tour.imageUrl
+                }}
                 dict={tTours}
                 lang={lang}
               />
