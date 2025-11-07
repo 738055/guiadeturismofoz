@@ -2,7 +2,7 @@
 import './globals.css';
 import { Inter, Merriweather } from 'next/font/google';
 import { CartProvider } from '@/contexts/CartContext';
-import { WhatsAppWidget } from '@/components/WhatsAppWidget'; // Importe o widget
+import { WhatsAppWidget } from '@/components/WhatsappWidget';
 
 const inter = Inter({
   subsets: ['latin'],
