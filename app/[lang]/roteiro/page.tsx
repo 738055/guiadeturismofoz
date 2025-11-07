@@ -1,9 +1,23 @@
+// app/[lang]/roteiro/page.tsx
+
 import { TourCard } from '@/components/TourCard';
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { Metadata } from 'next';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { MapPin } from 'lucide-react';
+
+// --- CORREÇÃO 1: Definir o tipo Tour localmente ---
+// (Este tipo é esperado pelo componente TourCard)
+type Tour = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  duration: number;
+  location: string;
+  imageUrl: string | undefined; // Deve ser string | undefined para corresponder ao retorno
+};
 
 // Busca de dados no Servidor (CORRIGIDA)
 async function loadToursByDate(lang: Locale, startDate: string | null, endDate: string | null) {
@@ -34,7 +48,6 @@ async function loadToursByDate(lang: Locale, startDate: string | null, endDate: 
         )
       `)
       .eq('is_active', true)
-      // REMOVIDO: .eq('tour_translations.language_code', lang)
       .order('display_order', { referencedTable: 'tour_images', ascending: true });
 
     const { data: toursData, error: toursError } = await query;
@@ -48,31 +61,25 @@ async function loadToursByDate(lang: Locale, startDate: string | null, endDate: 
       const end = parseISO(endDate);
 
       filteredTours = filteredTours.filter((tour: any) => {
-        // 1. Verifica se há disponibilidade geral nesse período
         const hasAvailability = tour.tour_availability?.some((avail: any) => {
           const availDate = parseISO(avail.available_date);
           return availDate >= start && availDate <= end && avail.total_spots > avail.spots_booked;
         });
 
         if (!hasAvailability) return false;
-
-        // 2. Verifica se o passeio não está bloqueado (lógica de dias)
-        // (Esta lógica pode ser refinada, mas por enquanto filtramos pela disponibilidade)
         return true; 
       });
     } else {
-      // Se não houver datas, não retorna nada (roteiro precisa de datas)
       return [];
     }
 
     // --- LÓGICA DE FALLBACK ADICIONADA ---
     // Formata os dados para o TourCard
-    return filteredTours.map((tour: any) => {
+    const tours = filteredTours.map((tour: any) => {
       const currentTranslation = tour.tour_translations.find((t: any) => t.language_code === lang);
       const fallbackTranslation = tour.tour_translations.find((t: any) => t.language_code === 'pt_BR');
       const translation = currentTranslation || fallbackTranslation;
 
-      // Se não houver tradução (ou disponibilidade), será nulo
       if (!translation) {
         return null; 
       }
@@ -86,7 +93,10 @@ async function loadToursByDate(lang: Locale, startDate: string | null, endDate: 
         location: tour.location,
         imageUrl: tour.tour_images[0]?.image_url
       };
-    }).filter(Boolean); // Remove os nulos
+    });
+    
+    // --- CORREÇÃO 2: Usar um filtro "type guard" explícito ---
+    return tours.filter((tour): tour is Tour => tour !== null);
 
   } catch (error) {
     console.error('Error loading tours for itinerary:', error);
@@ -162,7 +172,7 @@ export default async function RoteiroPage({
         <>
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Passeios disponíveis no período:</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tours.map(tour => (
+            {tours.map(tour => ( // Agora o TS sabe que 'tour' não é 'null'
               <TourCard
                 key={tour.id}
                 tour={tour}
