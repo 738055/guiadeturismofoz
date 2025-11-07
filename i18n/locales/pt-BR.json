@@ -55,7 +55,7 @@
     "adventure": "Aventura",
     "nature": "Natureza",
     "shopping": "Compras",
-    "cultural": "Cultura"
+    "culture": "Cultura" 
   },
   "combos": {
     "title": "Combos Especiais",
