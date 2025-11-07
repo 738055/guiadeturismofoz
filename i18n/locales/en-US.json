@@ -132,5 +132,25 @@
     "step2Desc": "Add the tours that interest you most.",
     "step3Title": "Finalize on WhatsApp",
     "step3Desc": "Our team confirms everything with you."
+  },
+  "servicesSection": {
+    "title": "Our Services",
+    "tabs": {
+      "description": "Description",
+      "howItWorks": "How it Works?",
+      "howToBook": "How to Book?"
+    },
+    "guide": {
+      "title": "Guide for Your Group",
+      "description": "The Tour Guide accompanies your company's excursion to the various local attractions, enriching the visits with information, facts and curiosities, science and culture, in addition to providing practicality and safety throughout the visit. They develop tour logistics, optimize schedules, routes, boarding/disembarking, etc;\n*Reservation subject to availability.",
+      "howItWorks": "You will request a date and schedule the Tour Guide for your service, and they will be at the requested location and time, ready to execute the itinerary, accompanying, informing, and guiding throughout the contracted tour(s).\nDoubts, curiosities, stories, history, and science of the region and/or tourist attraction can be addressed during the professional's service.\nRegional-PR TOUR GUIDE accredited by CADASTUR.",
+      "howToBook": "We are working to offer an efficient online scheduling system to better serve you.\nCurrently, you can use the FORM to send your travel information and the WhatsApp button to ask questions.\nPayment can be made via Pix (in full) or credit card with fees (via link)"
+    },
+    "private": {
+      "title": "Private Tours",
+      "description": "In this modality, you will hire a tour with private transport, a Tour Guide driving an accredited tourist vehicle, with differentiated access, exclusively for you and your family or friends.\nReservation subject to availability",
+      "howItWorks": "GTF bases its services on the concept of service through an Accredited Tour Guide (Cadastur) combined with transport service with an equally accredited vehicle, operating through prior appointment.\nWe will pick you up from your accommodation and take you to the tours you chose, and after completion, you will be returned to the hotel.\nRates will be applied, configuring a value for each selected attraction in the FORM regarding transport, making it possible to combine tours in sequence (itinerary) and optimize your time. (Tickets are not included but can be added to the service package).\nAccredited Vehicle has inspection by competent bodies, identification logo, and Cadastur registration number (Registry of Tourist Service Providers); for your safety.",
+      "howToBook": "Just set up your itinerary and finalize the purchase via our WhatsApp, where an experienced guide will analyze and finalize your itinerary.\nPayment for the contracted services can be made via Pix (in full) or credit card with fees (via link)"
+    }
   }
 }
