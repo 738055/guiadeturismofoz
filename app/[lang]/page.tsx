@@ -2,14 +2,15 @@
 import { Hero } from '@/components/Hero';
 import { Categories } from '@/components/Categories';
 import { PopularTours } from '@/components/PopularTours';
-import { UmbrellaCuriosity } from '@/components/UmbrellaCuriosity'; // NOVO
+import { UmbrellaCuriosity } from '@/components/UmbrellaCuriosity'; 
 import { TripAdvisor } from '@/components/TripAdvisor';
-import { SocialFeed } from '@/components/SocialFeed'; // NOVO
+import { SocialFeed } from '@/components/SocialFeed'; 
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
-// --- CORREÇÃO 1: Definir o tipo Tour localmente ---
-// (Este tipo é esperado pelo componente PopularTours)
+// --- CORREÇÃO AQUI ---
+// O tipo 'Tour' local deve corresponder ao que a função .map() retorna.
+// A propriedade 'imageUrl' sempre existe, mas seu valor pode ser 'undefined'.
 type Tour = {
   id: string;
   title: string;
@@ -17,7 +18,7 @@ type Tour = {
   price: number;
   duration: number;
   location: string;
-  imageUrl?: string;
+  imageUrl: string | undefined; // Alterado de 'imageUrl?: string'
 };
 
 async function getPopularTours(lang: Locale) {
@@ -46,12 +47,12 @@ async function getPopularTours(lang: Locale) {
           price: tour.base_price,
           duration: tour.duration_hours,
           location: tour.location,
-          imageUrl: tour.tour_images?.[0]?.image_url
+          imageUrl: tour.tour_images?.[0]?.image_url // Esta linha gera 'string | undefined'
         };
       });
       
-    // --- CORREÇÃO 2: Usar um filtro "type guard" explícito ---
-    // Isso garante ao TypeScript que o array de retorno é 'Tour[]', não '(Tour | null)[]'
+    // Este filtro "type guard" agora funciona, pois o tipo 'Tour' (com 'string | undefined')
+    // corresponde ao tipo do array 'tours'.
     return tours.filter((tour): tour is Tour => tour !== null);
 
   } catch (error) {
@@ -73,17 +74,15 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
       <Categories dict={dict.categoriesSection} lang={lang} />
       
       <PopularTours 
-        tours={tours} // Agora 'tours' é do tipo Tour[], o que satisfaz o componente
+        tours={tours} // 'tours' é 'Tour[]', que é compatível com o prop do componente
         dict={dict.tours} 
         lang={lang} 
       />
       
-      {/* NOVA SEÇÃO: Curiosidade do Guarda-Chuva */}
       <UmbrellaCuriosity dict={dict.umbrellaSection} lang={lang} />
       
       <TripAdvisor dict={dict.tripadvisor} />
 
-      {/* NOVA SEÇÃO: Feed de Mídias Sociais */}
       <SocialFeed dict={dict.socialFeed} lang={lang} />
     </>
   );
