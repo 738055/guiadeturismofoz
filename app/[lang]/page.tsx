@@ -8,8 +8,19 @@ import { SocialFeed } from '@/components/SocialFeed'; // NOVO
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
+// --- CORREÇÃO 1: Definir o tipo Tour localmente ---
+// (Este tipo é esperado pelo componente PopularTours)
+type Tour = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  duration: number;
+  location: string;
+  imageUrl?: string;
+};
+
 async function getPopularTours(lang: Locale) {
-  // ... (manter a mesma função de busca)
   try {
     const { data: toursData, error: toursError } = await supabase
       .from('tours')
@@ -24,7 +35,7 @@ async function getPopularTours(lang: Locale) {
 
     if (toursError) throw toursError;
 
-    return (toursData || []).map((tour: any) => {
+    const tours = (toursData || []).map((tour: any) => {
         const translation = tour.tour_translations.find((t: any) => t.language_code === lang) ||
                             tour.tour_translations.find((t: any) => t.language_code === 'pt_BR');
         if (!translation) return null;
@@ -37,7 +48,12 @@ async function getPopularTours(lang: Locale) {
           location: tour.location,
           imageUrl: tour.tour_images?.[0]?.image_url
         };
-      }).filter(Boolean);
+      });
+      
+    // --- CORREÇÃO 2: Usar um filtro "type guard" explícito ---
+    // Isso garante ao TypeScript que o array de retorno é 'Tour[]', não '(Tour | null)[]'
+    return tours.filter((tour): tour is Tour => tour !== null);
+
   } catch (error) {
     console.error('Error loading popular tours:', error);
     return [];
@@ -57,7 +73,7 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
       <Categories dict={dict.categoriesSection} lang={lang} />
       
       <PopularTours 
-        tours={tours} 
+        tours={tours} // Agora 'tours' é do tipo Tour[], o que satisfaz o componente
         dict={dict.tours} 
         lang={lang} 
       />
