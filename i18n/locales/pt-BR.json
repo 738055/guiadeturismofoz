@@ -55,7 +55,7 @@
     "adventure": "Aventura",
     "nature": "Natureza",
     "shopping": "Compras",
-    "culture": "Cultura" 
+    "culture": "Cultura"
   },
   "combos": {
     "title": "Combos Especiais",
@@ -132,5 +132,25 @@
     "step2Desc": "Adicione os passeios que mais te interessam.",
     "step3Title": "Finalize no WhatsApp",
     "step3Desc": "Nossa equipe confirma tudo com você."
+  },
+  "servicesSection": {
+    "title": "Nossos Serviços",
+    "tabs": {
+      "description": "Descritivo",
+      "howItWorks": "Como funciona?",
+      "howToBook": "Como Contrato?"
+    },
+    "guide": {
+      "title": "Guia para sua Excursão",
+      "description": "O Guia de Turismo acompanha a excursão da sua empresa aos diversos passeios pela localidade, enriquecendo as visitas com informações, fatos e curiosidades, ciência e cultura, além de transmitir praticidade e segurança durante toda a visita. Desenvolve a logística de passeios otimiza agendamentos, trajetos, embarque/desembarque, etc;\n*Reserva sujeito a disponibilidade.",
+      "howItWorks": "Você irá solicitar uma data e agendar o Guia de Turismo para o seu atendimento e este, estará no local e horário solicitado pronto a executar o roteiro acompanhando, informando e orientando durante todo o(s) passeio (s) contratado(s).\nDúvidas, curiosidades, causos, história e ciência da região e/ou atrativo turístico podem ser abordados durante a prestação de serviços do profissional.\nGUIA DE TURISMO Regional-PR credenciado CADASTUR.",
+      "howToBook": "Estamos trabalhando para oferecer um sistema de agendamento on line eficiente para melhor atendê-lo.\nNo momento você pode utilizar o FORMULÁRIO para enviar suas informações de viagem e o botão do Whatsapp para tirar dúvidas.\nO pagamento poderá ser realizado através de pix (à vista) ou cartão de crédito com taxas (via link)"
+    },
+    "private": {
+      "title": "Passeios Particulares",
+      "description": "Nesta modalidade, você irá contratar um tour com transporte privado, um Guia de Turismo conduzindo um veículo turístico credenciado, com acessos diferenciados, exclusivo para você e sua família ou amigos.\nReserva sujeito a disponibilidade",
+      "howItWorks": "A GTF baseia seus serviços no conceito de atendimento através de Guia de Turismo Credenciado (Cadastur) conciliado ao serviço de transporte com veículo igualmente credenciado, operando através de agendamento prévio.\nVamos até o seu local de hospedagem te buscar e levar para os passeios que você escolheu e após concluir, será realizado o seu retorno de volta ao hotel.\nSerão aplicadas tarifas configurando um valor para cada atrativo selecionado no FORMULÁRIO no que diz respeito ao transporte, sendo possível combinar passeios em sequência (roteiro) e otimizar seu tempo. (Os ingressos não estão inclusos mas podem ser agregados ao pacote de serviços.\nVeículo Credenciado possui vistoria dos órgãos competentes, logo de identificação e número de registro Cadastur (Cadastro de Prestadores de Serviços Turísticos); para sua segurança.",
+      "howToBook": "Basta montar seu roteiro e finalizar a compra por nosso whatsap, onde um guia experiente ira analisar e finalizar seu roteiro.\nO pagamento dos serviços contratados poderá ser realizado através de pix (a vista) ou cartão de crédito com taxas (via link)"
+    }
   }
 }

@@ -132,5 +132,25 @@
     "step2Desc": "Agrega los paseos que más te interesen.",
     "step3Title": "Finaliza en WhatsApp",
     "step3Desc": "Nuestro equipo confirma todo contigo."
+  },
+  "servicesSection": {
+    "title": "Nuestros Servicios",
+    "tabs": {
+      "description": "Descripción",
+      "howItWorks": "¿Cómo funciona?",
+      "howToBook": "¿Cómo Contrato?"
+    },
+    "guide": {
+      "title": "Guía para su Excursión",
+      "description": "El Guía de Turismo acompaña la excursión de su empresa a los diversos paseos por la localidad, enriqueciendo las visitas con informaciones, hechos y curiosidades, ciencia y cultura, además de transmitir practicidad y seguridad durante toda la visita. Desarrolla la logística de los paseos, optimiza horarios, trayectos, embarque/desembarque, etc;\n*Reserva sujeta a disponibilidad.",
+      "howItWorks": "Usted solicitará una fecha y programará al Guía de Turismo para su atención y este estará en el lugar y hora solicitados, listo para ejecutar el itinerario acompañando, informando y orientando durante todo el/los paseo(s) contratado(s).\nDudas, curiosidades, anécdotas, historia y ciencia de la región y/o atractivo turístico pueden ser abordados durante la prestación de servicios del profesional.\nGUÍA DE TURISMO Regional-PR acreditado por CADASTUR.",
+      "howToBook": "Estamos trabajando para ofrecer un sistema de agendamiento en línea eficiente para atenderlo mejor.\nPor el momento, puede utilizar el FORMULARIO para enviar su información de viaje y el botón de WhatsApp para resolver dudas.\nEl pago podrá realizarse a través de Pix (al contado) o tarjeta de crédito con tasas (vía enlace)"
+    },
+    "private": {
+      "title": "Tours Privados",
+      "description": "En esta modalidad, usted contratará un tour con transporte privado, un Guía de Turismo conduciendo un vehículo turístico acreditado, con accesos diferenciados, exclusivo para usted y su familia o amigos.\nReserva sujeta a disponibilidad",
+      "howItWorks": "GTF basa sus servicios en el concepto de atención a través de Guía de Turismo Acreditado (Cadastur) conciliado con el servicio de transporte con vehículo igualmente acreditado, operando mediante cita previa.\nVamos hasta su lugar de hospedaje a recogerlo y llevarlo a los paseos que eligió y al concluir, se realizará su regreso al hotel.\nSe aplicarán tarifas configurando un valor para cada atractivo seleccionado en el FORMULARIO en lo que respecta al transporte, siendo posible combinar paseos en secuencia (itinerario) y optimizar su tiempo. (Las entradas no están incluidas pero pueden agregarse al paquete de servicios).\nEl Vehículo Acreditado cuenta con inspección de los órganos competentes, logo de identificación y número de registro Cadastur (Registro de Prestadores de Servicios Turísticos); para su seguridad.",
+      "howToBook": "Basta armar su itinerario y finalizar la compra por nuestro WhatsApp, donde un guía experimentado analizará y finalizará su itinerario.\nEl pago de los servicios contratados podrá realizarse a través de Pix (al contado) o tarjeta de crédito con tasas (vía enlace)"
+    }
   }
 }

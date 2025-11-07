@@ -5,6 +5,7 @@ import { PopularTours } from '@/components/PopularTours';
 import { UmbrellaCuriosity } from '@/components/UmbrellaCuriosity'; 
 import { TripAdvisor } from '@/components/TripAdvisor';
 import { SocialFeed } from '@/components/SocialFeed'; 
+import { ServicesTabs } from '@/components/ServicesTabs'; 
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
@@ -63,21 +64,22 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
     getDictionary(lang),
   ]);
 
+  // --- DEBUG ---
+  // Esta linha aparecerá no seu TERMINAL.
+  // Verifique se 'servicesSection' está na lista após reiniciar o servidor.
+  console.log('CHAVES DO DICIONÁRIO CARREGADO:', Object.keys(dict)); 
+  // --- FIM DO DEBUG ---
+
   return (
     <>
       <Hero dict={dict.hero} lang={lang} />
       
       <Categories dict={dict.categoriesSection} lang={lang} />
       
-      {/* --- CORREÇÃO AQUI --- 
-          O componente PopularTours espera um objeto 'dict' com a chave 'popular'.
-          O seu 'dict.tours' não tem 'popular', mas tem 'title', 'from', 'viewDetails', e 'hours'.
-          Vamos construir o objeto 'dict' manualmente para o componente:
-      */}
       <PopularTours 
         tours={tours}
         dict={{
-          popular: dict.tours.title, // Usamos 'title' do JSON como o título 'popular'
+          popular: dict.tours.title, 
           from: dict.tours.from,
           viewDetails: dict.tours.viewDetails,
           hours: dict.tours.hours
@@ -86,6 +88,10 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
       />
       
       <UmbrellaCuriosity dict={dict.umbrellaSection} lang={lang} />
+      
+      {/* Passando a seção do dicionário. Se ela foi carregada (após reiniciar),
+          o componente irá renderizar. */}
+      <ServicesTabs dict={dict.servicesSection} />
       
       <TripAdvisor dict={dict.tripadvisor} />
 

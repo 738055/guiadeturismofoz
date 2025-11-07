@@ -33,7 +33,7 @@ export const UmbrellaCuriosity: React.FC<UmbrellaCuriosityProps> = ({ dict: t })
 
        
             <Image
-              src="/umbrella.svg" 
+              src="/logo.png" 
               alt="Ilustração de um guarda-chuva"
               width={200}
               height={200}

@@ -5,6 +5,7 @@ import React from 'react';
 import Link from 'next/link';
 import { MapPin, Mail, Phone, Facebook, Instagram, Twitter, ShieldCheck, CreditCard, Headphones } from 'lucide-react';
 import { Locale } from '@/i18n/dictionaries';
+import { SiteLogo } from './SiteLogoCinza'; // 1. Importe o componente SiteLogo
 
 interface FooterProps {
   lang: Locale;
@@ -52,12 +53,11 @@ export const Footer: React.FC<FooterProps> = ({ lang, footerText: t }) => {
         {/* Links Principais */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-12">
           <div className="col-span-1 md:col-span-2">
-            <Link href={`/${lang}`} className="inline-block mb-6">
-               <div className="flex flex-col leading-none">
-                  <h2 className="text-2xl font-bold text-white font-serif">GUIA DE TURISMO</h2>
-                  <span className="text-sm font-bold text-azul-foz tracking-[0.3em]">FOZ DO IGUAÇU</span>
-                </div>
-            </Link>
+            
+            {/* --- 2. SUBSTITUA O LOGO DE TEXTO POR ESTE COMPONENTE --- */}
+            <SiteLogo lang={lang} className="w-52 mb-6" /> 
+            {/* --- FIM DA SUBSTITUIÇÃO --- */}
+
             <p className="mb-6 max-w-md text-gray-400 leading-relaxed">
               {t.description}
             </p>
