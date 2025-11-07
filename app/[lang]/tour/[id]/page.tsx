@@ -1,3 +1,5 @@
+// app/[lang]/tour/[id]/page.tsx
+
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { Metadata, ResolvingMetadata } from 'next';
@@ -244,7 +246,8 @@ export default async function TourDetailPage({
                   <span>{dict.tours.whatsIncluded}</span>
                 </h3>
                 <ul className="space-y-2 pl-2">
-                  {tour.whatsIncluded.map((item, index) => (
+                  {/* --- CORREÇÃO 1 AQUI --- */}
+                  {tour.whatsIncluded.map((item: string, index: number) => (
                     <li key={index} className="flex items-center text-gray-700">
                       <CheckCircle className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
                       <span>{item}</span>
@@ -261,7 +264,8 @@ export default async function TourDetailPage({
                   <span>{dict.tours.whatsExcluded}</span>
                 </h3>
                 <ul className="space-y-2 pl-2">
-                  {tour.whatsExcluded.map((item, index) => (
+                  {/* --- CORREÇÃO 2 AQUI --- */}
+                  {tour.whatsExcluded.map((item: string, index: number) => (
                     <li key={index} className="flex items-center text-gray-700">
                       <XCircle className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
                       <span>{item}</span>
