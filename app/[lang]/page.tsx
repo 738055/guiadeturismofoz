@@ -8,9 +8,7 @@ import { SocialFeed } from '@/components/SocialFeed';
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
-// --- CORREÇÃO AQUI ---
-// O tipo 'Tour' local deve corresponder ao que a função .map() retorna.
-// A propriedade 'imageUrl' sempre existe, mas seu valor pode ser 'undefined'.
+// O tipo 'Tour' local
 type Tour = {
   id: string;
   title: string;
@@ -18,7 +16,7 @@ type Tour = {
   price: number;
   duration: number;
   location: string;
-  imageUrl: string | undefined; // Alterado de 'imageUrl?: string'
+  imageUrl: string | undefined; 
 };
 
 async function getPopularTours(lang: Locale) {
@@ -47,12 +45,10 @@ async function getPopularTours(lang: Locale) {
           price: tour.base_price,
           duration: tour.duration_hours,
           location: tour.location,
-          imageUrl: tour.tour_images?.[0]?.image_url // Esta linha gera 'string | undefined'
+          imageUrl: tour.tour_images?.[0]?.image_url
         };
       });
       
-    // Este filtro "type guard" agora funciona, pois o tipo 'Tour' (com 'string | undefined')
-    // corresponde ao tipo do array 'tours'.
     return tours.filter((tour): tour is Tour => tour !== null);
 
   } catch (error) {
@@ -73,9 +69,19 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
       
       <Categories dict={dict.categoriesSection} lang={lang} />
       
+      {/* --- CORREÇÃO AQUI --- 
+          O componente PopularTours espera um objeto 'dict' com a chave 'popular'.
+          O seu 'dict.tours' não tem 'popular', mas tem 'title', 'from', 'viewDetails', e 'hours'.
+          Vamos construir o objeto 'dict' manualmente para o componente:
+      */}
       <PopularTours 
-        tours={tours} // 'tours' é 'Tour[]', que é compatível com o prop do componente
-        dict={dict.tours} 
+        tours={tours}
+        dict={{
+          popular: dict.tours.title, // Usamos 'title' do JSON como o título 'popular'
+          from: dict.tours.from,
+          viewDetails: dict.tours.viewDetails,
+          hours: dict.tours.hours
+        }}
         lang={lang} 
       />
       
