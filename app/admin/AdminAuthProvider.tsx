@@ -1,3 +1,4 @@
+// app/admin/AdminAuthProvider.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -36,7 +37,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     
     // Ouve mudanças na autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      
+      // --- CORREÇÃO AQUI ---
+      // O evento 'USER_DELETED' não existe no 'onAuthStateChange', removemos a verificação.
+      if (event === 'SIGNED_OUT') {
         router.replace('/admin/login');
       } else if (event === 'SIGNED_IN') {
         if (pathname === '/admin/login') {
