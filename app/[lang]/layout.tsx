@@ -1,3 +1,4 @@
+// app/[lang]/layout.tsx
 'use client'; // Este layout é cliente pois gerencia o estado do CartModal
 
 import React, { useState } from 'react';
@@ -8,8 +9,9 @@ import { Footer } from '@/components/Footer';
 import { CartModal } from '@/components/CartModal';
 
 // Traduções estáticas para componentes de layout (necessário em Client Components)
+// --- CORREÇÃO AQUI: Chaves alteradas para usar hífen (ex: 'pt-BR') ---
 const translations = {
-  pt_BR: {
+  'pt-BR': {
     nav: { home: 'Início', tours: 'Passeios', about: 'Sobre Nós', contact: 'Contato' },
     footer: {
       description: 'Experiências únicas em Foz do Iguaçu desde 2010.',
@@ -30,7 +32,7 @@ const translations = {
       required: 'Por favor, preencha seu nome e email.'
     }
   },
-  en_US: {
+  'en-US': {
     nav: { home: 'Home', tours: 'Tours', about: 'About Us', contact: 'Contact' },
     footer: {
       description: 'Unique experiences in Foz do Iguaçu since 2010.',
@@ -51,7 +53,7 @@ const translations = {
       required: 'Please fill in your name and email.'
     }
   },
-  es_ES: {
+  'es-ES': {
     nav: { home: 'Inicio', tours: 'Tours', about: 'Sobre Nosotros', contact: 'Contacto' },
     footer: {
       description: 'Experiencias únicas en Foz de Iguazú desde 2010.',
@@ -83,8 +85,10 @@ export default function LangLayout({
   const params = useParams();
   
   // Garante que o Header receba um locale válido
-  const lang = (params.lang || 'pt_BR') as Locale;
-  const t = translations[lang] || translations.pt_BR;
+  const lang = (params.lang || 'pt-BR') as Locale;
+  
+  // --- CORREÇÃO AQUI: Acessa o fallback com colchetes ['pt-BR'] ---
+  const t = translations[lang] || translations['pt-BR'];
 
   return (
     <>
