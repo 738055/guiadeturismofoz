@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShoppingCart, Menu, X, MapPin, Phone, Globe } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { Locale } from '@/i18n/dictionaries';
+import { Locale } from '@/i18n/dictionaries'; // Este tipo espera 'pt-BR' (com hífen)
 import { SiteLogo } from './SiteLogo';
 
 interface HeaderProps {
@@ -27,13 +27,16 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- CORREÇÃO AQUI ---
+  // As chaves 'code' devem corresponder ao tipo 'Locale' (com hífen).
   const languages = [
-    { code: 'pt_BR' as const, label: 'BR' },
-    { code: 'en_US' as const, label: 'EN' },
-    { code: 'es_ES' as const, label: 'ES' }
+    { code: 'pt-BR' as const, label: 'BR' },
+    { code: 'en-US' as const, label: 'EN' },
+    { code: 'es-ES' as const, label: 'ES' }
   ];
+  // --- FIM DA CORREÇÃO ---
 
-  const getLocalizedPath = (locale: Locale) => {
+  const getLocalizedPath = (locale: Locale) => { // 'locale' espera 'pt-BR'
     if (!pathname) return `/${locale}`;
     const segments = pathname.split('/');
     if (segments.length > 1 && ['pt-BR', 'en-US', 'es-ES'].includes(segments[1])) {
