@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShoppingCart, Menu, X, MapPin, Phone, Globe } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { Locale } from '@/i18n/dictionaries'; // Este tipo espera 'pt-BR' (com hífen)
+import { Locale } from '@/i18n/dictionaries';
 import { SiteLogo } from './SiteLogo';
 
 interface HeaderProps {
@@ -27,16 +27,13 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- CORREÇÃO AQUI ---
-  // As chaves 'code' devem corresponder ao tipo 'Locale' (com hífen).
   const languages = [
     { code: 'pt-BR' as const, label: 'BR' },
     { code: 'en-US' as const, label: 'EN' },
     { code: 'es-ES' as const, label: 'ES' }
   ];
-  // --- FIM DA CORREÇÃO ---
 
-  const getLocalizedPath = (locale: Locale) => { // 'locale' espera 'pt-BR'
+  const getLocalizedPath = (locale: Locale) => {
     if (!pathname) return `/${locale}`;
     const segments = pathname.split('/');
     if (segments.length > 1 && ['pt-BR', 'en-US', 'es-ES'].includes(segments[1])) {
@@ -62,9 +59,11 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
   }
 
   return (
-    <>
-      {/* Barra Superior - Degradê vibrante com as cores da marca */}
-      <div className="bg-gradient-to-r from-foz-azul-escuro via-foz-azul-claro to-foz-verde text-white py-2 px-4 text-xs font-semibold hidden md:block">
+    // Container FIXO que engloba Barra Superior e Header para flutuar sobre o vídeo
+    <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      
+      {/* Barra Superior - Oculta ao rolar para limpar a visão, ou pode manter se preferir */}
+      <div className={`bg-gradient-to-r from-foz-azul-escuro via-foz-azul-claro to-foz-verde text-white px-4 text-xs font-semibold hidden md:block transition-all duration-500 overflow-hidden ${scrolled ? 'max-h-0 opacity-0' : 'max-h-10 py-2 opacity-100'}`}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
              <span className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity cursor-default">
@@ -90,21 +89,36 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
       </div>
 
       {/* Header Principal */}
-      <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-card py-2' : 'bg-white py-4 md:py-6'}`}>
+      <header className={`transition-all duration-500 ${
+        scrolled 
+          ? 'bg-white/95 backdrop-blur-md shadow-card py-2' // Estilo Scrolled (Fundo Branco)
+          : 'bg-transparent py-4 md:py-6' // Estilo Topo (Transparente)
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
-          <SiteLogo lang={lang} className={`transition-all duration-500 ${scrolled ? 'w-36' : 'w-44 md:w-56'}`} />
+          {/* Logo: Aplica filtro branco (brightness-0 invert) quando transparente para contraste no vídeo */}
+          <div className={`transition-all duration-500 ${scrolled ? '' : 'brightness-0 invert drop-shadow-md'}`}>
+             <SiteLogo lang={lang} className={`transition-all duration-500 ${scrolled ? 'w-36' : 'w-44 md:w-56'}`} />
+          </div>
 
           {/* Nav Desktop */}
-          <nav className="hidden lg:flex items-center gap-1 bg-foz-bege p-1.5 rounded-full border border-gray-100/50 ml-8">
+          <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-full border ml-8 transition-all duration-500 ${
+            scrolled 
+              ? 'bg-foz-bege border-gray-100/50' // Fundo Nav Scrolled
+              : 'bg-white/10 backdrop-blur-sm border-white/20 shadow-lg' // Fundo Nav Glassmorphism
+          }`}>
             {navLinks.map(link => (
               <Link 
                 key={link.href} 
                 href={link.href}
                 className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                   isActive(link.href)
-                    ? 'bg-foz-azul-escuro text-white shadow-md' 
-                    : 'text-foz-cinza hover:text-foz-azul-escuro hover:bg-white'
+                    ? scrolled 
+                        ? 'bg-foz-azul-escuro text-white shadow-md' // Ativo Scrolled
+                        : 'bg-white text-foz-azul-escuro shadow-md' // Ativo Transparente (Invertido)
+                    : scrolled
+                        ? 'text-foz-cinza hover:text-foz-azul-escuro hover:bg-white' // Inativo Scrolled
+                        : 'text-white hover:text-white hover:bg-white/20' // Inativo Transparente
                 }`}
               >
                 {link.label}
@@ -116,7 +130,13 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
           <div className="flex items-center gap-3">
             <button
               onClick={onCartClick}
-              className={`relative flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all duration-300 group ${items.length > 0 ? 'bg-foz-amarelo text-foz-azul-escuro shadow-md hover:shadow-lg hover:-translate-y-0.5' : 'bg-white border-2 border-foz-bege text-foz-cinza hover:border-foz-azul-claro hover:text-foz-azul-claro'}`}
+              className={`relative flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all duration-300 group ${
+                items.length > 0 
+                  ? 'bg-foz-amarelo text-foz-azul-escuro shadow-md hover:shadow-lg hover:-translate-y-0.5' 
+                  : scrolled
+                      ? 'bg-white border-2 border-foz-bege text-foz-cinza hover:border-foz-azul-claro hover:text-foz-azul-claro' // Botão Vazio Scrolled
+                      : 'bg-white/10 backdrop-blur-md border-2 border-white/20 text-white hover:bg-white hover:text-foz-azul-escuro hover:border-white' // Botão Vazio Transparente
+              }`}
             >
               <ShoppingCart className={`w-5 h-5 ${items.length > 0 ? 'animate-bounce-slow' : ''}`} />
               <span className="hidden sm:inline text-sm">Roteiro</span>
@@ -127,13 +147,20 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
               )}
             </button>
 
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-3 text-foz-azul-escuro hover:bg-foz-bege rounded-2xl transition-colors">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className={`lg:hidden p-3 rounded-2xl transition-colors ${
+                scrolled 
+                  ? 'text-foz-azul-escuro hover:bg-foz-bege' 
+                  : 'text-white hover:bg-white/20'
+              }`}
+            >
               {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
             </button>
           </div>
         </div>
 
-        {/* Menu Mobile */}
+        {/* Menu Mobile (Fundo sempre branco para legibilidade) */}
         {mobileMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-2xl p-4 flex flex-col h-[calc(100vh-80px)] animate-in slide-in-from-left-full duration-300">
             <div className="flex flex-col gap-2 mt-4">
@@ -162,6 +189,6 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
           </div>
         )}
       </header>
-    </>
+    </div>
   );
 };
