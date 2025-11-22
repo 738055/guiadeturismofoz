@@ -27,8 +27,7 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
           poster="/54.jpg" 
         >
           <source 
-            src="https://videos.pexels.com/video-files/2871902/2871902-uhd_2560_1440_24fps.mp4" 
-            type="video/mp4" 
+            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/CATARATAS.mov" 
           />
         </video>
       </div>
