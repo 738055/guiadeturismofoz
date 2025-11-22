@@ -3,35 +3,34 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { TourCard } from '@/components/TourCard';
-import { PageBanner } from '@/components/PageBanner';
 import { supabase } from '@/lib/supabase';
 import { Locale } from '@/i18n/dictionaries';
-import { Search, Loader2 } from 'lucide-react';
-import { Category, Tour } from '@/lib/supabase';
+import { Search, Loader2, Filter, X } from 'lucide-react';
+import Image from 'next/image';
 
-// Tipos auxiliares
-type TourWithDetails = Tour & {
+// Tipos
+type Tour = {
+  id: string;
   title: string;
   description: string;
+  price: number;
+  duration: number;
+  location: string;
   imageUrl?: string;
+  category_id: string;
 };
-type CategoryWithDetails = Category & {
+
+type Category = {
+  id: string;
   name: string;
-  slug: string;
 };
-type Dictionary = any;
 
-interface ToursPageProps {
-  params: { lang: Locale };
-}
-
-export default function ToursPage({ params: { lang } }: ToursPageProps) {
-  const [tours, setTours] = useState<TourWithDetails[]>([]);
-  const [categories, setCategories] = useState<CategoryWithDetails[]>([]);
-  const [dict, setDict] = useState<Dictionary | null>(null);
+export default function ToursPage({ params: { lang } }: { params: { lang: Locale } }) {
+  const [tours, setTours] = useState<Tour[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [dict, setDict] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [bannerUrl, setBannerUrl] = useState('');
-
+  
   // Estados de Filtro
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -44,200 +43,190 @@ export default function ToursPage({ params: { lang } }: ToursPageProps) {
         const dictionaryModule = await import(`@/i18n/locales/${lang}.json`);
         setDict(dictionaryModule.default);
 
-        // 2. Carrega Banner Personalizado
-        const { data: bannerData } = await supabase
-          .from('site_settings')
-          .select('setting_value')
-          .eq('setting_key', 'banner_tours')
-          .single();
-        if (bannerData) {
-            setBannerUrl(bannerData.setting_value);
-        }
-
-        // 3. Carrega Categorias
-        const { data: categoriesData } = await supabase
+        // 2. Carrega Categorias
+        const { data: catData } = await supabase
           .from('categories')
-          .select('id, category_translations!left(name, slug, language_code)');
+          .select('id, category_translations!left(name, language_code)');
+        
+        const formattedCats = (catData || []).map((c: any) => {
+           const trans = c.category_translations.find((t: any) => t.language_code === lang) || 
+                         c.category_translations.find((t: any) => t.language_code === 'pt_BR');
+           return { id: c.id, name: trans?.name || 'Categoria' };
+        });
+        setCategories(formattedCats);
 
-        const formattedCategories = (categoriesData || [])
-          .map((cat: any) => {
-            const translation = cat.category_translations.find((t: any) => t.language_code === lang) ||
-                                cat.category_translations.find((t: any) => t.language_code === 'pt_BR');
-            if (!translation) return null;
-            return {
-              id: cat.id,
-              name: translation.name,
-              slug: translation.slug
-            };
-          })
-          .filter(Boolean) as CategoryWithDetails[];
-        setCategories(formattedCategories);
-
-        // 4. Carrega Passeios Ativos
+        // 3. Carrega Passeios
         const { data: toursData } = await supabase
           .from('tours')
           .select(`
-            id,
-            base_price,
-            duration_hours,
-            location,
-            category_id,
-            is_active,
+            id, base_price, duration_hours, location, category_id,
             tour_translations!left(title, description, language_code),
             tour_images(image_url, display_order)
           `)
           .eq('is_active', true)
           .order('display_order', { referencedTable: 'tour_images', ascending: true });
 
-        const formattedTours = (toursData || [])
-          .map((tour: any) => {
-             // Lógica de Fallback de Idioma
-             const translation = tour.tour_translations.find((t: any) => t.language_code === lang) ||
-                                 tour.tour_translations.find((t: any) => t.language_code === 'pt_BR');
-             
-             if (!translation) return null;
+        const formattedTours = (toursData || []).map((t: any) => {
+           const trans = t.tour_translations.find((tr: any) => tr.language_code === lang) || 
+                         t.tour_translations.find((tr: any) => tr.language_code === 'pt_BR');
+           if (!trans) return null;
+           return {
+             id: t.id,
+             title: trans.title,
+             description: trans.description,
+             price: t.base_price,
+             duration: t.duration_hours,
+             location: t.location,
+             category_id: t.category_id,
+             imageUrl: t.tour_images?.[0]?.image_url
+           };
+        }).filter(Boolean) as Tour[];
 
-             return {
-               id: tour.id,
-               base_price: tour.base_price,
-               duration_hours: tour.duration_hours,
-               location: tour.location,
-               category_id: tour.category_id,
-               title: translation.title,
-               description: translation.description,
-               imageUrl: tour.tour_images?.[0]?.image_url
-             };
-          })
-          .filter(Boolean) as TourWithDetails[];
         setTours(formattedTours);
 
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
-
     loadData();
   }, [lang]);
 
-  // Lógica de Filtragem (Memoizada para performance)
   const filteredTours = useMemo(() => {
     return tours.filter(tour => {
-      // Filtro por Categoria
-      const categoryMatch = selectedCategory === 'all' || tour.category_id === selectedCategory;
-      
-      // Filtro por Busca (Título ou Descrição)
-      const query = searchQuery.toLowerCase();
-      const searchMatch = query === '' || 
-                          tour.title.toLowerCase().includes(query) || 
-                          tour.description.toLowerCase().includes(query);
-
-      return categoryMatch && searchMatch;
+      const matchSearch = tour.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCat = selectedCategory === 'all' || tour.category_id === selectedCategory;
+      return matchSearch && matchCat;
     });
   }, [tours, searchQuery, selectedCategory]);
 
   if (loading || !dict) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-verde-principal" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-foz-azul-claro" /></div>;
   }
 
-  // Atalhos para traduções
-  const tCat = dict.categories;
   const tCommon = dict.common;
   const tTours = dict.tours;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-foz-bege">
       
-      {/* Banner da Página */}
-      <PageBanner 
-        title={tTours.title} 
-        subtitle={tTours.subtitle}
-        // Usa o banner do banco ou um fallback padrão do Unsplash
-        image={bannerUrl || "/54.jpg"}
-      />
+      {/* --- 1. BANNER IMERSIVO --- */}
+      <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center">
+        <div className="absolute inset-0">
+          <Image
+            src="/54.jpg" // Ou a imagem de banner configurada no admin
+            alt="Banner Passeios"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-foz-azul-escuro/60 via-foz-azul-escuro/40 to-foz-bege" />
+        </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        
-        {/* Barra de Filtros (Sobreposta ao Banner) */}
-        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg mb-12 -mt-20 relative z-20">
-          <div className="flex flex-col md:flex-row gap-6 items-center">
+        <div className="relative z-10 text-center px-4 max-w-4xl mt-10">
+          <h1 className="text-4xl md:text-6xl font-bold text-white font-serif mb-4 drop-shadow-lg animate-fade-in-up">
+            {tTours.title}
+          </h1>
+          <p className="text-lg md:text-xl text-white/90 font-light animate-fade-in-up delay-100">
+            {tTours.subtitle}
+          </p>
+        </div>
+      </div>
+
+      {/* --- 2. BARRA DE FILTROS "GLASS" (Sobrepondo o Banner) --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 -mt-24 mb-12">
+        <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-glass p-4 md:p-6 animate-fade-in-up delay-200">
+          
+          <div className="flex flex-col lg:flex-row gap-6 items-center">
             
-            {/* Campo de Busca */}
-            <div className="relative w-full md:flex-1">
+            {/* Input de Busca */}
+            <div className="relative w-full lg:w-1/3 group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search className="w-5 h-5 text-gray-400 group-focus-within:text-foz-azul-claro transition-colors" />
+              </div>
               <input
                 type="text"
-                placeholder={tCommon.search + '...'}
+                placeholder={tCommon.search + "..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border-2 border-gray-100 rounded-xl focus:ring-0 focus:border-verde-principal transition-all text-gray-700 font-medium"
+                className="w-full pl-12 pr-4 py-4 bg-white/50 border-2 border-transparent hover:border-white/60 focus:border-foz-azul-claro rounded-2xl outline-none transition-all placeholder-gray-500 text-gray-800 font-medium shadow-inner"
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
 
-            {/* Botões de Categoria (Scroll horizontal no mobile) */}
-             <div className="w-full md:w-auto flex overflow-x-auto pb-2 md:pb-0 gap-3 scrollbar-hide">
+            {/* Categorias (Scroll Horizontal no Mobile) */}
+            <div className="w-full lg:flex-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setSelectedCategory('all')}
-                  className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-                    selectedCategory === 'all' 
-                      ? 'bg-verde-principal text-white shadow-md transform scale-105' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2 ${
+                    selectedCategory === 'all'
+                      ? 'bg-foz-azul-escuro text-white shadow-lg scale-105'
+                      : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-escuro'
                   }`}
                 >
-                  {tCat.all}
+                  <Filter className="w-4 h-4" />
+                  {dict.categories.all}
                 </button>
+                
                 {categories.map(cat => (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-                      selectedCategory === cat.id 
-                        ? 'bg-verde-principal text-white shadow-md transform scale-105' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 ${
+                      selectedCategory === cat.id
+                        ? 'bg-foz-azul-claro text-white shadow-lg scale-105'
+                        : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-claro'
                     }`}
                   >
                     {cat.name}
                   </button>
                 ))}
+              </div>
             </div>
+
           </div>
         </div>
+      </div>
 
-        {/* Grid de Resultados */}
+      {/* --- 3. GRID DE RESULTADOS --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        
+        {/* Contador de Resultados */}
+        <div className="mb-8 text-gray-500 font-medium px-2 flex justify-between items-center">
+           <span>{filteredTours.length} experiências encontradas</span>
+           {(searchQuery || selectedCategory !== 'all') && (
+             <button 
+               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+               className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+             >
+               <X className="w-4 h-4" /> Limpar filtros
+             </button>
+           )}
+        </div>
+
         {filteredTours.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-            <p className="text-gray-500 text-xl font-medium">{tCommon.noResults}</p>
-            <button 
-                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                className="mt-4 text-verde-principal hover:underline font-semibold"
-            >
-                Limpar filtros
-            </button>
+          <div className="text-center py-32 bg-white rounded-[2rem] shadow-sm border border-gray-100">
+            <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+               <Search className="w-10 h-10 text-gray-300" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{tCommon.noResults}</h3>
+            <p className="text-gray-500">Tente mudar os filtros ou buscar por outro termo.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
-            {/* --- ESTA É A CORREÇÃO --- */}
-            {filteredTours.map(tour => (
-              <TourCard
-                key={tour.id}
-                tour={{
-                  id: tour.id,
-                  title: tour.title,
-                  description: tour.description,
-                  price: tour.base_price, // Mapeia 'base_price' para 'price'
-                  duration: tour.duration_hours, // Mapeia 'duration_hours' para 'duration'
-                  location: tour.location,
-                  imageUrl: tour.imageUrl
-                }}
-                dict={tTours}
-                lang={lang}
-              />
+            {filteredTours.map((tour, index) => (
+              <div 
+                key={tour.id} 
+                className="animate-fade-in-up h-[450px]" // Altura fixa para consistência
+                style={{ animationDelay: `${index * 100}ms` }} // Efeito cascata
+              >
+                <TourCard
+                  tour={tour}
+                  dict={tTours}
+                  lang={lang}
+                />
+              </div>
             ))}
           </div>
         )}
