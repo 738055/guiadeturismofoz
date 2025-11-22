@@ -59,10 +59,9 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
   }
 
   return (
-    // Container FIXO que engloba Barra Superior e Header para flutuar sobre o vídeo
     <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       
-      {/* Barra Superior - Oculta ao rolar para limpar a visão, ou pode manter se preferir */}
+      {/* Barra Superior - Some suavemente ao rolar */}
       <div className={`bg-gradient-to-r from-foz-azul-escuro via-foz-azul-claro to-foz-verde text-white px-4 text-xs font-semibold hidden md:block transition-all duration-500 overflow-hidden ${scrolled ? 'max-h-0 opacity-0' : 'max-h-10 py-2 opacity-100'}`}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
@@ -91,21 +90,21 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
       {/* Header Principal */}
       <header className={`transition-all duration-500 ${
         scrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-card py-2' // Estilo Scrolled (Fundo Branco)
-          : 'bg-transparent py-4 md:py-6' // Estilo Topo (Transparente)
+          ? 'bg-white/20 backdrop-blur-md shadow-sm py-2' // ROLAGEM: Fundo "Glass" Transparente
+          : 'bg-transparent py-4 md:py-6' // TOPO: Totalmente Transparente
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
-          {/* Logo: Aplica filtro branco (brightness-0 invert) quando transparente para contraste no vídeo */}
-          <div className={`transition-all duration-500 ${scrolled ? '' : 'brightness-0 invert drop-shadow-md'}`}>
-             <SiteLogo lang={lang} className={`transition-all duration-500 ${scrolled ? 'w-36' : 'w-44 md:w-56'}`} />
+          {/* Logo: Sempre Original (Removido filtros de inversão) */}
+          <div className={`transition-all duration-500 ${scrolled ? 'w-36' : 'w-44 md:w-56'} drop-shadow-sm`}>
+             <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
 
           {/* Nav Desktop */}
           <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-full border ml-8 transition-all duration-500 ${
             scrolled 
-              ? 'bg-foz-bege border-gray-100/50' // Fundo Nav Scrolled
-              : 'bg-white/10 backdrop-blur-sm border-white/20 shadow-lg' // Fundo Nav Glassmorphism
+              ? 'bg-white/40 border-white/30 shadow-sm' // Fundo Nav ao Rolar (Mais legível)
+              : 'bg-white/10 backdrop-blur-sm border-white/20 shadow-lg' // Fundo Nav no Topo
           }`}>
             {navLinks.map(link => (
               <Link 
@@ -113,12 +112,10 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
                 href={link.href}
                 className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                   isActive(link.href)
-                    ? scrolled 
-                        ? 'bg-foz-azul-escuro text-white shadow-md' // Ativo Scrolled
-                        : 'bg-white text-foz-azul-escuro shadow-md' // Ativo Transparente (Invertido)
+                    ? 'bg-foz-azul-escuro text-white shadow-md' // Ativo: Azul Escuro
                     : scrolled
-                        ? 'text-foz-cinza hover:text-foz-azul-escuro hover:bg-white' // Inativo Scrolled
-                        : 'text-white hover:text-white hover:bg-white/20' // Inativo Transparente
+                        ? 'text-foz-azul-escuro hover:bg-white/60' // Inativo Rolar: Texto Escuro
+                        : 'text-white hover:text-white hover:bg-white/20' // Inativo Topo: Texto Branco
                 }`}
               >
                 {link.label}
@@ -134,8 +131,8 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
                 items.length > 0 
                   ? 'bg-foz-amarelo text-foz-azul-escuro shadow-md hover:shadow-lg hover:-translate-y-0.5' 
                   : scrolled
-                      ? 'bg-white border-2 border-foz-bege text-foz-cinza hover:border-foz-azul-claro hover:text-foz-azul-claro' // Botão Vazio Scrolled
-                      : 'bg-white/10 backdrop-blur-md border-2 border-white/20 text-white hover:bg-white hover:text-foz-azul-escuro hover:border-white' // Botão Vazio Transparente
+                      ? 'bg-white/40 border-2 border-white/30 text-foz-azul-escuro hover:bg-white hover:border-white' 
+                      : 'bg-white/10 backdrop-blur-md border-2 border-white/20 text-white hover:bg-white hover:text-foz-azul-escuro hover:border-white'
               }`}
             >
               <ShoppingCart className={`w-5 h-5 ${items.length > 0 ? 'animate-bounce-slow' : ''}`} />
@@ -151,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
               className={`lg:hidden p-3 rounded-2xl transition-colors ${
                 scrolled 
-                  ? 'text-foz-azul-escuro hover:bg-foz-bege' 
+                  ? 'text-foz-azul-escuro hover:bg-white/30' 
                   : 'text-white hover:bg-white/20'
               }`}
             >
@@ -160,9 +157,9 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
           </div>
         </div>
 
-        {/* Menu Mobile (Fundo sempre branco para legibilidade) */}
+        {/* Menu Mobile */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-2xl p-4 flex flex-col h-[calc(100vh-80px)] animate-in slide-in-from-left-full duration-300">
+          <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-2xl p-4 flex flex-col h-[calc(100vh-80px)] animate-in slide-in-from-left-full duration-300">
             <div className="flex flex-col gap-2 mt-4">
               {navLinks.map(link => (
                 <Link 
