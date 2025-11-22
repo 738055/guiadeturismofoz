@@ -22,7 +22,7 @@
   @apply bg-foz-azul-claro/50 hover:bg-foz-azul-claro rounded-full border-2 border-foz-bege;
 }
 
-/* --- NOVAS ANIMAÇÕES (Hero e Cards) --- */
+/* --- ANIMAÇÕES PERSONALIZADAS (Estilo AquaFoz) --- */
 @layer utilities {
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
