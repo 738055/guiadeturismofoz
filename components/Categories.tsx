@@ -1,84 +1,169 @@
 // components/Categories.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Locale } from '@/i18n/dictionaries';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Droplets, TreePalm, Compass, Landmark, LucideIcon } from 'lucide-react';
 
 interface CategoriesProps {
   dict: any;
   lang: Locale;
 }
 
+// Definição dos dados das categorias com ícones e imagens
+type CategoryItem = {
+  id: string;
+  key: string; // Chave para buscar a tradução no dicionário
+  image: string;
+  icon: LucideIcon;
+};
+
 export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
+  // Estado para controlar qual card está expandido. 
+  // 'cataratas' começa expandido por padrão para não ficar tudo fechado.
+  const [activeId, setActiveId] = useState<string>('cataratas');
+
   if (!t) return null;
 
-  const categories = [
+  const categories: CategoryItem[] = [
     {
       id: 'cataratas',
-      title: t.falls,
-      image: 'https://images.unsplash.com/photo-1461958508236-9a742665a0d5?q=80&w=1000&auto=format&fit=crop', // Cataratas
-      colSpan: 'md:col-span-2', // Destaque maior
+      key: 'falls', // t.falls
+      image: 'https://images.unsplash.com/photo-1461958508236-9a742665a0d5?q=80&w=1000&auto=format&fit=crop',
+      icon: Droplets,
     },
     {
       id: 'natureza',
-      title: t.nature,
-      image: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?q=80&w=1000&auto=format&fit=crop', // Parque das Aves (Arara)
-      colSpan: 'md:col-span-1',
+      key: 'nature', // t.nature
+      image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1000&auto=format&fit=crop', // Imagem de Arara/Natureza
+      icon: TreePalm,
     },
     {
       id: 'aventura',
-      title: t.adventure,
-      image: 'https://images.unsplash.com/photo-1625123627242-97ef009796d1?q=80&w=1000&auto=format&fit=crop', // Macuco Safari (barco)
-      colSpan: 'md:col-span-1',
+      key: 'adventure', // t.adventure
+      image: 'https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?q=80&w=1000&auto=format&fit=crop', // Rafting/Aventura
+      icon: Compass,
     },
     {
       id: 'itaipu',
-      title: t.cultural,
-      image: 'https://images.unsplash.com/photo-1574102225629-6e588f03660c?q=80&w=1000&auto=format&fit=crop', // Itaipu
-      colSpan: 'md:col-span-2',
+      key: 'cultural', // t.cultural
+      image: 'https://images.unsplash.com/photo-1574102225629-6e588f03660c?q=80&w=1000&auto=format&fit=crop',
+      icon: Landmark,
     }
   ];
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-verde-principal mb-4 font-serif">
+    <section className="py-24 bg-white overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Cabeçalho */}
+        <div className="text-center mb-16 animate-fade-in-up">
+          <h2 className="text-4xl md:text-5xl font-bold text-foz-azul-escuro mb-4 font-serif">
             {t.title}
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto font-light">
             {t.subtitle}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/${lang}/tours?cat=${cat.id}`}
-              className={`relative h-64 md:h-80 rounded-3xl overflow-hidden group ${cat.colSpan} shadow-md hover:shadow-xl transition-all duration-500`}
-            >
-              <Image
-                src={cat.image}
-                alt={cat.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              {/* Gradiente Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-              
-              {/* Texto */}
-              <div className="absolute bottom-0 left-0 p-8 w-full">
-                <h3 className="text-2xl font-bold text-white mb-2 flex items-center justify-between group-hover:text-acento-dourado transition-colors">
-                  {cat.title}
-                  <ArrowRight className="w-6 h-6 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" />
-                </h3>
+        {/* --- ACCORDION CONTAINER --- */}
+        <div className="flex flex-col md:flex-row gap-4 h-[600px] w-full">
+          {categories.map((cat) => {
+            const isActive = activeId === cat.id;
+            const title = t[cat.key]; // Pega o título traduzido (ex: t.falls)
+
+            return (
+              <div
+                key={cat.id}
+                onMouseEnter={() => setActiveId(cat.id)}
+                onClick={() => setActiveId(cat.id)} // Para funcionar bem no mobile
+                className={`
+                  relative overflow-hidden rounded-[2rem] cursor-pointer shadow-card transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
+                  ${isActive ? 'md:flex-[3.5] flex-[3]' : 'md:flex-[1] flex-[1]'}
+                  /* Altura no mobile é distribuída pelo flex vertical */
+                `}
+              >
+                {/* Link para a página de busca filtrada */}
+                <Link href={`/${lang}/tours?cat=${cat.id}`} className="absolute inset-0 z-20" aria-label={`Ver passeios de ${title}`} />
+
+                {/* Imagem de Fundo */}
+                <div className="absolute inset-0 w-full h-full">
+                  <Image
+                    src={cat.image}
+                    alt={title}
+                    fill
+                    className={`
+                      object-cover transition-transform duration-1000 ease-out
+                      ${isActive ? 'scale-110 grayscale-0' : 'scale-100 grayscale-[30%]'}
+                    `}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                  {/* Overlay Gradiente */}
+                  <div className={`
+                    absolute inset-0 bg-gradient-to-t from-foz-azul-escuro/90 via-black/20 to-transparent transition-opacity duration-500
+                    ${isActive ? 'opacity-80' : 'opacity-70'}
+                  `} />
+                </div>
+
+                {/* Conteúdo do Card */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-end z-10 pointer-events-none">
+                  
+                  {/* Ícone Flutuante (Sempre visível) */}
+                  <div className={`
+                    absolute top-6 right-6 bg-white/20 backdrop-blur-md p-3 rounded-full text-white border border-white/30 transition-all duration-500
+                    ${isActive ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-80'}
+                  `}>
+                    <cat.icon className="w-6 h-6" />
+                  </div>
+
+                  {/* Texto e Título */}
+                  <div className="relative overflow-hidden">
+                    
+                    {/* Título Vertical (Visível apenas quando INATIVO e no DESKTOP) */}
+                    <h3 className={`
+                      hidden md:block absolute bottom-0 left-0 origin-bottom-left -rotate-90 whitespace-nowrap text-2xl font-bold text-white/80 font-serif tracking-wider transition-opacity duration-300
+                      ${isActive ? 'opacity-0 translate-y-10' : 'opacity-100 translate-y-0'}
+                    `}>
+                      {title}
+                    </h3>
+
+                    {/* Conteúdo Expandido (Visível quando ATIVO) */}
+                    <div className={`
+                      transition-all duration-500 transform
+                      ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 md:opacity-0 md:translate-y-12'}
+                    `}>
+                      {/* Título Principal */}
+                      <h3 className="text-3xl md:text-4xl font-bold text-white font-serif mb-3 leading-tight drop-shadow-lg">
+                        {title}
+                      </h3>
+                      
+                      {/* Linha decorativa */}
+                      <div className="w-16 h-1 bg-foz-amarelo rounded-full mb-4" />
+
+                      {/* Botão "Explorar" Simulado */}
+                      <div className="inline-flex items-center gap-2 text-white font-bold text-sm uppercase tracking-widest group">
+                        <span>Explorar</span>
+                        <div className="bg-foz-verde p-1.5 rounded-full group-hover:bg-green-500 transition-colors">
+                           <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Título Simples (Mobile Inativo - para garantir que sempre tenha texto no mobile) */}
+                    <h3 className={`
+                      md:hidden text-xl font-bold text-white font-serif transition-opacity duration-300
+                      ${isActive ? 'hidden' : 'block'}
+                    `}>
+                      {title}
+                    </h3>
+
+                  </div>
+                </div>
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
