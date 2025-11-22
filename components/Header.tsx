@@ -21,6 +21,21 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
+  // Lista de rotas que devem ter o header transparente (overlay)
+  // Adicione aqui qualquer nova página que tenha um banner no topo
+  const transparentRoutes = ['', 'tours', 'combos', 'about'];
+
+  // Verifica se a rota atual deve ser transparente
+  const isTransparentPage = () => {
+    if (!pathname) return false;
+    const segments = pathname.split('/').filter(Boolean);
+    // segments[0] é o lang (pt-BR), segments[1] é a página
+    const currentPage = segments[1] || ''; 
+    return transparentRoutes.includes(currentPage);
+  };
+
+  const isTransparent = isTransparentPage();
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -58,11 +73,25 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
       return false;
   }
 
+  // Define o estilo baseado na página e no scroll
+  // Se NÃO for página transparente (ex: Contato), força o estilo "scrolled" (fundo branco) sempre.
+  const useWhiteStyle = !isTransparent || scrolled;
+
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div 
+      className={`
+        z-50 transition-all duration-300
+        ${isTransparent ? 'fixed top-0 left-0 right-0' : 'sticky top-0 bg-white shadow-sm'}
+      `}
+    >
       
-      {/* Barra Superior - Some suavemente ao rolar */}
-      <div className={`bg-gradient-to-r from-foz-azul-escuro via-foz-azul-claro to-foz-verde text-white px-4 text-xs font-semibold hidden md:block transition-all duration-500 overflow-hidden ${scrolled ? 'max-h-0 opacity-0' : 'max-h-10 py-2 opacity-100'}`}>
+      {/* Barra Superior */}
+      <div 
+        className={`
+          bg-gradient-to-r from-foz-azul-escuro via-foz-azul-claro to-foz-verde text-white px-4 text-xs font-semibold hidden md:block transition-all duration-500 overflow-hidden
+          ${isTransparent && scrolled ? 'max-h-0 opacity-0' : 'max-h-10 py-2 opacity-100'}
+        `}
+      >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
              <span className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity cursor-default">
@@ -89,22 +118,22 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
 
       {/* Header Principal */}
       <header className={`transition-all duration-500 ${
-        scrolled 
-          ? 'bg-white/20 backdrop-blur-md shadow-sm py-2' // ROLAGEM: Fundo "Glass" Transparente
-          : 'bg-transparent py-4 md:py-6' // TOPO: Totalmente Transparente
+        useWhiteStyle 
+          ? 'bg-white/95 backdrop-blur-md shadow-sm py-2' // Estilo Sólido/Scrolled
+          : 'bg-transparent py-4 md:py-6' // Estilo Transparente (Topo da Home/Banner)
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
-          {/* Logo: Sempre Original (Removido filtros de inversão) */}
-          <div className={`transition-all duration-500 ${scrolled ? 'w-36' : 'w-44 md:w-56'} drop-shadow-sm`}>
+          {/* Logo */}
+          <div className={`transition-all duration-500 ${useWhiteStyle ? 'w-36' : 'w-44 md:w-56'} drop-shadow-sm`}>
              <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
 
           {/* Nav Desktop */}
           <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-full border ml-8 transition-all duration-500 ${
-            scrolled 
-              ? 'bg-white/40 border-white/30 shadow-sm' // Fundo Nav ao Rolar (Mais legível)
-              : 'bg-white/10 backdrop-blur-sm border-white/20 shadow-lg' // Fundo Nav no Topo
+            useWhiteStyle
+              ? 'bg-white/40 border-white/30 shadow-sm' 
+              : 'bg-white/10 backdrop-blur-sm border-white/20 shadow-lg' 
           }`}>
             {navLinks.map(link => (
               <Link 
@@ -112,10 +141,10 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
                 href={link.href}
                 className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                   isActive(link.href)
-                    ? 'bg-foz-azul-escuro text-white shadow-md' // Ativo: Azul Escuro
-                    : scrolled
-                        ? 'text-foz-azul-escuro hover:bg-white/60' // Inativo Rolar: Texto Escuro
-                        : 'text-white hover:text-white hover:bg-white/20' // Inativo Topo: Texto Branco
+                    ? 'bg-foz-azul-escuro text-white shadow-md' // Ativo sempre azul
+                    : useWhiteStyle
+                        ? 'text-foz-azul-escuro hover:bg-white/60' // Texto escuro em fundo branco
+                        : 'text-white hover:text-white hover:bg-white/20' // Texto branco em fundo transparente
                 }`}
               >
                 {link.label}
@@ -130,7 +159,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
               className={`relative flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all duration-300 group ${
                 items.length > 0 
                   ? 'bg-foz-amarelo text-foz-azul-escuro shadow-md hover:shadow-lg hover:-translate-y-0.5' 
-                  : scrolled
+                  : useWhiteStyle
                       ? 'bg-white/40 border-2 border-white/30 text-foz-azul-escuro hover:bg-white hover:border-white' 
                       : 'bg-white/10 backdrop-blur-md border-2 border-white/20 text-white hover:bg-white hover:text-foz-azul-escuro hover:border-white'
               }`}
@@ -147,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
               className={`lg:hidden p-3 rounded-2xl transition-colors ${
-                scrolled 
+                useWhiteStyle
                   ? 'text-foz-azul-escuro hover:bg-white/30' 
                   : 'text-white hover:bg-white/20'
               }`}
