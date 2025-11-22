@@ -1,34 +1,35 @@
-/* app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Adicione ao final do seu arquivo globals.css */
 
-@layer base {
-  body {
-    @apply bg-foz-bege text-foz-cinza font-sans;
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-foz-azul-escuro font-bold;
+  
+  .animate-slide-up-fade {
+    animation: slideUpFade 1s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.3s;
   }
 }
 
-/* Animações Personalizadas */
-@keyframes fade-in-up {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out forwards;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-foz-bege;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-foz-azul-claro/50 hover:bg-foz-azul-claro rounded-full border-2 border-foz-bege;
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
