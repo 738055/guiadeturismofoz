@@ -10,32 +10,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // PALETA VIBRANTE "GUIA FOZ"
-        'foz-azul-escuro': '#002F6C', // Azul institucional forte (texto principal, headers)
-        'foz-azul-claro': '#00A3E0',  // Azul ciano vibrante (ícones, detalhes, links)
-        'foz-verde': '#009739',       // Verde bandeira (natureza, confirmações, preços)
-        'foz-amarelo': '#FFD100',     // Amarelo sol (CTAs, destaques, estrelas)
-        
-        // Neutros mais quentes para fundo
-        'foz-bege': '#F8F9FA',        // Fundo quase branco, mais acolhedor que cinza
-        'foz-cinza': '#4A5568',       // Texto secundário legível
+        'foz-azul-escuro': '#002F6C',
+        'foz-azul-claro': '#00A3E0',
+        'foz-verde': '#009739',
+        'foz-amarelo': '#FFD100',
+        'foz-bege': '#F8F9FA',
+        'foz-cinza': '#4A5568',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
         serif: ['var(--font-merriweather)', 'serif'],
       },
       boxShadow: {
-        'card': '0 8px 24px -4px rgba(0, 47, 108, 0.08)', // Sombra levemente azulada
-        'card-hover': '0 15px 40px -8px rgba(0, 163, 224, 0.25)', // Sombra vibrante ao passar o mouse
+        'card': '0 10px 30px -10px rgba(0, 47, 108, 0.1)',
+        'card-hover': '0 20px 40px -10px rgba(0, 47, 108, 0.2)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+      },
+      transitionTimingFunction: {
+        'elastic': 'cubic-bezier(0.25, 1, 0.5, 1)', // Curva suave usada no AquaFoz
       },
       animation: {
-        'pulse-vibrant': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 3s ease-in-out infinite',
+        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-5px)' },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         }
       }
     },

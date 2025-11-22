@@ -1,6 +1,6 @@
 // components/TourCard.tsx
 import React from 'react';
-import { Clock, MapPin, ArrowUpRight, Star } from 'lucide-react';
+import { Clock, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Locale } from '@/i18n/dictionaries';
@@ -26,64 +26,50 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
   return (
     <Link
       href={`/${lang}/tour/${tour.id}${query}`}
-      className="group bg-white rounded-3xl shadow-card hover:shadow-card-hover transition-all duration-500 overflow-hidden flex flex-col h-full border border-transparent hover:border-foz-azul-claro/20 relative"
+      className="group relative bg-white rounded-3xl shadow-sm hover:shadow-card-hover transition-all duration-500 overflow-hidden h-full flex flex-col"
     >
-      {/* Imagem com efeito de zoom suave */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+      {/* Container da Imagem */}
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-3xl">
         {tour.imageUrl ? (
           <Image
             src={tour.imageUrl}
             alt={tour.title}
             fill
-            className="object-cover transform group-hover:scale-110 transition-transform duration-700"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-foz-bege">
-            <MapPin className="w-16 h-16 text-foz-azul-claro/30" />
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <MapPin className="text-gray-400" />
           </div>
         )}
-        {/* Gradiente para legibilidade */}
-        <div className="absolute inset-0 bg-gradient-to-t from-foz-azul-escuro/90 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
         
-        {/* Destaques sobre a imagem */}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 text-xs font-bold text-foz-azul-escuro shadow-sm">
-            <Star className="w-3 h-3 text-foz-amarelo fill-foz-amarelo" /> 4.9 {/* Placeholder de nota */}
-        </div>
-
-        <div className="absolute bottom-0 left-0 p-6 w-full text-white">
-             <p className="text-sm font-medium opacity-90 mb-1">{t.from}</p>
-             <div className="flex items-baseline gap-1">
-               <span className="text-xs opacity-80">R$</span>
-               <span className="text-3xl font-extrabold tracking-tight">{tour.price.toFixed(2)}</span>
-             </div>
+        {/* Tag de Preço Flutuante */}
+        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur shadow-lg px-4 py-2 rounded-xl z-10">
+          <span className="text-xs text-gray-500 block font-semibold">{t.from}</span>
+          <span className="text-lg font-bold text-foz-verde">R$ {tour.price.toFixed(2)}</span>
         </div>
       </div>
 
       {/* Conteúdo */}
       <div className="p-6 flex flex-col flex-1">
-        <div className="flex justify-between items-start gap-4 mb-3">
-             <h3 className="text-xl font-bold text-foz-azul-escuro line-clamp-2 leading-tight group-hover:text-foz-azul-claro transition-colors duration-300">
-              {tour.title}
-            </h3>
-            <div className="bg-foz-azul-claro/10 p-2 rounded-full group-hover:bg-foz-azul-claro group-hover:text-white text-foz-azul-claro transition-all duration-300 shrink-0">
-               <ArrowUpRight className="w-5 h-5" />
-            </div>
+        <div className="flex items-center gap-3 text-xs font-bold text-foz-azul-claro mb-3 uppercase tracking-wide">
+           <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {tour.duration}H</span>
+           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+           <span className="truncate max-w-[150px]">{tour.location}</span>
         </div>
 
-        <p className="text-foz-cinza text-sm mb-6 line-clamp-2 leading-relaxed flex-grow">
+        <h3 className="text-xl font-bold text-foz-azul-escuro mb-3 line-clamp-2 group-hover:text-foz-azul-claro transition-colors font-serif">
+          {tour.title}
+        </h3>
+
+        <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-1">
           {tour.description}
         </p>
 
-        <div className="flex items-center gap-4 text-sm font-medium text-foz-cinza/80 pt-4 border-t border-dashed border-gray-100">
-          <div className="flex items-center gap-1.5 bg-foz-bege px-3 py-1.5 rounded-lg">
-            <Clock className="w-4 h-4 text-foz-azul-claro" />
-            <span>{tour.duration}h</span>
-          </div>
-          <div className="flex items-center gap-1.5 truncate">
-            <MapPin className="w-4 h-4 text-foz-verde" />
-            <span className="truncate">{tour.location}</span>
-          </div>
+        <div className="flex items-center text-foz-azul-escuro font-bold text-sm group/btn">
+          <span className="group-hover/btn:underline">{t.viewDetails}</span>
+          <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
         </div>
       </div>
     </Link>
