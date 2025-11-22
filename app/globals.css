@@ -1,5 +1,28 @@
-/* Adicione ao final do seu arquivo globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-foz-bege text-foz-cinza font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-foz-azul-escuro font-bold;
+  }
+}
+
+/* Scrollbar moderna e colorida */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-foz-bege;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-foz-azul-claro/50 hover:bg-foz-azul-claro rounded-full border-2 border-foz-bege;
+}
+
+/* --- NOVAS ANIMAÇÕES (Hero e Cards) --- */
 @layer utilities {
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
