@@ -112,7 +112,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
     <div className="min-h-screen bg-foz-bege">
       
       {/* --- 1. BANNER IMERSIVO --- */}
-      <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center pt-16 md:pt-20"> {/* ADICIONADO pt-16 md:pt-20 */}
+      <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center pt-20">
         <div className="absolute inset-0">
           <Image
             src="/54.jpg" // Ou a imagem de banner configurada no admin
@@ -135,7 +135,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       </div>
 
       {/* --- 2. BARRA DE FILTROS "GLASS" (NOVA POSIÇÃO) --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 mb-12"> {/* REMOVIDO -mt-24 e ajustado z-index para z-0 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 mb-12">
         <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-glass p-4 md:p-6 animate-fade-in-up delay-200">
           
           <div className="flex flex-col lg:flex-row gap-6 items-center">

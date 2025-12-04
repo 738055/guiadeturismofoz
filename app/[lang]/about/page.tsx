@@ -1,3 +1,4 @@
+// app/[lang]/about/page.tsx
 import React from 'react';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { MapPin, Heart, Shield } from 'lucide-react';
@@ -8,7 +9,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
   const t = dict.about;
 
   return (
-    <div className="bg-white">
+    <div className="bg-white pt-20">
       {/* Banner Institucional */}
       <div className="relative h-[400px]">
         <Image

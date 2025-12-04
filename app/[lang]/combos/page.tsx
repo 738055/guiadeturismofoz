@@ -40,7 +40,7 @@ export default function CombosPage({ params: { lang } }: { params: { lang: Local
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-20">
       <PageBanner 
         title={dict.combos.title} 
         subtitle={dict.combos.subtitle}
