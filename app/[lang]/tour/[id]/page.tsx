@@ -1,4 +1,4 @@
-// guiadeturismofoz/app/[lang]/tour/[id]/page.tsx
+// app/[lang]/tour/[id]/page.tsx
 
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
@@ -34,7 +34,7 @@ const safeParse = (content: any) => {
         }
     } catch (e) {
         // Em caso de falha no JSON.parse (ex: campo tem texto simples, não JSON),
-        // retorna o conteúdo como um array de string se não for vazio.
+        // tenta retornar o conteúdo como um array de string se não for vazio.
         if (typeof content === 'string' && content.trim() !== '') {
              return [content.trim()];
         }
@@ -44,10 +44,9 @@ const safeParse = (content: any) => {
 };
 
 
-// --- Busca de Dados no Servidor (AJUSTADA PARA ROBUSTEZ) ---
+// --- Busca de Dados no Servidor (AJUSTADA PARA TRATAR IMAGENS INVÁLIDAS) ---
 async function getTourDetail(id: string, lang: Locale) {
   try {
-    // A query completa é grande, mas necessária
     const selectQuery = `
         id,
         base_price,
@@ -80,53 +79,50 @@ async function getTourDetail(id: string, lang: Locale) {
       .from('tours')
       .select(selectQuery)
       .eq('id', id)
-      .eq('is_active', true) // Mantém o filtro de ativo
+      .eq('is_active', true) 
       .order('display_order', { referencedTable: 'tour_images', ascending: true })
       .maybeSingle();
 
     if (tourError) {
-        // Loga o erro exato do Supabase
         console.error('SUPABASE FETCH ERROR in getTourDetail:', tourError);
-        throw tourError; // Lança para o catch, que retorna null
+        throw tourError;
     }
-    if (!tourData) return null; // Passeio não encontrado ou não ativo
+    if (!tourData) return null;
 
     const translations = tourData.tour_translations || [];
     
-    // --- LÓGICA DE FALLBACK APRIMORADA ---
+    // Lógica de Fallback de Tradução
     let translation = translations.find((t: any) => t.language_code === lang);
-    
-    if (!translation) {
-        translation = translations.find((t: any) => t.language_code === 'pt-BR');
-    }
-    // Adiciona o fallback para pt_BR (com underline) para cobrir dados legados
-    if (!translation) {
-        translation = translations.find((t: any) => t.language_code === 'pt_BR');
-    }
+    if (!translation) translation = translations.find((t: any) => t.language_code === 'pt-BR');
+    if (!translation) translation = translations.find((t: any) => t.language_code === 'pt_BR');
 
     if (!translation) {
       console.error(`Tour ${id} found, but no usable translation available.`);
       return null;
     }
+    
+    // --- NOVO: FILTRAR IMAGENS INVÁLIDAS (PLACEHOLDER) ---
+    const rawImages = tourData.tour_images || [];
+    const validImages = rawImages.filter((img: any) => 
+        img.image_url && !img.image_url.includes('placeholder')
+    );
+    // --- FIM DO FILTRO ---
 
-    const images = tourData.tour_images || [];
     const availability = tourData.tour_availability || [];
 
     return {
       ...tourData,
       title: translation.title || '',
       description: translation.description || '',
-      // Usa safeParse para garantir que os campos são arrays
       whatsIncluded: safeParse(translation.whats_included), 
       whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
       disabled_specific_dates: tourData.disabled_specific_dates || [],
       isWomenExclusive: tourData.is_women_exclusive || false,
-      images,
+      images: validImages, // Usa apenas imagens válidas
       availability
     };
   } catch (error) {
-    // Loga o erro geral antes de retornar null
     console.error('GENERIC ERROR IN getTourDetail:', error);
     return null;
   }
@@ -200,6 +196,7 @@ export default async function TourDetailPage({
   ]);
 
   if (!tour) {
+    // Se o tour não for encontrado ou falhar, exibe o erro
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center min-h-[60vh]">
         <p className="text-gray-500">{dict.common.error}</p>
@@ -224,6 +221,7 @@ export default async function TourDetailPage({
         {/* Parte de Imagens (Servidor) */}
         <div>
           <div className="relative h-96 rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-verde-principal to-verde-secundario">
+            {/* Agora ele só renderiza se houver pelo menos uma imagem VÁLIDA */}
             {tour.images[0] ? (
               <Image
                 src={tour.images[0].image_url}
