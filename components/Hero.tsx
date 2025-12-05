@@ -28,11 +28,11 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
         >
           {/* URL DO VÍDEO DO BUCKET (VERIFICADO) */}
           <source 
-            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/CATARATAS.mp4"
+            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/VID_20231011_140853.mp4"
             type="video/mp4" 
           />
           <source 
-            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/CATARATAS.mov" 
+            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/VID_20231011_140853.mp4" 
             type="video/quicktime"
           />
           {/* Fallback caso o vídeo não seja suportado */}
