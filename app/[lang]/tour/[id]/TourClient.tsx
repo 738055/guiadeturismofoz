@@ -18,9 +18,10 @@ interface TourClientProps {
   };
   availableDates: { available_date: string; total_spots: number; spots_booked: number; }[];
   dict: Dictionary; // Recebe o dicionário completo
+  lang: Locale; // <--- CORREÇÃO: Adicionada a prop lang
 }
 
-export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, dict }) => {
+export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, dict, lang }) => { // <--- CORREÇÃO: Desestruturada a prop lang
   const { addItem } = useCart();
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
