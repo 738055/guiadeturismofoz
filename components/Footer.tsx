@@ -85,7 +85,7 @@ export const Footer: React.FC<FooterProps> = ({ lang, footerText: t }) => {
                <li className="flex items-start gap-3">
                  <Phone className="w-5 h-5 text-verde-principal flex-shrink-0" />
                  <div>
-                    <p className="text-white font-medium">+55 45 9999-9999</p>
+                    <p className="text-white font-medium">+55 45 9996-4855</p>
                     <p className="text-xs">Seg a Sex: 8h às 18h</p>
                  </div>
                </li>

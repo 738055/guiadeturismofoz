@@ -1,3 +1,4 @@
+// app/[lang]/contact/page.tsx
 import React from 'react';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { Mail, Phone, MapPin } from 'lucide-react';
@@ -25,7 +26,7 @@ export default async function ContactPage({ params: { lang } }: { params: { lang
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 text-lg mb-1">WhatsApp / Telefone</h3>
-                <p className="text-verde-principal font-semibold text-lg">+55 45 9999-9999</p>
+                <p className="text-verde-principal font-semibold text-lg">+55 45 9996-4855</p>
                 <p className="text-sm text-gray-500 mt-1">Seg a Sex, 8h às 18h | Sáb 8h às 12h</p>
               </div>
             </div>

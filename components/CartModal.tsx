@@ -76,7 +76,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, cartText:
     message += `*Por favor, confirme a disponibilidade e o valor final. Aguardamos a resposta!*`;
 
     // Lembre-se de pegar o número do .env
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999999999';
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999648551';
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
     // Abrir o WhatsApp

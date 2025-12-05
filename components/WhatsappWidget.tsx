@@ -6,7 +6,7 @@ import { MessageCircle } from 'lucide-react';
 
 export const WhatsAppWidget = () => {
   // Número do .env ou fallback
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999999999';
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999648551';
   const defaultMessage = "Olá! Estou no site da Guia de Turismo Foz e gostaria de ajuda.";
 
   const handleClick = () => {

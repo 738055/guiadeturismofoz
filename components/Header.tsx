@@ -1,3 +1,4 @@
+// components/Header.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -103,8 +104,8 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
              <span className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity cursor-default">
                <MapPin className="w-3.5 h-3.5" /> Foz do Iguaçu - Brasil
              </span>
-             <a href="https://wa.me/554599999999" target="_blank" className="flex items-center gap-2 hover:text-foz-amarelo transition-colors">
-               <Phone className="w-3.5 h-3.5" /> +55 45 9999-9999
+             <a href="https://wa.me/5545999648551" target="_blank" className="flex items-center gap-2 hover:text-foz-amarelo transition-colors">
+               <Phone className="w-3.5 h-3.5" /> +55 45 9996-4855
              </a>
           </div>
           <div className="flex items-center gap-4">
