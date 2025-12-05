@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Calendar } from 'lucide-react';
-// IMPORTAR getDay
 import { format, parseISO, getDay } from 'date-fns';
 import { Dictionary } from '@/i18n/dictionaries';
 
@@ -14,7 +13,8 @@ interface TourClientProps {
     id: string;
     title: string;
     base_price: number;
-    disabled_week_days?: number[]; // <-- ADICIONE ESTA PROP
+    disabled_week_days?: number[]; 
+    disabled_specific_dates?: string[]; // <-- ADICIONADO
   };
   availableDates: any[];
   dict: Dictionary; // Recebe o dicionário completo
@@ -55,14 +55,29 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
 
   // --- LÓGICA DE FILTRO DE DATAS ---
   const disabledDays = tour.disabled_week_days || [];
+  const disabledSpecificDates = tour.disabled_specific_dates || []; // NOVO: Pega as datas específicas
   
   const filteredDates = availableDates.filter(avail => {
     try {
-      const date = parseISO(avail.available_date);
+      const dateString = avail.available_date; // Formato 'yyyy-MM-dd'
+      const date = parseISO(dateString);
       const dayOfWeek = getDay(date); // 0 = Domingo, 1 = Segunda...
       
-      // Retorna true se o dia DA SEMANA NÃO ESTÁ na lista de desabilitados
-      return !disabledDays.includes(dayOfWeek);
+      // 1. FILTRO DE DIA DA SEMANA RECORRENTE
+      // Retorna false se o dia DA SEMANA ESTÁ na lista de desabilitados
+      if (disabledDays.includes(dayOfWeek)) {
+         return false;
+      }
+      
+      // 2. FILTRO DE DATA ESPECÍFICA (feriados, etc.)
+      // Retorna false se a data (YYYY-MM-DD) ESTÁ na lista de desabilitados
+      if (disabledSpecificDates.includes(dateString)) {
+          return false;
+      }
+      
+      // 3. FILTRO DE VAGAS (mantido pela estrutura mockada)
+      return avail.total_spots > avail.spots_booked;
+
 
     } catch (e) {
       console.error('Data inválida:', avail.available_date, e);

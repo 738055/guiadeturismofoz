@@ -8,9 +8,9 @@ import {
   ArrowLeft, Save, Loader2, Image as ImageIcon, Trash2, Upload, X, Check, Plus, Calendar as CalendarIcon
 } from 'lucide-react';
 import Link from 'next/link';
-import { TourImage, TourAvailability } from '@/lib/supabase'; // Importar tipos
+import { TourImage } from '@/lib/supabase'; // TourAvailability removida
 import Image from 'next/image';
-import { format, parseISO } from 'date-fns'; // Para formatar datas na lista
+import { format, parseISO } from 'date-fns'; 
 
 // Tipo para os dados do formulário
 type TranslationData = {
@@ -29,7 +29,7 @@ type FormData = {
   location: string;
   isActive: boolean;
   isWomenExclusive: boolean; 
-  isFeatured: boolean; // <--- CAMPO DE DESTAQUE ADICIONADO
+  isFeatured: boolean; 
   translations: {
     'pt-BR': TranslationData;
     'en-US': TranslationData;
@@ -43,7 +43,7 @@ const initialFormData: FormData = {
   location: '',
   isActive: true,
   isWomenExclusive: false,
-  isFeatured: false, // <--- VALOR INICIAL ADICIONADO
+  isFeatured: false, 
   translations: {
     'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
     'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
@@ -53,12 +53,6 @@ const initialFormData: FormData = {
 
 // Tipo para Categoria
 type CategoryOption = { id: string; name: string; };
-
-// --- TIPO PARA ITEM DE DISPONIBILIDADE NO ESTADO ---
-type AvailabilityStateItem = {
-  available_date: string; // Formato 'YYYY-MM-DD'
-  total_spots: number;
-};
 
 export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
   const router = useRouter();
@@ -80,11 +74,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
-
-  // --- ESTADOS PARA GERENCIAR DISPONIBILIDADE ---
-  const [availabilityList, setAvailabilityList] = useState<AvailabilityStateItem[]>([]);
-  const [availabilityDateInput, setAvailabilityDateInput] = useState('');
-  const [availabilitySpotsInput, setAvailabilitySpotsInput] = useState<number>(10); // Default
 
   useEffect(() => {
     loadCategories();
@@ -119,12 +108,10 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         .select(`
           *,
           tour_translations (*),
-          tour_images (*),
-          tour_availability (*)
+          tour_images (*)
         `) 
         .eq('id', tourId)
         .order('display_order', { referencedTable: 'tour_images', ascending: true })
-        .order('available_date', { referencedTable: 'tour_availability', ascending: true }) 
         .maybeSingle();
 
       if (tourError) throw tourError;
@@ -154,7 +141,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: tour.location, 
         isActive: tour.is_active, 
         isWomenExclusive: tour.is_women_exclusive || false, 
-        isFeatured: tour.is_featured || false, // <-- CARREGA isFeatured
+        isFeatured: tour.is_featured || false, 
         translations: translations as FormData['translations'] 
       });
 
@@ -163,11 +150,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       setDisabledDays(tour.disabled_week_days || []);
       setSpecificDisabledDates(tour.disabled_specific_dates || []);
 
-      // --- CARREGA A DISPONIBILIDADE EXISTENTE ---
-      setAvailabilityList(tour.tour_availability.map((avail: TourAvailability) => ({
-        available_date: avail.available_date,
-        total_spots: avail.total_spots
-      })) || []);
 
     } catch (error) {
       console.error('Error loading tour:', error);
@@ -188,7 +170,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: formData.location,
         is_active: formData.isActive,
         is_women_exclusive: formData.isWomenExclusive, 
-        is_featured: formData.isFeatured, // <-- SALVA isFeatured
+        is_featured: formData.isFeatured, 
         category_id: categoryId,
         disabled_week_days: disabledDays,
         disabled_specific_dates: specificDisabledDates
@@ -216,42 +198,23 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       const { error: upsertError } = await supabase.from('tour_translations').upsert(translationsToUpsert, { onConflict: 'tour_id, language_code' });
       if (upsertError) throw upsertError;
 
-      // 4. GERENCIA DISPONIBILIDADE
-      if (currentTourId) { 
-        const { error: deleteError } = await supabase
-          .from('tour_availability')
-          .delete()
-          .eq('tour_id', currentTourId);
-        if (deleteError) { console.warn('Could not delete old availability:', deleteError.message); }
-
-        if (availabilityList.length > 0) {
-          const availabilityToInsert = availabilityList.map(item => ({
-            tour_id: currentTourId,
-            available_date: item.available_date,
-            total_spots: item.total_spots,
-            spots_booked: 0 
-          }));
-          const { error: insertAvailError } = await supabase
-            .from('tour_availability')
-            .insert(availabilityToInsert);
-          if (insertAvailError) throw insertAvailError;
-        }
-      }
-
+      
       alert('Passeio salvo com sucesso!');
       router.push('/admin/tours');
 
     } catch (error) {
       console.error('Error saving tour:', error);
-      // O erro 400 'Error saving tour: Object' geralmente significa que um dado é inválido ou 
-      // há um erro na política RLS.
       alert('Erro ao salvar passeio. Verifique o console. (Provavelmente erro de dados ou RLS).');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Handlers auxiliares (mantidos) ---
+  // --- Handlers auxiliares ---
+  // Ações no-op para disponibilidade manual removida
+  const handleAddAvailability = () => { /* No-op */ }; 
+  const handleRemoveAvailability = (dateToRemove: string) => { /* No-op */ }; 
+
   const updateTranslation = (field: keyof Omit<TranslationData, 'whatsIncluded' | 'whatsExcluded'>, value: string) => {
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: value } } }));
   };
@@ -324,25 +287,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     const field = type === 'include' ? 'whatsIncluded' : 'whatsExcluded';
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: prev.translations[activeTab][field].filter((_, i) => i !== index) } } }));
   };
-  const handleAddAvailability = () => {
-    if (availabilityDateInput && availabilitySpotsInput > 0) {
-      const existingIndex = availabilityList.findIndex(item => item.available_date === availabilityDateInput);
-      if (existingIndex !== -1) {
-        const updatedList = [...availabilityList];
-        updatedList[existingIndex].total_spots = availabilitySpotsInput;
-        setAvailabilityList(updatedList.sort((a, b) => a.available_date.localeCompare(b.available_date)));
-      } else {
-        const newItem: AvailabilityStateItem = { available_date: availabilityDateInput, total_spots: availabilitySpotsInput };
-        setAvailabilityList(prev => [...prev, newItem].sort((a, b) => a.available_date.localeCompare(b.available_date)));
-      }
-    } else {
-      alert("Por favor, selecione uma data e informe um número de vagas maior que zero.");
-    }
-  };
 
-  const handleRemoveAvailability = (dateToRemove: string) => {
-    setAvailabilityList(prev => prev.filter(item => item.available_date !== dateToRemove));
-  };
 
   const weekDays = [
      { label: 'Dom', index: 0 }, { label: 'Seg', index: 1 }, { label: 'Ter', index: 2 },
@@ -374,7 +319,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
               <button
                 type="submit"
                 disabled={loading}
-                // AJUSTE: Adicionada classe shadow-lg para garantir visibilidade contra fundo branco
                 className="flex items-center space-x-2 bg-verde-principal text-white px-4 py-2 rounded-lg hover:bg-verde-secundario transition-colors disabled:opacity-50 shadow-lg"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
@@ -496,56 +440,21 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                </div>
             </div>
 
-             {/* --- SEÇÃO DE GERENCIAMENTO DE DISPONIBILIDADE --- */}
+             {/* --- SEÇÃO DE GERENCIAMENTO DE DISPONIBILIDADE - SUBSTITUÍDA --- */}
              <div className="mb-8 mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Gerenciar Disponibilidade</h3>
-                <p className="text-sm text-gray-500 mb-4">Adicione as datas em que o passeio estará disponível e quantas vagas totais terá em cada dia.</p>
-                {/* Inputs e Botão Adicionar */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 border rounded-lg bg-gray-50">
-                   <div className='flex-1'>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                     <input type="date" value={availabilityDateInput} onChange={(e) => setAvailabilityDateInput(e.target.value)}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent" />
-                   </div>
-                   <div className='w-full sm:w-32'>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Vagas Totais</label>
-                     <input type="number" min="1" value={availabilitySpotsInput} onChange={(e) => setAvailabilitySpotsInput(parseInt(e.target.value) || 1)}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent" />
-                   </div>
-                   <div className="flex items-end">
-                      <button type="button" onClick={handleAddAvailability}
-                        className="w-full sm:w-auto px-4 py-2 bg-verde-principal text-white rounded-lg font-medium hover:bg-verde-secundario flex items-center justify-center space-x-2">
-                         <Plus className="w-5 h-5" />
-                         <span>Adicionar/Atualizar</span>
-                      </button>
-                   </div>
-                </div>
-                {/* Lista de disponibilidade */}
-                {availabilityList.length > 0 ? (
-                  <div>
-                    <h4 className="text-md font-semibold text-gray-700 mb-3">Datas Disponíveis Adicionadas:</h4>
-                    <ul className="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-3 bg-white">
-                      {availabilityList.map(item => (
-                        <li key={item.available_date} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
-                          <div className="flex items-center space-x-2">
-                            <CalendarIcon className="w-4 h-4 text-gray-500"/>
-                            {/* Formata a data para dd/MM/yyyy */}
-                            <span>{format(parseISO(item.available_date), 'dd/MM/yyyy')}</span>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <span className="text-gray-600">{item.total_spots} vagas</span>
-                            <button type="button" onClick={() => handleRemoveAvailability(item.available_date)}
-                              className="text-red-500 hover:text-red-700" aria-label="Remover data">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 text-center py-4 border rounded-lg bg-gray-50">Nenhuma data de disponibilidade adicionada ainda.</p>
-                )}
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                   <CalendarIcon className="w-5 h-5 text-verde-principal" />
+                   <span>Regra de Disponibilidade</span>
+                </h3>
+                <p className="text-sm text-gray-700 leading-relaxed p-4 border rounded-lg bg-gray-50">
+                  A funcionalidade de agendamento manual por data foi **desativada**. 
+                  O sistema agora considera o passeio **disponível todos os dias nos próximos 90 dias**, exceto:
+                  <ul className="list-disc pl-5 mt-2 space-y-1">
+                    <li>Os **dias da semana** marcados acima como `NÃO funciona`.</li>
+                    <li>As **datas específicas** marcadas acima como `NÃO funciona` (Ex: feriados).</li>
+                  </ul>
+                  As vagas são definidas por um valor padrão no código para simplificar o controle de ingressos no app.
+                </p>
             </div>
             {/* --- FIM DA SEÇÃO DE DISPONIBILIDADE --- */}
 

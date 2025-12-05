@@ -6,12 +6,12 @@ import { Metadata, ResolvingMetadata } from 'next';
 import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { TourClient } from './TourClient';
-import { parseISO } from 'date-fns';
+import { parseISO, addDays, format, differenceInDays } from 'date-fns';
 
 // --- Tipo de Retorno da Busca ---
 type TourDetailData = Awaited<ReturnType<typeof getTourDetail>>;
 
-// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (CORRIGIDA PARA ROBUSTEZ) ---
+// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (CORRIGIDA PARA ROBUSTZ) ---
 const safeParse = (content: any) => {
     if (!content) return [];
     try {
@@ -44,7 +44,7 @@ const safeParse = (content: any) => {
 };
 
 
-// --- Busca de Dados no Servidor (AJUSTADA PARA TRATAR IMAGENS INVÁLIDAS) ---
+// --- Busca de Dados no Servidor (AJUSTADA: REMOVIDA tour_availability) ---
 async function getTourDetail(id: string, lang: Locale) {
   try {
     const selectQuery = `
@@ -66,11 +66,6 @@ async function getTourDetail(id: string, lang: Locale) {
           image_url,
           alt_text,
           display_order
-        ),
-        tour_availability (
-          available_date,
-          total_spots,
-          spots_booked
         )
       `;
       
@@ -108,8 +103,6 @@ async function getTourDetail(id: string, lang: Locale) {
     );
     // --- FIM DO FILTRO ---
 
-    const availability = tourData.tour_availability || [];
-
     return {
       ...tourData,
       title: translation.title || '',
@@ -117,11 +110,9 @@ async function getTourDetail(id: string, lang: Locale) {
       whatsIncluded: safeParse(translation.whats_included), 
       whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
-      // CORREÇÃO: Usar array vazio como fallback
       disabled_specific_dates: tourData.disabled_specific_dates || [], 
       isWomenExclusive: tourData.is_women_exclusive || false,
       images: validImages, // Usa apenas imagens válidas
-      availability
     };
   } catch (error) {
     console.error('GENERIC ERROR IN getTourDetail:', error);
@@ -166,8 +157,8 @@ export async function generateMetadata(
           '@type': 'Offer',
           price: tour.base_price,
           priceCurrency: 'BRL',
-          // Note: Availability check logic might need adjustment if using this in production
-          availabilityStarts: tour.availability.filter(a => a.total_spots > a.spots_booked).map(a => a.available_date), 
+          // Atualizado para refletir o agendamento no app
+          availability: 'https://schema.org/InStoreOnly',
           url: `https://destino.co/${lang}/tour/${tour.id}`, 
           seller: {
             '@type': 'Organization',
@@ -180,7 +171,7 @@ export async function generateMetadata(
 }
 
 
-// --- A Página (Servidor) ---
+// --- A Página (Servidor) - Lógica de Geração de Datas ---
 export default async function TourDetailPage({
   params: { id, lang },
   searchParams,
@@ -205,16 +196,42 @@ export default async function TourDetailPage({
     );
   }
 
-  // Filtra disponibilidade com base nos searchParams
-  let availability = tour.availability;
+  // --- NOVA LÓGICA: SIMULAR DISPONIBILIDADE FUTURA ---
+  const fixedSpots = 50; 
+  const numDaysToGenerate = 90; 
+  
+  let simulatedAvailability = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+  
+  let startGen = addDays(today, 1);
+  let endGen = addDays(today, numDaysToGenerate);
+
+  // Se houver datas na URL de roteiro, o range se ajusta.
   if (startDate && endDate) {
-    const start = parseISO(startDate);
-    const end = parseISO(endDate);
-    availability = availability.filter((avail: any) => {
-      const availDate = parseISO(avail.available_date);
-      return availDate >= start && availDate <= end && avail.total_spots > avail.spots_booked;
-    });
+    const searchStart = parseISO(startDate);
+    const searchEnd = parseISO(endDate);
+
+    // Começa a gerar a partir da data de início da pesquisa (se for futura)
+    if (searchStart > startGen) startGen = searchStart;
+    
+    // O final da geração é o final da pesquisa, se for mais tarde que a geração padrão.
+    if (searchEnd > endGen) endGen = searchEnd;
   }
+  
+  // Se o start for maior que o end, ajusta o start para o dia seguinte ao atual.
+  if (startGen > endGen) startGen = addDays(today, 1);
+
+  for (let d = startGen; d <= endGen; d = addDays(d, 1)) {
+      simulatedAvailability.push({
+          available_date: format(d, 'yyyy-MM-dd'),
+          total_spots: fixedSpots,
+          spots_booked: 0, 
+      });
+  }
+  
+  const availableDates = simulatedAvailability; 
+  // --- FIM DA NOVA LÓGICA ---
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-20">
@@ -294,8 +311,14 @@ export default async function TourDetailPage({
 
           {/* --- Componente de Cliente para Interação --- */}
           <TourClient 
-            tour={tour} // Passa o objeto 'tour' inteiro
-            availableDates={availability} 
+            tour={{
+                id: tour.id,
+                title: tour.title,
+                base_price: tour.base_price,
+                disabled_week_days: tour.disabled_week_days,
+                disabled_specific_dates: tour.disabled_specific_dates,
+            }} 
+            availableDates={availableDates} // Passa a lista simulada
             dict={dict} // Passa o dicionário completo
           />
 

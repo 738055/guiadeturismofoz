@@ -1,3 +1,4 @@
+// guiadeturismofoz/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
 // As variáveis de ambiente devem estar no seu arquivo .env.local
@@ -15,10 +16,10 @@ export interface Tour {
   is_active: boolean;
   category_id: string;
   created_at: string;
-  is_women_exclusive: boolean; // <-- NOVO (EXISTENTE, MAS MANTIDO)
-  disabled_week_days: number[]; // <-- ADICIONADO
-  disabled_specific_dates: string[]; // <-- ADICIONADO
-  is_featured: boolean; // <-- ADICIONADO
+  is_women_exclusive: boolean; 
+  is_featured: boolean; 
+  disabled_week_days: number[]; // <-- INCLUÍDO
+  disabled_specific_dates: string[]; // <-- INCLUÍDO
 }
 
 export interface TourTranslation {
@@ -39,13 +40,7 @@ export interface TourImage {
   display_order: number;
 }
 
-export interface TourAvailability {
-  id: string;
-  tour_id: string;
-  available_date: string;
-  total_spots: number;
-  spots_booked: number;
-}
+// TourAvailability REMOVIDA
 
 export interface Category {
   id: string;
