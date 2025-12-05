@@ -9,7 +9,7 @@ import { ServicesTabs } from '@/components/ServicesTabs';
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
-// O tipo 'Tour' local
+// O tipo 'Tour' local (CORRIGIDO: is_women_exclusive não é mais opcional)
 type Tour = {
   id: string;
   title: string;
@@ -18,7 +18,7 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl: string | undefined; 
-  is_women_exclusive?: boolean; // Adiciona para o TourCard
+  is_women_exclusive: boolean; // <-- CORREÇÃO APLICADA: Removido o '?'
 };
 
 // NOVO TIPO PARA CATEGORIAS DINÂMICAS
@@ -61,6 +61,7 @@ async function getPopularTours(lang: Locale) {
       });
       
     return tours.filter((tour): tour is Tour => tour !== null);
+    // ^ ESTA LINHA AGORA COMPILA CORRETAMENTE
 
   } catch (error) {
     console.error('Error loading popular tours:', error);
