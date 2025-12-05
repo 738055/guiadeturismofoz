@@ -132,11 +132,11 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
           {/* Logo */}
-          {/* CORREÇÃO MOBILE: No modo transparente, a largura é reduzida para 'w-32' no mobile e a margem negativa é aplicada apenas no desktop 'md:-my-8' para evitar sobreposição no mobile. */}
+          {/* AJUSTE APLICADO: A largura é definida para 'w-24' (menor) no mobile para evitar a sobreposição, independentemente do scroll. */}
           <div className={`transition-all duration-500 drop-shadow-sm ${
             useWhiteStyle 
-              ? 'w-36' 
-              : 'w-32 md:w-52 md:-my-8' // Ajuste de largura para w-32 no mobile e margem negativa -my-8 apenas no desktop (md:).
+              ? 'w-24 md:w-36' // Scrolled: w-24 no mobile, w-36 no desktop
+              : 'w-24 md:w-52 md:-my-8' // Transparente: w-24 no mobile, w-52 com margem negativa no desktop
           }`}>
              <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
