@@ -15,7 +15,10 @@ export interface Tour {
   is_active: boolean;
   category_id: string;
   created_at: string;
-  is_women_exclusive: boolean; // <-- NOVO
+  is_women_exclusive: boolean; // <-- NOVO (EXISTENTE, MAS MANTIDO)
+  disabled_week_days: number[]; // <-- ADICIONADO
+  disabled_specific_dates: string[]; // <-- ADICIONADO
+  is_featured: boolean; // <-- ADICIONADO
 }
 
 export interface TourTranslation {
