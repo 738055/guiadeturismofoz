@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Locale } from '@/i18n/dictionaries';
 import { Search, Loader2, Filter, X } from 'lucide-react';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation'; // Importa para pegar o query param
+import { useSearchParams, useRouter } from 'next/navigation'; // <-- Adiciona useRouter
 
 // Tipos
 type Tour = {
@@ -19,7 +19,7 @@ type Tour = {
   location: string;
   imageUrl?: string;
   category_id: string;
-  is_women_exclusive?: boolean; // <-- NOVO: Adiciona a flag
+  is_women_exclusive?: boolean; 
 };
 
 type Category = {
@@ -28,15 +28,17 @@ type Category = {
 };
 
 export default function ToursPage({ params: { lang } }: { params: { lang: Locale } }) {
+  const router = useRouter(); // <-- Inicializa o router
+  const searchParams = useSearchParams();
+  
+  const isWomenExclusiveMode = searchParams?.get('exclusive') === 'women';
+  
   const [tours, setTours] = useState<Tour[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [dict, setDict] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // LÓGICA DE FILTRO NOVO
-  const searchParams = useSearchParams();
-  const isWomenExclusiveMode = searchParams?.get('exclusive') === 'women';
-  // Fim Lógica de Filtro Novo
+  const [toursBanner, setToursBanner] = useState('');
+  const [womenExclusiveBanner, setWomenExclusiveBanner] = useState(''); // <-- NOVO: Estado do banner exclusivo
   
   // Estados de Filtro (MANTIDOS)
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +52,21 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
         const dictionaryModule = await import(`@/i18n/locales/${lang}.json`);
         setDict(dictionaryModule.default);
 
-        // 2. Carrega Categorias
+        // 1.5. Carrega Configurações (para o banner exclusivo e padrão de tours)
+        const { data: settingsData } = await supabase
+            .from('site_settings')
+            .select('setting_key, setting_value')
+            .in('setting_key', ['banner_tours', 'banner_women_exclusive']);
+        
+        if (settingsData) {
+            settingsData.forEach(item => {
+                if (item.setting_key === 'banner_tours') setToursBanner(item.setting_value);
+                if (item.setting_key === 'banner_women_exclusive') setWomenExclusiveBanner(item.setting_value);
+            });
+        }
+
+
+        // 2. Carrega Categorias (sem alteração)
         const { data: catData } = await supabase
           .from('categories')
           .select('id, category_translations!left(name, language_code)');
@@ -73,7 +89,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
           .eq('is_active', true)
           .order('display_order', { referencedTable: 'tour_images', ascending: true });
           
-        // NOVO: Aplica o filtro de exclusividade se estiver no modo exclusivo
+        // Aplica o filtro de exclusividade
         if (isWomenExclusiveMode) {
             query = query.eq('is_women_exclusive', true);
         }
@@ -93,7 +109,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
              duration: t.duration_hours,
              location: t.location,
              category_id: t.category_id,
-             is_women_exclusive: t.is_women_exclusive, // <-- NOVO
+             is_women_exclusive: t.is_women_exclusive, 
              imageUrl: t.tour_images?.[0]?.image_url
            };
         }).filter(Boolean) as Tour[];
@@ -107,7 +123,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       }
     };
     loadData();
-  }, [lang, isWomenExclusiveMode, searchParams]); // Adiciona a dependência searchParams
+  }, [lang, isWomenExclusiveMode, searchParams]);
 
   const filteredTours = useMemo(() => {
     return tours.filter(tour => {
@@ -116,6 +132,19 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       return matchSearch && matchCat;
     });
   }, [tours, searchQuery, selectedCategory]);
+  
+  // Lógica de limpar filtros (Point 4)
+  const handleClearFilters = () => {
+      // Limpa os estados locais
+      setSearchQuery('');
+      setSelectedCategory('all');
+      
+      // Se estiver no modo exclusivo, volta para a página base /tours, removendo o query param.
+      if (isWomenExclusiveMode || searchParams.has('cat') || searchParams.has('search')) {
+          router.push(`/${lang}/tours`);
+      } 
+  };
+
 
   if (loading || !dict) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-foz-azul-claro" /></div>;
@@ -123,7 +152,13 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
 
   const tCommon = dict.common;
   const tTours = dict.tours;
-  const tHero = dict.hero; // Para pegar o título exclusivo
+  const tHero = dict.hero; 
+  
+  // Seleciona o banner: primeiro o exclusivo, depois o configurado para tours, senão o default.
+  const selectedBannerUrl = isWomenExclusiveMode 
+      ? womenExclusiveBanner || "/54.jpg" 
+      : toursBanner || "/54.jpg";
+
 
   return (
     <div className="min-h-screen bg-foz-bege">
@@ -132,7 +167,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center pt-20">
         <div className="absolute inset-0">
           <Image
-            src={isWomenExclusiveMode ? "/54.jpg" : "/54.jpg"} // Manter a mesma imagem por enquanto
+            src={selectedBannerUrl} // <-- Banner Dinâmico
             alt="Banner Passeios"
             fill
             className="object-cover"
@@ -218,7 +253,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
            <span>{filteredTours.length} experiências encontradas</span>
            {(searchQuery || selectedCategory !== 'all' || isWomenExclusiveMode) && (
              <button 
-               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+               onClick={handleClearFilters} // <-- Usa a nova função de limpar
                className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
              >
                <X className="w-4 h-4" /> Limpar filtros

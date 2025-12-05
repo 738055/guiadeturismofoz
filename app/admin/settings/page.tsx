@@ -16,7 +16,8 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [banners, setBanners] = useState({
     banner_tours: '',
-    banner_combos: ''
+    banner_combos: '',
+    banner_women_exclusive: '' // <-- NOVO: Banner Exclusivo Mulheres
   });
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function AdminSettingsPage() {
       const { data, error } = await supabase
         .from('site_settings')
         .select('setting_key, setting_value')
-        .in('setting_key', ['banner_tours', 'banner_combos']);
+        .in('setting_key', ['banner_tours', 'banner_combos', 'banner_women_exclusive']); // <-- NOVO: Inclui a nova chave
 
       if (error) throw error;
 
@@ -36,6 +37,7 @@ export default function AdminSettingsPage() {
       data?.forEach(item => {
         if (item.setting_key === 'banner_tours') newBanners.banner_tours = item.setting_value;
         if (item.setting_key === 'banner_combos') newBanners.banner_combos = item.setting_value;
+        if (item.setting_key === 'banner_women_exclusive') newBanners.banner_women_exclusive = item.setting_value; // <-- NOVO
       });
       setBanners(newBanners);
     } catch (error) {
@@ -45,7 +47,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: 'banner_tours' | 'banner_combos') => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: 'banner_tours' | 'banner_combos' | 'banner_women_exclusive') => { // <-- NOVO: Tipo da chave
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
@@ -77,7 +79,8 @@ export default function AdminSettingsPage() {
     try {
       const updates = [
         { setting_key: 'banner_tours', setting_value: banners.banner_tours },
-        { setting_key: 'banner_combos', setting_value: banners.banner_combos }
+        { setting_key: 'banner_combos', setting_value: banners.banner_combos },
+        { setting_key: 'banner_women_exclusive', setting_value: banners.banner_women_exclusive } // <-- NOVO
       ];
 
       const { error } = await supabase.from('site_settings').upsert(updates, { onConflict: 'setting_key' });
@@ -160,6 +163,29 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
             </div>
+            
+            {/* NOVO: Banner Exclusivo Mulheres */}
+            <div>
+              <label className="block text-sm font-medium text-acento-mulher mb-3">Banner da Página Exclusiva para Mulheres</label>
+              <div className="flex items-start space-x-6">
+                <div className="relative w-64 h-36 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-acento-mulher-dark flex items-center justify-center">
+                  {banners.banner_women_exclusive ? (
+                    <Image src={banners.banner_women_exclusive} alt="Banner Mulheres" fill className="object-cover" />
+                  ) : (
+                    <ImageIcon className="w-10 h-10 text-acento-mulher" />
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="upload-women-exclusive" className="cursor-pointer inline-flex items-center space-x-2 px-4 py-2 bg-acento-mulher text-white border border-acento-mulher-dark rounded-md font-semibold text-xs uppercase tracking-widest shadow-sm hover:bg-acento-mulher-dark transition ease-in-out duration-150">
+                    <Upload className="w-4 h-4" />
+                    <span>Alterar Imagem Exclusiva</span>
+                  </label>
+                  <input id="upload-women-exclusive" type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'banner_women_exclusive')} />
+                  <p className="mt-2 text-xs text-gray-500">Recomendado: 1920x400px. Max 2MB. Use tons de rosa/roxo.</p>
+                </div>
+              </div>
+            </div>
+            
           </div>
 
         </div>

@@ -23,6 +23,7 @@ async function getTourDetail(id: string, lang: Locale) {
         location,
         disabled_week_days,
         disabled_specific_dates,
+        is_women_exclusive, // <-- NOVO: Adiciona a flag
         tour_translations!left (
           title,
           description,
@@ -71,6 +72,7 @@ async function getTourDetail(id: string, lang: Locale) {
       whatsExcluded: translation?.whats_excluded || [], // <-- GARANTE ARRAY
       disabled_week_days: tourData.disabled_week_days || [],
       disabled_specific_dates: tourData.disabled_specific_dates || [],
+      isWomenExclusive: tourData.is_women_exclusive || false, // <-- NOVO: Passa a flag
       images,
       availability
     };
@@ -204,12 +206,20 @@ export default async function TourDetailPage({
 
         {/* Parte de Conteúdo (Servidor) */}
         <div>
-          <h1
-            className="text-3xl md:text-4xl font-bold text-verde-principal mb-4"
-            style={{ fontFamily: 'var(--font-merriweather)' }}
-          >
-            {tour.title}
-          </h1>
+          <div className="flex items-center gap-4 mb-2">
+             <h1
+                className="text-3xl md:text-4xl font-bold text-verde-principal"
+                style={{ fontFamily: 'var(--font-merriweather)' }}
+              >
+                {tour.title}
+              </h1>
+              {/* NOVO: Badge Exclusivo */}
+              {tour.isWomenExclusive && (
+                  <span className="bg-acento-mulher text-white px-3 py-1 rounded-full text-sm font-bold shadow-md uppercase tracking-wider whitespace-nowrap">
+                      {dict.tours.womenExclusiveBadge}
+                  </span>
+              )}
+          </div>
 
           <div className="flex items-center space-x-6 text-gray-600 mb-6">
             <div className="flex items-center space-x-2">
