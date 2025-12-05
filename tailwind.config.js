@@ -14,11 +14,18 @@ const config: Config = {
         'foz-azul-claro': '#00A3E0',
         'foz-verde': '#009739',
         'foz-amarelo': '#FFD100',
-        'foz-bege': '#0b7ef2ff',
+        // CORREÇÃO: Altera 'foz-bege' para um tom de cinza claro/off-white mais apropriado.
+        'foz-bege': '#F3F4F6', 
         'foz-cinza': '#4A5568',
         // NOVO: Cor de destaque para o serviço feminino
-        'acento-mulher': '#FF69B4', // Hot Pink
-        'acento-mulher-dark': '#E91E63', // Um tom mais escuro
+        'acento-mulher': '#FF69B4', 
+        'acento-mulher-dark': '#E91E63', 
+        
+        // CORREÇÃO ESSENCIAL: Adiciona ALIASES para as cores usadas nos componentes
+        'verde-principal': '#009739', // Agora 'bg-verde-principal' é verde
+        'verde-secundario': '#00A3E0', // Agora 'hover:bg-verde-secundario' é azul/ciano
+        'azul-foz': '#00A3E0', 
+        'acento-dourado': '#FFD100', 
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
@@ -30,7 +37,7 @@ const config: Config = {
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
       },
       transitionTimingFunction: {
-        'elastic': 'cubic-bezier(0.25, 1, 0.5, 1)', // Curva suave usada no AquaFoz
+        'elastic': 'cubic-bezier(0.25, 1, 0.5, 1)', 
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards',
