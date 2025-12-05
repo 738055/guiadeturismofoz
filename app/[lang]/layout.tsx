@@ -9,7 +9,7 @@ import { Footer } from '@/components/Footer';
 import { CartModal } from '@/components/CartModal';
 
 // Traduções estáticas para componentes de layout (necessário em Client Components)
-// --- CORREÇÃO AQUI: Chaves alteradas para usar hífen (ex: 'pt-BR') ---
+// --- CORREÇÃO AQUI: 'subtotal' adicionado ao objeto 'cart' ---
 const translations = {
   'pt-BR': {
     nav: { home: 'Início', tours: 'Passeios', about: 'Sobre Nós', contact: 'Contato' },
@@ -25,6 +25,7 @@ const translations = {
       date: 'Data',
       adults: 'Adultos',
       children: 'Crianças',
+      subtotal: 'Subtotal', // <-- ADICIONADO
       name: 'Nome',
       email: 'Email',
       total: 'Total',
@@ -46,6 +47,7 @@ const translations = {
       date: 'Date',
       adults: 'Adults',
       children: 'Children',
+      subtotal: 'Subtotal', // <-- ADICIONADO
       name: 'Name',
       email: 'Email',
       total: 'Total',
@@ -67,6 +69,7 @@ const translations = {
       date: 'Fecha',
       adults: 'Adultos',
       children: 'Niños',
+      subtotal: 'Subtotal', // <-- ADICIONADO
       name: 'Nombre',
       email: 'Email',
       total: 'Total',
