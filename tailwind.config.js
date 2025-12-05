@@ -14,7 +14,7 @@ const config: Config = {
         'foz-azul-claro': '#00A3E0',
         'foz-verde': '#009739',
         'foz-amarelo': '#FFD100',
-        'foz-bege': '#F8F9FA',
+        'foz-bege': '#0b7ef2ff',
         'foz-cinza': '#4A5568',
         // NOVO: Cor de destaque para o serviço feminino
         'acento-mulher': '#FF69B4', // Hot Pink
