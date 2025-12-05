@@ -139,13 +139,23 @@ export default async function RoteiroPage({
   let numDays = 0;
   
   if(startDate && endDate) {
-    try {
-      dateLabel = `${format(parseISO(startDate), 'dd/MM/yy')} - ${format(parseISO(endDate), 'dd/MM/yy')}`;
-      numDays = differenceInDays(parseISO(endDate), parseISO(startDate)) + 1;
-    } catch (e) {
-      console.error("Invalid date format");
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+
+    // --- CORREÇÃO DE RANGEERROR: Verificar se as datas são válidas antes de formatar ---
+    if (start.toString() !== 'Invalid Date' && end.toString() !== 'Invalid Date') {
+        try {
+            dateLabel = `${format(start, 'dd/MM/yy')} - ${format(end, 'dd/MM/yy')}`;
+            numDays = differenceInDays(end, start) + 1;
+        } catch (e) {
+            console.error("Date formatting error:", e);
+            dateLabel = "Datas inválidas";
+        }
+    } else {
+      console.error("Invalid date format in URL parameters.");
       dateLabel = "Datas inválidas";
     }
+    // --- FIM DA CORREÇÃO ---
   }
 
 
