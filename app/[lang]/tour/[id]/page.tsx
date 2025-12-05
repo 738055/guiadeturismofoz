@@ -23,7 +23,7 @@ async function getTourDetail(id: string, lang: Locale) {
         location,
         disabled_week_days,
         disabled_specific_dates,
-        is_women_exclusive, // <-- NOVO: Adiciona a flag
+        is_women_exclusive,
         tour_translations!left (
           title,
           description,
