@@ -16,8 +16,8 @@
     "searchAllButton": "Ver todos os passeios",
     "searchPlaceholder": "O que você quer viver em Foz?",
     "searchButton": "Buscar",
-    "womenExclusiveTitle": "Viagem Só para Mulheres", 
-    "womenExclusiveButton": "Ver Passeios Exclusivos" 
+    "womenExclusiveTitle": "", 
+    "womenExclusiveButton": "Feito de Mulher para Mulheres, Confira" 
   },
   "categoriesSection": {
     "title": "Explore por Experiência",
