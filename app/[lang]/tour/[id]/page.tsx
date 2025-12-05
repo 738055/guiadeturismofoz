@@ -101,7 +101,7 @@ async function getTourDetail(id: string, lang: Locale) {
       return null;
     }
     
-    // --- NOVO: FILTRAR IMAGENS INVÁLIDAS (PLACEHOLDER) ---
+    // --- FILTRAR IMAGENS INVÁLIDAS (PLACEHOLDER) ---
     const rawImages = tourData.tour_images || [];
     const validImages = rawImages.filter((img: any) => 
         img.image_url && !img.image_url.includes('placeholder')
@@ -117,7 +117,8 @@ async function getTourDetail(id: string, lang: Locale) {
       whatsIncluded: safeParse(translation.whats_included), 
       whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
-      disabled_specific_dates: tourData.disabled_specific_dates || false,
+      // CORREÇÃO: Usar array vazio como fallback
+      disabled_specific_dates: tourData.disabled_specific_dates || [], 
       isWomenExclusive: tourData.is_women_exclusive || false,
       images: validImages, // Usa apenas imagens válidas
       availability
