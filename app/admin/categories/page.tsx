@@ -4,54 +4,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, Plus, Save, Trash2, Loader2, Tag, Image as ImageIcon, Upload, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, Tag, Image as ImageIcon, Edit } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-// BUCKET de Imagens (definido previamente como 'tours')
 const BUCKET_NAME = 'tours'; 
-
-// Tipo para os dados do formulário
-type TranslationData = {
-  name: string;
-  slug: string;
-};
-
-// Usando o formato padrão com hífen
-type LanguageCode = 'pt-BR' | 'en-US' | 'es-ES';
-
-type NewCategoryTranslations = {
-  'pt-BR': TranslationData;
-  'en-US': TranslationData;
-  'es-ES': TranslationData;
-};
-
-// NOVO TIPO para o estado local, inclui a URL da imagem
-type NewCategoryState = {
-  imageUrl: string;
-  translations: NewCategoryTranslations;
-};
-
-const initialTranslations: NewCategoryTranslations = {
-  'pt-BR': { name: '', slug: '' },
-  'en-US': { name: '', slug: '' },
-  'es-ES': { name: '', slug: '' }
-};
-
-const initialCategoryState: NewCategoryState = {
-  imageUrl: '',
-  translations: initialTranslations
-};
 
 export default function AdminCategoriesPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingSave, setLoadingSave] = useState(false);
-  const [uploading, setUploading] = useState(false); 
-  
-  const [newCategoryState, setNewCategoryState] = useState<NewCategoryState>(initialCategoryState);
-  const [activeTab, setActiveTab] = useState<LanguageCode>('pt-BR');
 
   useEffect(() => {
     loadCategories();
@@ -65,7 +27,7 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          image_url, 
+          image_url,  
           category_translations!left (
             name,
             slug,
@@ -76,10 +38,9 @@ export default function AdminCategoriesPage() {
 
       if (error) {
         console.error('Error loading categories:', error);
-        throw error; // Lança o erro para ir ao bloco finally
+        throw error; 
       }
       
-      // Filtra entradas nulas que podem vir devido a RLS ou joins complexos
       setCategories((data || []).filter(item => item.id)); 
       
     } catch (error) {
@@ -89,127 +50,8 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // Handler para atualizar o estado aninhado das traduções
-  const updateNewTranslation = (field: keyof TranslationData, value: string) => {
-    let slug = value.toLowerCase()
-      .replace(/ /g, '-')
-      .replace(/[^\w-]+/g, '');
-
-    setNewCategoryState(prev => ({
-      ...prev,
-      translations: {
-        ...prev.translations,
-        [activeTab]: {
-          ...prev.translations[activeTab], 
-          [field]: value,
-          ...(field === 'name' && activeTab === 'pt-BR' && { slug: slug })
-        }
-      }
-    }));
-  };
-
-  // --- FUNÇÃO DE UPLOAD DE IMAGEM ---
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    setUploading(true);
-    const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    
-    const fileName = `categories/new-${Date.now()}.${fileExt}`;
-    
-    try {
-      // 1. Upload da imagem
-      const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(fileName, file);
-      if (uploadError) throw uploadError;
-
-      // 2. Pegar URL pública
-      const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
-      
-      // 3. Salvar no estado local
-      setNewCategoryState(prev => ({ ...prev, imageUrl: publicUrlData.publicUrl }));
-      
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Erro ao enviar imagem.');
-    } finally {
-      setUploading(false);
-      e.target.value = ''; 
-    }
-  };
-
-  // --- FUNÇÃO DE REMOÇÃO DE IMAGEM ---
-  const handleImageDelete = async () => {
-    if (!newCategoryState.imageUrl) return;
-
-    // Remove do Storage
-    try {
-        // CORREÇÃO: Usando a URL completa para extrair o caminho correto do storage
-        const pathSegments = newCategoryState.imageUrl.split(`${BUCKET_NAME}/`);
-        const imagePath = pathSegments.length > 1 ? pathSegments[1] : null;
-
-        if (imagePath) {
-            // Se a imagem não for de um registro salvo, o caminho pode ser problemático.
-            // Aqui presumimos que é o caminho completo dentro do bucket.
-            await supabase.storage.from(BUCKET_NAME).remove([imagePath]);
-        }
-    } catch (error) {
-        console.warn('Could not delete file from storage:', error);
-    }
-
-    // Remove do estado local
-    setNewCategoryState(prev => ({ ...prev, imageUrl: '' }));
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const translations = newCategoryState.translations;
-    if (!translations['pt-BR'].name || !translations['pt-BR'].slug) {
-      alert('Preencha pelo menos o Nome e Slug em Português.');
-      return;
-    }
-    setLoadingSave(true);
-
-    try {
-      // 1. Cria a Categoria principal (incluindo a URL da imagem)
-      const { data: newCategory, error: insertError } = await supabase
-        .from('categories')
-        .insert({ image_url: newCategoryState.imageUrl }) 
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      // 2. Prepara e salva as Traduções
-      const translationsToUpsert = Object.entries(translations)
-        .filter(([_, translation]) => translation.name)
-        .map(([langCode, translation]) => ({
-          category_id: newCategory.id,
-          language_code: langCode,
-          name: translation.name,
-          slug: translation.slug || translations['pt-BR'].slug
-        }));
-
-      const { error: upsertError } = await supabase
-        .from('category_translations')
-        .upsert(translationsToUpsert);
-
-      if (upsertError) throw upsertError;
-
-      alert('Categoria criada com sucesso!');
-      setNewCategoryState(initialCategoryState); 
-      loadCategories(); 
-
-    } catch (error) {
-      console.error('Error creating category:', error);
-      alert('Erro ao criar categoria.');
-    } finally {
-      setLoadingSave(false);
-    }
-  };
-
-
   const deleteCategory = async (categoryId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta categoria? Os passeios associados a ela perderão a categoria.')) return;
+    if (!confirm('Tem certeza que deseja excluir esta categoria? Isso é irreversível.')) return;
 
     try {
       // 1. Encontra o URL da imagem para deletar no storage
@@ -221,13 +63,7 @@ export default function AdminCategoriesPage() {
         if (imagePath) await supabase.storage.from(BUCKET_NAME).remove([imagePath]);
       }
       
-      // 2. Deleta as traduções
-      await supabase
-        .from('category_translations')
-        .delete()
-        .eq('category_id', categoryId);
-        
-      // 3. Deleta a categoria principal
+      // 2. Deleta a categoria (ON DELETE CASCADE deve remover as traduções)
       await supabase
         .from('categories')
         .delete()
@@ -237,13 +73,13 @@ export default function AdminCategoriesPage() {
       loadCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
+      alert('Erro ao excluir categoria. Verifique o console.');
     }
   };
 
   // Helper para pegar o nome em PT-BR para a lista
   const getCategoryName = (translations: any[] | null) => {
     if (!translations || translations.length === 0) return 'Sem nome';
-    // O join retorna um array mesmo para left join, mas pode ser nulo ou vazio
     const pt = Array.isArray(translations) ? translations.find(t => t.language_code === 'pt-BR') : null;
     return pt?.name || translations?.[0]?.name || 'Sem nome';
   };
@@ -270,119 +106,21 @@ export default function AdminCategoriesPage() {
               <span>Voltar</span>
             </Link>
             <h1 className="text-2xl font-bold text-verde-principal">Gerenciar Categorias</h1>
-            <div className="w-24"></div> {/* Espaçador */}
+            {/* Botão Nova Categoria */}
+            <Link
+              href="/admin/categories/new"
+              className="flex items-center space-x-2 bg-verde-principal text-white px-4 py-2 rounded-lg hover:bg-verde-secundario transition-colors shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Nova Categoria</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Conteúdo */}
+      {/* Conteúdo: Apenas Lista */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Formulário de Nova Categoria */}
-          <div className="lg:col-span-1">
-            <form onSubmit={handleCreate} className="bg-white rounded-xl shadow-md p-6 sticky top-24">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Nova Categoria</h3>
-              
-              {/* --- NOVO: Seção de Imagem de Destaque --- */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Imagem de Destaque (Home)</label>
-                <div className="flex flex-col gap-3">
-                  {newCategoryState.imageUrl ? (
-                    <div className="relative aspect-video rounded-lg overflow-hidden group border-2">
-                       <Image 
-                          src={newCategoryState.imageUrl} 
-                          alt="Pré-visualização da Categoria" 
-                          fill 
-                          className="object-cover" 
-                          sizes="100px" // Adicionado para Next/Image
-                        />
-                        <button type="button" onClick={handleImageDelete}
-                          className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full transition-opacity"
-                          aria-label="Excluir imagem">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                    </div>
-                  ) : (
-                    <label htmlFor="categoryImageUpload" className="relative flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      {uploading ? (<Loader2 className="w-6 h-6 animate-spin text-verde-principal" />) : (
-                        <><Upload className="w-6 h-6 text-gray-500 mb-1" /><span className="text-sm text-gray-600">Enviar Imagem</span></>
-                      )}
-                      <input 
-                          id="categoryImageUpload" 
-                          type="file" 
-                          accept="image/*" 
-                          className="opacity-0 absolute inset-0"
-                          onChange={handleImageUpload} 
-                          disabled={uploading} 
-                      />
-                    </label>
-                  )}
-                  <p className="text-xs text-gray-500">Recomendado: Imagem de paisagem (proporção 4:3).</p>
-                </div>
-              </div>
-              {/* --- FIM: Seção de Imagem de Destaque --- */}
-
-
-              {/* Abas de Idioma */}
-              <div className="flex space-x-2 mb-6 border-b">
-                {[
-                  { code: 'pt-BR' as const, label: 'Português' },
-                  { code: 'en-US' as const, label: 'English' },
-                  { code: 'es-ES' as const, label: 'Español' }
-                ].map(lang => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => setActiveTab(lang.code)}
-                    className={`flex-1 text-sm font-semibold pb-3 border-b-2 transition-all ${
-                      activeTab === lang.code
-                        ? 'border-b-2 border-verde-principal text-verde-principal'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Campos de Tradução */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nome</label>
-                  <input
-                    type="text"
-                    value={newCategoryState.translations[activeTab].name}
-                    onChange={(e) => updateNewTranslation('name', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Slug (URL)</label>
-                  <input
-                    type="text"
-                    value={newCategoryState.translations[activeTab].slug}
-                    onChange={(e) => updateNewTranslation('slug', e.target.value)}
-                    disabled={activeTab !== 'pt-BR'} 
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent disabled:bg-gray-100"
-                  />
-                  {activeTab !== 'pt-BR' && <p className="text-xs text-gray-500 mt-1">O Slug é definido na aba Português.</p>}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loadingSave}
-                className="w-full mt-6 flex items-center justify-center space-x-2 bg-verde-principal text-white px-4 py-2 rounded-lg hover:bg-verde-secundario transition-colors disabled:opacity-50"
-              >
-                {loadingSave ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                <span>Salvar Nova Categoria</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Lista de Categorias Existentes */}
-          <div className="lg:col-span-2">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
             {loading ? (
               <div className="text-center py-12 flex justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-verde-principal" />
@@ -391,10 +129,16 @@ export default function AdminCategoriesPage() {
               <div className="text-center py-12 bg-white rounded-xl shadow-md">
                 <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">Nenhuma categoria cadastrada</p>
+                <Link
+                  href="/admin/categories/new"
+                  className="mt-4 inline-flex items-center space-x-2 text-verde-principal hover:underline"
+                >
+                    <Plus className="w-4 h-4" />
+                    <span>Crie a primeira categoria</span>
+                </Link>
               </div>
             ) : (
-              <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
+              <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagem</th>
@@ -407,7 +151,7 @@ export default function AdminCategoriesPage() {
                     {categories.map((cat) => (
                       <tr key={cat.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="relative w-12 h-8 rounded overflow-hidden">
+                            <div className="relative w-12 h-8 rounded overflow-hidden border border-gray-200">
                                 {cat.image_url ? (
                                     <Image src={cat.image_url} alt={getCategoryName(cat.category_translations)} fill className="object-cover" sizes="100px" />
                                 ) : (
@@ -423,6 +167,13 @@ export default function AdminCategoriesPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
+                            onClick={() => router.push(`/admin/categories/edit/${cat.id}`)}
+                            className="text-verde-principal hover:text-verde-secundario mr-4"
+                            aria-label="Editar"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
                             onClick={() => deleteCategory(cat.id)}
                             className="text-red-600 hover:text-red-800"
                             aria-label="Excluir"
@@ -434,9 +185,7 @@ export default function AdminCategoriesPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
             )}
-          </div>
         </div>
       </div>
     </div>
