@@ -9,7 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Locale } from '@/i18n/dictionaries';
 import { SiteLogo } from './SiteLogo';
 
-// Tipagem básica para as props (assumindo que já existe ou foi deduzida)
+// Tipagem básica para as props
 interface HeaderProps {
   onCartClick: () => void;
   lang: Locale;
@@ -132,11 +132,11 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
           {/* Logo */}
-          {/* CORREÇÃO APLICADA: Reduz a largura e adiciona margem vertical negativa (-my-8) para puxar o logo para cima no modo transparente, evitando sobreposição com o texto da Hero Section. */}
+          {/* CORREÇÃO MOBILE: No modo transparente, a largura é reduzida para 'w-32' no mobile e a margem negativa é aplicada apenas no desktop 'md:-my-8' para evitar sobreposição no mobile. */}
           <div className={`transition-all duration-500 drop-shadow-sm ${
             useWhiteStyle 
               ? 'w-36' 
-              : 'w-40 md:w-52 -my-8' // Largura ajustada e MARGEM NEGATIVA -my-8
+              : 'w-32 md:w-52 md:-my-8' // Ajuste de largura para w-32 no mobile e margem negativa -my-8 apenas no desktop (md:).
           }`}>
              <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
