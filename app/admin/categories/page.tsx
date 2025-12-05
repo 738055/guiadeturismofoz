@@ -12,16 +12,20 @@ type TranslationData = {
   name: string;
   slug: string;
 };
+
+// CORREÇÃO: Usando o formato padrão com hífen
+type LanguageCode = 'pt-BR' | 'en-US' | 'es-ES';
+
 type NewCategoryTranslations = {
-  pt_BR: TranslationData;
-  en_US: TranslationData;
-  es_ES: TranslationData;
+  'pt-BR': TranslationData;
+  'en-US': TranslationData;
+  'es-ES': TranslationData;
 };
 
 const initialTranslations: NewCategoryTranslations = {
-  pt_BR: { name: '', slug: '' },
-  en_US: { name: '', slug: '' },
-  es_ES: { name: '', slug: '' }
+  'pt-BR': { name: '', slug: '' },
+  'en-US': { name: '', slug: '' },
+  'es-ES': { name: '', slug: '' }
 };
 
 export default function AdminCategoriesPage() {
@@ -30,9 +34,9 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [loadingSave, setLoadingSave] = useState(false);
   
-  // Estado para o formulário de nova categoria
+  // CORREÇÃO: Muda o tipo do useState e o valor inicial para 'pt-BR'
   const [newTranslations, setNewTranslations] = useState<NewCategoryTranslations>(initialTranslations);
-  const [activeTab, setActiveTab] = useState<'pt_BR' | 'en_US' | 'es_ES'>('pt_BR');
+  const [activeTab, setActiveTab] = useState<LanguageCode>('pt-BR');
 
   useEffect(() => {
     loadCategories();
@@ -46,14 +50,13 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          -- CORREÇÃO: Muda para LEFT JOIN para pegar categorias mesmo sem tradução
+          -- Usa LEFT JOIN para não excluir categorias sem tradução
           category_translations!left (
             name,
             slug,
             language_code
           )
         `)
-        // REMOVIDA A LINHA .eq('category_translations.language_code', 'pt_BR')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -65,6 +68,7 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  // --- FUNÇÃO CORRIGIDA E PADRONIZADA ---
   // Handler para atualizar o estado aninhado das traduções
   const updateNewTranslation = (field: keyof TranslationData, value: string) => {
     // Auto-gera o slug a partir do nome (apenas em pt-BR)
@@ -78,14 +82,15 @@ export default function AdminCategoriesPage() {
         ...prev[activeTab], 
         [field]: value,
         // Se estiver editando o nome em pt-BR, atualiza o slug de todos
-        ...(field === 'name' && activeTab === 'pt_BR' && { slug: slug })
+        ...(field === 'name' && activeTab === 'pt-BR' && { slug: slug })
       }
     }));
   };
+  // --- FIM DA CORREÇÃO ---
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTranslations.pt_BR.name || !newTranslations.pt_BR.slug) {
+    if (!newTranslations['pt-BR'].name || !newTranslations['pt-BR'].slug) {
       alert('Preencha pelo menos o Nome e Slug em Português.');
       return;
     }
@@ -108,7 +113,7 @@ export default function AdminCategoriesPage() {
           category_id: newCategory.id,
           language_code: langCode,
           name: translation.name,
-          slug: translation.slug || newTranslations.pt_BR.slug // Usa o slug PT se o específico estiver vazio
+          slug: translation.slug || newTranslations['pt-BR'].slug // Usa o slug PT se o específico estiver vazio
         }));
 
       const { error: upsertError } = await supabase
@@ -153,7 +158,7 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // Helper para pegar o nome em PT-BR para a lista (Agora mais robusto)
+  // Helper para pegar o nome em PT-BR para a lista
   const getCategoryName = (translations: any[] | null) => {
     if (!translations || translations.length === 0) return 'Sem nome';
     const pt = translations.find(t => t.language_code === 'pt-BR');
@@ -161,7 +166,7 @@ export default function AdminCategoriesPage() {
     return pt?.name || translations[0]?.name || 'Sem nome';
   };
 
-  // Helper para pegar o slug em PT-BR (Agora mais robusto)
+  // Helper para pegar o slug em PT-BR
   const getCategorySlug = (translations: any[] | null) => {
      if (!translations || translations.length === 0) return '';
     const pt = translations.find(t => t.language_code === 'pt-BR');
@@ -208,8 +213,9 @@ export default function AdminCategoriesPage() {
                   <button
                     key={lang.code}
                     type="button"
+                    // CORREÇÃO: Passa o código correto 'pt-BR'
                     onClick={() => setActiveTab(lang.code)}
-                    className={`px-4 py-2 font-medium transition-colors ${
+                    className={`flex-1 text-sm font-semibold pb-3 border-b-2 transition-all ${
                       activeTab === lang.code
                         ? 'border-b-2 border-verde-principal text-verde-principal'
                         : 'text-gray-500 hover:text-gray-700'
@@ -226,7 +232,6 @@ export default function AdminCategoriesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nome</label>
                   <input
                     type="text"
-                    // Correção: Agora acessa o estado corretamente
                     value={newTranslations[activeTab].name} 
                     onChange={(e) => updateNewTranslation('name', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
