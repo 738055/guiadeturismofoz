@@ -47,7 +47,6 @@ export default function AdminToursPage() {
 
       if (error) throw error;
 
-      
       const formattedTours = data.map((tour: any) => {
         // Encontra a tradução em PT-BR (ou usa a primeira disponível como fallback)
         const ptTranslation = tour.tour_translations.find((t: any) => t.language_code === 'pt-BR');

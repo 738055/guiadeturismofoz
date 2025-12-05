@@ -42,7 +42,7 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, []);
 
- const loadCategories = async () => {
+  const loadCategories = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
