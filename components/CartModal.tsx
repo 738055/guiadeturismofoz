@@ -1,3 +1,4 @@
+// components/CartModal.tsx
 'use client'; // Usa hooks (useState, useCart)
 
 import React, { useState } from 'react';
@@ -19,6 +20,7 @@ interface CartModalProps {
     total: string;
     checkoutWhatsapp: string;
     required: string;
+    subtotal: string;
   };
 }
 
@@ -35,30 +37,39 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, cartText:
       return;
     }
 
-    let message = `Olá, Araucária Turismo! 🌲\nGostaria de solicitar uma reserva para:\n\n`;
-    message += `*Cliente:* ${customerName}\n`;
-    message += `*Email:* ${customerEmail}\n\n`;
-    message += `*MEU ROTEIRO:*\n`;
+    let message = `Olá, Guia de Turismo Foz! ☂️\n`;
+    message += `Gostaria de solicitar uma reserva para o seguinte roteiro:\n\n`;
+    message += `*CLIENTE:*\n`;
+    message += `  Nome: ${customerName}\n`;
+    message += `  Email: ${customerEmail}\n\n`;
+    
+    message += `*DETALHES DO ROTEIRO:*\n`;
 
     items.forEach((item, index) => {
+      const childrenPriceFactor = item.children > 0 ? ` (Criança: R$ ${(item.price * 0.5).toFixed(2)})` : '';
+      
+      message += `---------------------------------\n`;
       message += `${index + 1}. *${item.tourTitle}*\n`;
-      // A data já vem como string 'yyyy-MM-dd', precisamos formatá-la
-      message += `   - Data: ${format(new Date(item.date), 'dd/MM/yyyy')}\n`;
-      message += `   - Pessoas: ${item.adults} adulto(s)`;
+      message += `   - ${t.date}: ${format(new Date(item.date), 'dd/MM/yyyy')}\n`;
+      message += `   - ${t.adults}: ${item.adults} x R$ ${item.price.toFixed(2)}\n`;
       if (item.children > 0) {
-        message += ` + ${item.children} criança(s)`;
+        message += `   - ${t.children}: ${item.children} x R$ ${(item.price * 0.5).toFixed(2)}\n`;
       }
-      message += `\n   - Subtotal: R$ ${item.subtotal.toFixed(2)}\n\n`;
+      message += `   - *${t.subtotal}: R$ ${item.subtotal.toFixed(2)}*\n`;
     });
-
-    message += `*TOTAL DO PEDIDO: R$ ${total.toFixed(2)}*\n\n`;
-    message += `Aguardo a confirmação e os detalhes para pagamento. Obrigado!`;
+    
+    message += `---------------------------------\n`;
+    message += `*TOTAL ESTIMADO DO PEDIDO: R$ ${total.toFixed(2)}*\n\n`;
+    message += `*Aguardamos o contato para confirmação final e pagamento.*`;
 
     // Lembre-se de pegar o número do .env
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545000000000';
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999999999';
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    
+    // Abrir o WhatsApp
     window.open(whatsappUrl, '_blank');
 
+    // Limpar e fechar a modal
     clearCart();
     setCustomerName('');
     setCustomerEmail('');

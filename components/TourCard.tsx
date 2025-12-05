@@ -28,6 +28,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
 
   return (
     <Link
+      // Garante que o link aponta para a página de detalhes com ou sem a query de datas
       href={`/${lang}/tour/${tour.id}${query}`}
       className="group relative bg-white rounded-3xl shadow-sm hover:shadow-card-hover transition-all duration-500 overflow-hidden h-full flex flex-col"
     >
