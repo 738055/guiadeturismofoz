@@ -18,6 +18,7 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl: string | undefined; 
+  is_women_exclusive?: boolean; // Adiciona para o TourCard
 };
 
 // NOVO TIPO PARA CATEGORIAS DINÂMICAS
@@ -32,12 +33,12 @@ async function getPopularTours(lang: Locale) {
     const { data: toursData, error: toursError } = await supabase
       .from('tours')
       .select(`
-        id, base_price, duration_hours, location, category_id,
+        id, base_price, duration_hours, location, category_id, is_women_exclusive, 
         tour_translations!left(title, description, language_code),
         tour_images (image_url, display_order)
       `)
       .eq('is_active', true)
-      // .eq('is_featured', true) // <-- Adicionar este filtro após implementar a coluna is_featured
+      .eq('is_featured', true) // <-- AGORA FILTRA PELO DESTAQUE
       .order('display_order', { referencedTable: 'tour_images', ascending: true })
       .limit(6);
 
@@ -54,6 +55,7 @@ async function getPopularTours(lang: Locale) {
           price: tour.base_price,
           duration: tour.duration_hours,
           location: tour.location,
+          is_women_exclusive: tour.is_women_exclusive || false, // Passa a flag
           imageUrl: tour.tour_images?.[0]?.image_url
         };
       });
@@ -131,8 +133,6 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
   ]);
 
   // --- DEBUG ---
-  // Esta linha aparecerá no seu TERMINAL.
-  // Verifique se 'servicesSection' está na lista após reiniciar o servidor.
   console.log('CHAVES DO DICIONÁRIO CARREGADO:', Object.keys(dict)); 
   // --- FIM DO DEBUG ---
 

@@ -29,6 +29,7 @@ type FormData = {
   location: string;
   isActive: boolean;
   isWomenExclusive: boolean; // <-- NOVO: Flag de exclusividade
+  isFeatured: boolean; // <-- NOVO: Flag de destaque
   translations: {
     'pt-BR': TranslationData; // CORRIGIDO
     'en-US': TranslationData; // CORRIGIDO
@@ -42,6 +43,7 @@ const initialFormData: FormData = {
   location: '',
   isActive: true,
   isWomenExclusive: false, // <-- NOVO: Padrão como falso
+  isFeatured: false, // <-- NOVO: Padrão como falso
   translations: {
     'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
     'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
@@ -153,7 +155,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         durationHours: tour.duration_hours.toString(),
         location: tour.location, 
         isActive: tour.is_active, 
-        isWomenExclusive: tour.is_women_exclusive || false, // <-- NOVO: Carrega o estado
+        isWomenExclusive: tour.is_women_exclusive || false, 
+        isFeatured: tour.is_featured || false, // <-- NOVO: Carrega o estado de destaque
         translations: translations as FormData['translations'] // Força o tipo após o preenchimento
       });
 
@@ -186,7 +189,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         duration_hours: parseInt(formData.durationHours) || 0,
         location: formData.location,
         is_active: formData.isActive,
-        is_women_exclusive: formData.isWomenExclusive, // <-- NOVO: Salva o estado
+        is_women_exclusive: formData.isWomenExclusive, 
+        is_featured: formData.isFeatured, // <-- NOVO: Salva o estado de destaque
         category_id: categoryId,
         disabled_week_days: disabledDays,
         disabled_specific_dates: specificDisabledDates
@@ -215,13 +219,12 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       if (upsertError) throw upsertError;
 
       // --- 4. GERENCIA DISPONIBILIDADE (APAGA E RECRIA) ---
-      if (currentTourId) { // Só faz se tivermos um ID
+      if (currentTourId) { 
         // 4.1 Apaga a disponibilidade antiga
         const { error: deleteError } = await supabase
           .from('tour_availability')
           .delete()
           .eq('tour_id', currentTourId);
-        // Não lançar erro aqui, pois pode não haver disponibilidade antiga
         if (deleteError) { console.warn('Could not delete old availability:', deleteError.message); }
 
         // 4.2 Insere a nova disponibilidade (se houver)
@@ -230,7 +233,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
             tour_id: currentTourId,
             available_date: item.available_date,
             total_spots: item.total_spots,
-            spots_booked: 0 // Novas datas começam com 0 reservas
+            spots_booked: 0 
           }));
           const { error: insertAvailError } = await supabase
             .from('tour_availability')
@@ -251,7 +254,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     }
   };
 
-  // --- Handlers existentes ---
+  // --- Handlers existentes (sem alteração significativa na lógica) ---
   const updateTranslation = (field: keyof Omit<TranslationData, 'whatsIncluded' | 'whatsExcluded'>, value: string) => {
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: value } } }));
   };
@@ -260,16 +263,12 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
     const files = Array.from(e.target.files);
-    // Tenta pegar o ID atual (se editando) ou busca o último ID criado (se for novo e acabou de salvar)
     let currentId = tourId;
     if (!currentId) {
         try {
-            // Se for um novo passeio, busca o ID mais recente (pode ser falho em ambientes concorrentes)
             const { data: latestTour, error: fetchError } = await supabase.from('tours').select('id').order('created_at', { ascending: false }).limit(1).single();
             if (fetchError || !latestTour) throw new Error('Failed to fetch latest tour ID');
             currentId = latestTour.id;
-            // Se for um novo passeio, talvez redirecionar para a página de edição seja melhor após o primeiro save?
-            // router.replace(`/admin/tours/edit/${currentId}`); // Opcional
         } catch (err) {
             console.error("Error determining tour ID for upload:", err);
             alert('Erro: Não foi possível obter o ID do passeio para o upload. Salve o passeio primeiro.');
@@ -288,7 +287,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         if (uploadError) throw uploadError;
         const { data: publicUrlData } = supabase.storage.from('tours').getPublicUrl(filePath);
         const imageUrl = publicUrlData.publicUrl;
-        const currentMaxOrder = images.reduce((max, img) => Math.max(max, img.display_order || 0), 0); // Adicionado || 0
+        const currentMaxOrder = images.reduce((max, img) => Math.max(max, img.display_order || 0), 0); 
         const { data: newImageData, error: insertError } = await supabase
           .from('tour_images')
           .insert({ tour_id: currentId, image_url: imageUrl, alt_text: formData.translations['pt-BR'].title || 'Imagem', display_order: currentMaxOrder + 1 })
@@ -327,8 +326,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     const field = type === 'include' ? 'whatsIncluded' : 'whatsExcluded';
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: prev.translations[activeTab][field].filter((_, i) => i !== index) } } }));
   };
-
-  // --- FUNÇÕES DE DISPONIBILIDADE ---
   const handleAddAvailability = () => {
     if (availabilityDateInput && availabilitySpotsInput > 0) {
       const existingIndex = availabilityList.findIndex(item => item.available_date === availabilityDateInput);
@@ -439,12 +436,20 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                     <span className="text-sm font-medium text-gray-700">Passeio Ativo</span>
                   </label>
                   
-                  {/* NOVO: Checkbox Exclusivo Mulheres */}
+                  {/* Checkbox Exclusivo Mulheres */}
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" checked={formData.isWomenExclusive}
                       onChange={(e) => setFormData({ ...formData, isWomenExclusive: e.target.checked })}
                       className="w-4 h-4 text-acento-mulher focus:ring-acento-mulher border-gray-300 rounded" />
                     <span className="text-sm font-medium text-acento-mulher">Exclusivo Mulheres</span>
+                  </label>
+
+                  {/* NOVO: Checkbox Destaque Home */}
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={formData.isFeatured}
+                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                      className="w-4 h-4 text-foz-amarelo focus:ring-foz-amarelo border-gray-300 rounded" />
+                    <span className="text-sm font-medium text-foz-amarelo">Destaque na Home</span>
                   </label>
                   
                 </div>
