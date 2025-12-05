@@ -117,7 +117,7 @@ async function getTourDetail(id: string, lang: Locale) {
       whatsIncluded: safeParse(translation.whats_included), 
       whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
-      disabled_specific_dates: tourData.disabled_specific_dates || [],
+      disabled_specific_dates: tourData.disabled_specific_dates || false,
       isWomenExclusive: tourData.is_women_exclusive || false,
       images: validImages, // Usa apenas imagens válidas
       availability
