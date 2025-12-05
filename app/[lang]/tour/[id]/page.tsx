@@ -29,12 +29,11 @@ const safeParse = (content: any) => {
 };
 
 
-// --- Busca de Dados no Servidor (CORREÇÃO DE FALLBACK DE LÍNGUA) ---
+// --- Busca de Dados no Servidor (AJUSTADA PARA ROBUSTEZ) ---
 async function getTourDetail(id: string, lang: Locale) {
   try {
-    const { data: tourData, error: tourError } = await supabase
-      .from('tours')
-      .select(`
+    // A query completa é grande, mas necessária
+    const selectQuery = `
         id,
         base_price,
         duration_hours,
@@ -59,31 +58,36 @@ async function getTourDetail(id: string, lang: Locale) {
           total_spots,
           spots_booked
         )
-      `)
+      `;
+      
+    // 1. Executa a consulta
+    const { data: tourData, error: tourError } = await supabase
+      .from('tours')
+      .select(selectQuery)
       .eq('id', id)
-      .eq('is_active', true)
+      .eq('is_active', true) // Mantém o filtro de ativo
       .order('display_order', { referencedTable: 'tour_images', ascending: true })
       .maybeSingle();
 
-    if (tourError) throw tourError;
-    if (!tourData) return null;
+    if (tourError) {
+        // Loga o erro exato do Supabase
+        console.error('SUPABASE FETCH ERROR in getTourDetail:', tourError);
+        throw tourError; // Lança para o catch, que retorna null
+    }
+    if (!tourData) return null; // Passeio não encontrado ou não ativo
 
     const translations = tourData.tour_translations || [];
     
     // --- LÓGICA DE FALLBACK APRIMORADA ---
-    // 1. Tenta encontrar a tradução exata (ex: en-US)
     let translation = translations.find((t: any) => t.language_code === lang);
     
-    // 2. Se falhar, tenta o fallback padrão (pt-BR)
     if (!translation) {
         translation = translations.find((t: any) => t.language_code === 'pt-BR');
     }
-    
-    // 3. Se o banco tiver pt_BR (com underline), tenta também:
+    // Adiciona o fallback para pt_BR (com underline) para cobrir dados legados
     if (!translation) {
         translation = translations.find((t: any) => t.language_code === 'pt_BR');
     }
-    // --- FIM DA LÓGICA DE FALLBACK ---
 
     if (!translation) {
       console.error(`Tour ${id} found, but no usable translation available.`);
@@ -97,7 +101,7 @@ async function getTourDetail(id: string, lang: Locale) {
       ...tourData,
       title: translation.title || '',
       description: translation.description || '',
-      // Usa safeParse para garantir que os campos são arrays, mesmo que venham como null/undefined/string
+      // Usa safeParse para garantir que os campos são arrays
       whatsIncluded: safeParse(translation.whats_included), 
       whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
@@ -107,7 +111,8 @@ async function getTourDetail(id: string, lang: Locale) {
       availability
     };
   } catch (error) {
-    console.error('Error loading tour detail:', error);
+    // Loga o erro geral antes de retornar null
+    console.error('GENERIC ERROR IN getTourDetail:', error);
     return null;
   }
 }
