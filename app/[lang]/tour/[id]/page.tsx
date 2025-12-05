@@ -320,7 +320,7 @@ export default async function TourDetailPage({
             }} 
             availableDates={availableDates} // Passa a lista simulada
             dict={dict} // Passa o dicionário completo
-            lang={lang} // <--- CORREÇÃO APLICADA AQUI
+            lang={lang} 
           />
 
           {/* --- ÁREA DE INCLUÍDO / NÃO INCLUÍDO --- */}

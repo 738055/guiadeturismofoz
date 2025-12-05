@@ -6,6 +6,20 @@ import { useCart } from '@/contexts/CartContext';
 import { Calendar, User, MessageCircle, ShoppingCart, ArrowRight, Loader2 } from 'lucide-react';
 import { format, parseISO, getDay, addDays } from 'date-fns';
 import { Locale, Dictionary } from '@/i18n/dictionaries';
+// --- CORREÇÃO: Importa os objetos de Locale do date-fns ---
+import { Locale as DateFnsLocale } from 'date-fns';
+import { ptBR } from 'date-fns/locale/pt-BR';
+import { enUS } from 'date-fns/locale/en-US';
+import { es } from 'date-fns/locale/es'; // Usando 'es' para 'es-ES'
+
+// Mapeamento do nosso Locale string para o objeto Locale do date-fns
+const localeMap: Record<Locale, DateFnsLocale> = {
+    'pt-BR': ptBR,
+    'en-US': enUS,
+    'es-ES': es, 
+};
+// ---------------------------------------------------
+
 
 // Tipamos as props recebidas do Server Component
 interface TourClientProps {
@@ -18,10 +32,10 @@ interface TourClientProps {
   };
   availableDates: { available_date: string; total_spots: number; spots_booked: number; }[];
   dict: Dictionary; // Recebe o dicionário completo
-  lang: Locale; // <--- CORREÇÃO: Adicionada a prop lang
+  lang: Locale; 
 }
 
-export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, dict, lang }) => { // <--- CORREÇÃO: Desestruturada a prop lang
+export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, dict, lang }) => { 
   const { addItem } = useCart();
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
@@ -33,6 +47,10 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
   const t = dict.tours;
   const c = dict.cart;
   const tCommon = dict.common;
+  
+  // --- LÓGICA DE SELEÇÃO DE LOCALE PARA date-fns ---
+  const dateFnsLocale = localeMap[lang];
+  // ---------------------------------------------------
   
   // --- LÓGICA DE FILTRO E VISUALIZAÇÃO DE DATAS ---
   const disabledDays = tour.disabled_week_days || [];
@@ -141,7 +159,7 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
               `}
             >
               <span className="block text-xs font-medium uppercase transition-colors">
-                {format(parseISO(avail.available_date), 'EEE', { locale: lang.includes('pt') ? undefined : lang.split('-')[0] })}
+                {format(parseISO(avail.available_date), 'EEE', { locale: dateFnsLocale })}
               </span>
               <span className="block text-2xl font-bold transition-colors">
                 {format(parseISO(avail.available_date), 'dd')}
