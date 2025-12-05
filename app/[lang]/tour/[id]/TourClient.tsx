@@ -155,9 +155,9 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
         <div className="flex overflow-x-auto space-x-3 pb-3 scrollbar-hide mb-6">
           {previewDates.length > 0 ? previewDates.map((avail) => {
             const parsedDate = parseISO(avail.available_date);
-            // --- CORREÇÃO: Adiciona a verificação de data inválida ---
+            // Guarda para evitar RangeError (mantida da correção anterior)
             if (isNaN(parsedDate.getTime())) return null; 
-            // -----------------------------------------------------
+
             return (
             <button
               key={avail.available_date}
@@ -176,9 +176,8 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
               <span className="block text-2xl font-bold transition-colors">
                 {format(parsedDate, 'dd')}
               </span>
-              <span className="block text-xs opacity-70 transition-colors">
-                {avail.total_spots - avail.spots_booked} vagas
-              </span>
+              {/* LINHA REMOVIDA: Remoção da informação de vagas */}
+              
             </button>
           )}) : (
               <p className="text-gray-500">{tCommon.noResults}</p>
