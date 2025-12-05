@@ -1,4 +1,4 @@
-// app/admin/categories/page.tsx
+// guiadeturismofoz/app/admin/categories/page.tsx
 'use client'; // Página de cliente para gerenciar estado
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +17,7 @@ type TranslationData = {
   slug: string;
 };
 
-// CORREÇÃO: Usando o formato padrão com hífen
+// Usando o formato padrão com hífen
 type LanguageCode = 'pt-BR' | 'en-US' | 'es-ES';
 
 type NewCategoryTranslations = {
@@ -48,9 +48,8 @@ export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSave, setLoadingSave] = useState(false);
-  const [uploading, setUploading] = useState(false); // NOVO: Estado de upload
+  const [uploading, setUploading] = useState(false); 
   
-  // CORREÇÃO: Muda o tipo do useState e o valor inicial para o novo objeto de estado
   const [newCategoryState, setNewCategoryState] = useState<NewCategoryState>(initialCategoryState);
   const [activeTab, setActiveTab] = useState<LanguageCode>('pt-BR');
 
@@ -66,7 +65,7 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          image_url,  // <-- BUSCA NOVA COLUNA
+          image_url, 
           category_translations!left (
             name,
             slug,
@@ -75,8 +74,14 @@ export default function AdminCategoriesPage() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setCategories(data || []);
+      if (error) {
+        console.error('Error loading categories:', error);
+        throw error; // Lança o erro para ir ao bloco finally
+      }
+      
+      // Filtra entradas nulas que podem vir devido a RLS ou joins complexos
+      setCategories((data || []).filter(item => item.id)); 
+      
     } catch (error) {
       console.error('Error loading categories:', error);
     } finally {
@@ -97,21 +102,19 @@ export default function AdminCategoriesPage() {
         [activeTab]: {
           ...prev.translations[activeTab], 
           [field]: value,
-          // Se estiver editando o nome em pt-BR, atualiza o slug de todos
           ...(field === 'name' && activeTab === 'pt-BR' && { slug: slug })
         }
       }
     }));
   };
 
-  // --- NOVO: FUNÇÃO DE UPLOAD DE IMAGEM ---
+  // --- FUNÇÃO DE UPLOAD DE IMAGEM ---
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
     
-    // Usa um nome temporário, como 'new' + timestamp, antes de ter um ID
     const fileName = `categories/new-${Date.now()}.${fileExt}`;
     
     try {
@@ -130,18 +133,23 @@ export default function AdminCategoriesPage() {
       alert('Erro ao enviar imagem.');
     } finally {
       setUploading(false);
-      e.target.value = ''; // Limpa o input
+      e.target.value = ''; 
     }
   };
 
-  // --- NOVO: FUNÇÃO DE REMOÇÃO DE IMAGEM ---
+  // --- FUNÇÃO DE REMOÇÃO DE IMAGEM ---
   const handleImageDelete = async () => {
     if (!newCategoryState.imageUrl) return;
 
     // Remove do Storage
     try {
-        const imagePath = newCategoryState.imageUrl.split('/tours/').pop();
+        // CORREÇÃO: Usando a URL completa para extrair o caminho correto do storage
+        const pathSegments = newCategoryState.imageUrl.split(`${BUCKET_NAME}/`);
+        const imagePath = pathSegments.length > 1 ? pathSegments[1] : null;
+
         if (imagePath) {
+            // Se a imagem não for de um registro salvo, o caminho pode ser problemático.
+            // Aqui presumimos que é o caminho completo dentro do bucket.
             await supabase.storage.from(BUCKET_NAME).remove([imagePath]);
         }
     } catch (error) {
@@ -165,7 +173,7 @@ export default function AdminCategoriesPage() {
       // 1. Cria a Categoria principal (incluindo a URL da imagem)
       const { data: newCategory, error: insertError } = await supabase
         .from('categories')
-        .insert({ image_url: newCategoryState.imageUrl }) // <-- SALVA A IMAGEM AQUI
+        .insert({ image_url: newCategoryState.imageUrl }) 
         .select()
         .single();
 
@@ -173,12 +181,12 @@ export default function AdminCategoriesPage() {
 
       // 2. Prepara e salva as Traduções
       const translationsToUpsert = Object.entries(translations)
-        .filter(([_, translation]) => translation.name) // Salva apenas se tiver nome
+        .filter(([_, translation]) => translation.name)
         .map(([langCode, translation]) => ({
           category_id: newCategory.id,
           language_code: langCode,
           name: translation.name,
-          slug: translation.slug || translations['pt-BR'].slug // Usa o slug PT se o específico estiver vazio
+          slug: translation.slug || translations['pt-BR'].slug
         }));
 
       const { error: upsertError } = await supabase
@@ -188,8 +196,8 @@ export default function AdminCategoriesPage() {
       if (upsertError) throw upsertError;
 
       alert('Categoria criada com sucesso!');
-      setNewCategoryState(initialCategoryState); // Limpa o formulário
-      loadCategories(); // Recarrega a lista
+      setNewCategoryState(initialCategoryState); 
+      loadCategories(); 
 
     } catch (error) {
       console.error('Error creating category:', error);
@@ -207,7 +215,9 @@ export default function AdminCategoriesPage() {
       // 1. Encontra o URL da imagem para deletar no storage
       const catToDelete = categories.find(c => c.id === categoryId);
       if (catToDelete?.image_url) {
-        const imagePath = catToDelete.image_url.split('/tours/').pop();
+        const pathSegments = catToDelete.image_url.split(`${BUCKET_NAME}/`);
+        const imagePath = pathSegments.length > 1 ? pathSegments[1] : null;
+
         if (imagePath) await supabase.storage.from(BUCKET_NAME).remove([imagePath]);
       }
       
@@ -233,15 +243,16 @@ export default function AdminCategoriesPage() {
   // Helper para pegar o nome em PT-BR para a lista
   const getCategoryName = (translations: any[] | null) => {
     if (!translations || translations.length === 0) return 'Sem nome';
-    const pt = translations.find(t => t.language_code === 'pt-BR');
-    return pt?.name || translations[0]?.name || 'Sem nome';
+    // O join retorna um array mesmo para left join, mas pode ser nulo ou vazio
+    const pt = Array.isArray(translations) ? translations.find(t => t.language_code === 'pt-BR') : null;
+    return pt?.name || translations?.[0]?.name || 'Sem nome';
   };
 
   // Helper para pegar o slug em PT-BR
   const getCategorySlug = (translations: any[] | null) => {
      if (!translations || translations.length === 0) return '';
-    const pt = translations.find(t => t.language_code === 'pt-BR');
-    return pt?.slug || translations[0]?.slug || '';
+    const pt = Array.isArray(translations) ? translations.find(t => t.language_code === 'pt-BR') : null;
+    return pt?.slug || translations?.[0]?.slug || '';
   }
 
 
@@ -284,6 +295,7 @@ export default function AdminCategoriesPage() {
                           alt="Pré-visualização da Categoria" 
                           fill 
                           className="object-cover" 
+                          sizes="100px" // Adicionado para Next/Image
                         />
                         <button type="button" onClick={handleImageDelete}
                           className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full transition-opacity"
@@ -340,7 +352,7 @@ export default function AdminCategoriesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nome</label>
                   <input
                     type="text"
-                    value={newCategoryState.translations[activeTab].name} // USAR NOVO ESTADO
+                    value={newCategoryState.translations[activeTab].name}
                     onChange={(e) => updateNewTranslation('name', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
                   />
@@ -349,9 +361,9 @@ export default function AdminCategoriesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Slug (URL)</label>
                   <input
                     type="text"
-                    value={newCategoryState.translations[activeTab].slug} // USAR NOVO ESTADO
+                    value={newCategoryState.translations[activeTab].slug}
                     onChange={(e) => updateNewTranslation('slug', e.target.value)}
-                    disabled={activeTab !== 'pt-BR'} // Edita slug só em PT
+                    disabled={activeTab !== 'pt-BR'} 
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent disabled:bg-gray-100"
                   />
                   {activeTab !== 'pt-BR' && <p className="text-xs text-gray-500 mt-1">O Slug é definido na aba Português.</p>}
@@ -385,7 +397,7 @@ export default function AdminCategoriesPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagem</th> {/* NOVO */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagem</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome (PT-BR)</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -397,12 +409,12 @@ export default function AdminCategoriesPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                             <div className="relative w-12 h-8 rounded overflow-hidden">
                                 {cat.image_url ? (
-                                    <Image src={cat.image_url} alt={getCategoryName(cat.category_translations)} fill className="object-cover" />
+                                    <Image src={cat.image_url} alt={getCategoryName(cat.category_translations)} fill className="object-cover" sizes="100px" />
                                 ) : (
                                     <div className="w-full h-full bg-gray-200 flex items-center justify-center"><ImageIcon className='w-4 h-4 text-gray-400'/></div>
                                 )}
                             </div>
-                        </td> {/* NOVO */}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{getCategoryName(cat.category_translations)}</div>
                         </td>
@@ -410,7 +422,6 @@ export default function AdminCategoriesPage() {
                           <div className="text-sm text-gray-500">{getCategorySlug(cat.category_translations)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          {/* Em um projeto mais complexo, haveria um botão de editar que carregaria os dados para o formulário */}
                           <button
                             onClick={() => deleteCategory(cat.id)}
                             className="text-red-600 hover:text-red-800"
