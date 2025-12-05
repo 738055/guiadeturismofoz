@@ -1,4 +1,4 @@
-// app/[lang]/tour/[id]/page.tsx
+// guiadeturismofoz/app/[lang]/tour/[id]/page.tsx
 
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
@@ -11,18 +11,33 @@ import { parseISO } from 'date-fns';
 // --- Tipo de Retorno da Busca ---
 type TourDetailData = Awaited<ReturnType<typeof getTourDetail>>;
 
-// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (MANTIDA) ---
+// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (CORRIGIDA PARA ROBUSTEZ) ---
 const safeParse = (content: any) => {
     if (!content) return [];
     try {
         if (typeof content === 'string') {
-            return JSON.parse(content);
+            // Tenta fazer o parse. Se for uma string vazia, retorna array vazio.
+            if (content.trim() === '') return []; 
+            
+            const parsed = JSON.parse(content);
+            
+            // Se o resultado do parse é um array, filtra itens vazios
+            if (Array.isArray(parsed)) {
+                 return parsed.filter(item => typeof item === 'string' && item.trim() !== '');
+            }
+            // Tenta tratar um único item parseado como string e retorna em um array.
+            return [String(parsed)].filter(item => typeof item === 'string' && item.trim() !== '');
         }
         if (Array.isArray(content)) {
-            return content;
+            // Se já é um array, apenas garante que os itens são strings e não estão vazios
+            return content.filter(item => typeof item === 'string' && item.trim() !== '');
         }
     } catch (e) {
-        console.warn("Failed to parse JSON content:", content, e);
+        // Em caso de falha no JSON.parse (ex: campo tem texto simples, não JSON),
+        // retorna o conteúdo como um array de string se não for vazio.
+        if (typeof content === 'string' && content.trim() !== '') {
+             return [content.trim()];
+        }
         return []; 
     }
     return [];

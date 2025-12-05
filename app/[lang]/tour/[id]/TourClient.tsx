@@ -1,3 +1,4 @@
+// guiadeturismofoz/app/[lang]/tour/[id]/TourClient.tsx
 'use client'; // Este componente é de cliente (usa hooks)
 
 import React, { useState } from 'react';

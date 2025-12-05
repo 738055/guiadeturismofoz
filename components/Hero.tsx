@@ -26,8 +26,14 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
           className="w-full h-full object-cover scale-105 animate-slow-pan" // Animação sutil de movimento
           poster="/54.jpg" 
         >
+          {/* CORREÇÃO: Adicionada tag MP4 (se disponível, deve ser o formato preferido) e tipo para MOV */}
+          <source 
+            src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/CATARATAS.mp4"
+            type="video/mp4" 
+          />
           <source 
             src="https://oghvwsixolilslpcfhhi.supabase.co/storage/v1/object/public/videos/CATARATAS.mov" 
+            type="video/quicktime"
           />
         </video>
       </div>
