@@ -5,33 +5,31 @@ import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { Metadata, ResolvingMetadata } from 'next';
 import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
-import { TourClient } from './TourClient'; // Componente de cliente
+import { TourClient } from './TourClient';
 import { parseISO } from 'date-fns';
 
 // --- Tipo de Retorno da Busca ---
 type TourDetailData = Awaited<ReturnType<typeof getTourDetail>>;
 
-// --- FUNÇÃO AUXILIAR DE PARSING SEGURO ---
+// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (MANTIDA) ---
 const safeParse = (content: any) => {
     if (!content) return [];
     try {
-        // Tenta fazer o parse da string JSON para um Array
         if (typeof content === 'string') {
             return JSON.parse(content);
         }
-        // Se já for array, retorna o array (para robustez)
         if (Array.isArray(content)) {
             return content;
         }
     } catch (e) {
         console.warn("Failed to parse JSON content:", content, e);
-        return []; // Retorna array vazio em caso de falha
+        return []; 
     }
     return [];
 };
 
 
-// --- Busca de Dados no Servidor (CORRIGIDA) ---
+// --- Busca de Dados no Servidor (CORREÇÃO DE FALLBACK DE LÍNGUA) ---
 async function getTourDetail(id: string, lang: Locale) {
   try {
     const { data: tourData, error: tourError } = await supabase
@@ -72,12 +70,23 @@ async function getTourDetail(id: string, lang: Locale) {
 
     const translations = tourData.tour_translations || [];
     
-    // Tenta o idioma do usuário, senão tenta pt-BR
-    const translation = translations.find((t: any) => t.language_code === lang) || 
-                        translations.find((t: any) => t.language_code === 'pt-BR');
+    // --- LÓGICA DE FALLBACK APRIMORADA ---
+    // 1. Tenta encontrar a tradução exata (ex: en-US)
+    let translation = translations.find((t: any) => t.language_code === lang);
+    
+    // 2. Se falhar, tenta o fallback padrão (pt-BR)
+    if (!translation) {
+        translation = translations.find((t: any) => t.language_code === 'pt-BR');
+    }
+    
+    // 3. Se o banco tiver pt_BR (com underline), tenta também:
+    if (!translation) {
+        translation = translations.find((t: any) => t.language_code === 'pt_BR');
+    }
+    // --- FIM DA LÓGICA DE FALLBACK ---
 
     if (!translation) {
-      console.error(`Tour ${id} found, but no translation available (not even pt-BR).`);
+      console.error(`Tour ${id} found, but no usable translation available.`);
       return null;
     }
 
@@ -86,11 +95,11 @@ async function getTourDetail(id: string, lang: Locale) {
 
     return {
       ...tourData,
-      title: translation?.title || '',
-      description: translation?.description || '',
-      // CORREÇÃO AQUI: Usa safeParse
-      whatsIncluded: safeParse(translation?.whats_included), 
-      whatsExcluded: safeParse(translation?.whats_excluded), 
+      title: translation.title || '',
+      description: translation.description || '',
+      // Usa safeParse para garantir que os campos são arrays, mesmo que venham como null/undefined/string
+      whatsIncluded: safeParse(translation.whats_included), 
+      whatsExcluded: safeParse(translation.whats_excluded), 
       disabled_week_days: tourData.disabled_week_days || [],
       disabled_specific_dates: tourData.disabled_specific_dates || [],
       isWomenExclusive: tourData.is_women_exclusive || false,
@@ -271,7 +280,7 @@ export default async function TourDetailPage({
             dict={dict} // Passa o dicionário completo
           />
 
-          {/* --- ÁREA DE INCLUÍDO / NÃO INCLUÍDO (ATUALIZADA) --- */}
+          {/* --- ÁREA DE INCLUÍDO / NÃO INCLUÍDO --- */}
           <div className="space-y-6 mt-8">
             {tour.whatsIncluded && tour.whatsIncluded.length > 0 && (
               <div>
@@ -280,7 +289,6 @@ export default async function TourDetailPage({
                   <span>{dict.tours.whatsIncluded}</span>
                 </h3>
                 <ul className="space-y-2 pl-2">
-                  {/* Itera sobre o array PARSEADO */}
                   {tour.whatsIncluded.map((item: string, index: number) => (
                     <li key={index} className="flex items-center text-gray-700">
                       <CheckCircle className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
@@ -298,7 +306,6 @@ export default async function TourDetailPage({
                   <span>{dict.tours.whatsExcluded}</span>
                 </h3>
                 <ul className="space-y-2 pl-2">
-                  {/* Itera sobre o array PARSEADO */}
                   {tour.whatsExcluded.map((item: string, index: number) => (
                     <li key={index} className="flex items-center text-gray-700">
                       <XCircle className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
