@@ -89,15 +89,19 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
     });
   }, [availableDates, disabledDays, disabledSpecificDates]);
   
-  // Simulação de 7 dias de visualização (para o calendário simplificado)
-  const previewDates = filteredDates.slice(0, 7);
+  // Simulação de 7 dias de visualização (REMOVIDA PARA O CALENDÁRIO, MAS FILTROS DE DATAS AINDA SÃO ÚTEIS)
   const selectedDateObject = filteredDates.find(d => d.available_date === selectedDate);
   const remainingSpots = selectedDateObject ? selectedDateObject.total_spots - selectedDateObject.spots_booked : 0;
+  
+  // Definindo min/max date para o input nativo
+  const minDate = filteredDates.length > 0 ? filteredDates[0].available_date : format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const maxDate = filteredDates.length > 0 ? filteredDates[filteredDates.length - 1].available_date : undefined;
   // --- FIM DA LÓGICA DE DATAS ---
 
   const handleAddToCart = () => {
-    if (!selectedDate || adults < 1) {
-      alert(t.selectDate);
+    // Validação extra para garantir que a data selecionada é válida e disponível
+    if (!selectedDate || adults < 1 || !filteredDates.find(d => d.available_date === selectedDate)) {
+      alert("Por favor, selecione uma data válida e disponível.");
       return;
     }
 
@@ -151,39 +155,24 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
           <span>{t.selectDate}</span>
         </h4>
         
-        {/* Simulação de Calendário Estilizado (Carrossel de Datas) */}
-        <div className="flex overflow-x-auto space-x-3 pb-3 scrollbar-hide mb-6">
-          {previewDates.length > 0 ? previewDates.map((avail) => {
-            const parsedDate = parseISO(avail.available_date);
-            // Guarda para evitar RangeError (mantida da correção anterior)
-            if (isNaN(parsedDate.getTime())) return null; 
-
-            return (
-            <button
-              key={avail.available_date}
-              onClick={() => setSelectedDate(avail.available_date)}
-              className={`
-                flex-shrink-0 w-24 h-24 rounded-xl border-2 transition-all duration-300 shadow-sm
-                ${selectedDate === avail.available_date 
-                    ? 'bg-verde-principal border-verde-principal text-white shadow-lg scale-105' 
-                    : 'bg-gray-50 border-gray-200 text-gray-800 hover:border-verde-principal/50'
-                }
-              `}
-            >
-              <span className="block text-xs font-medium uppercase transition-colors">
-                {format(parsedDate, 'EEE', { locale: dateFnsLocale })}
-              </span>
-              <span className="block text-2xl font-bold transition-colors">
-                {format(parsedDate, 'dd')}
-              </span>
-              {/* LINHA REMOVIDA: Remoção da informação de vagas */}
-              
-            </button>
-          )}) : (
-              <p className="text-gray-500">{tCommon.noResults}</p>
-          )}
+        {/* NOVO: INPUT DE DATA ESTILO CALENDÁRIO (TripAdvisor/Decolar) */}
+        <div className="mb-6">
+            <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                min={minDate}
+                max={maxDate}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-verde-principal focus:ring-2 focus:ring-verde-principal/50 focus:border-transparent transition-all text-lg font-semibold"
+            />
+            {/* Mensagem de Ajuda/Status */}
+            {selectedDate && !filteredDates.find(d => d.available_date === selectedDate) ? (
+                <p className="text-sm text-red-500 mt-2">Esta data está indisponível ou fora do período de agendamento.</p>
+            ) : (
+                <p className="text-sm text-gray-500 mt-2">Datas disponíveis entre {format(parseISO(minDate), 'dd/MM/yy')} e {maxDate ? format(parseISO(maxDate), 'dd/MM/yy') : 'futuro'}.</p>
+            )}
         </div>
-        {/* Fim do Calendário Estilizado */}
+        {/* Fim do Novo Calendário */}
         
         <h4 className="font-semibold text-lg mb-3 flex items-center space-x-2 text-gray-800">
           <User className="w-5 h-5 text-verde-secundario" />
@@ -221,7 +210,8 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
 
         <button
           onClick={() => setStep(2)}
-          disabled={!selectedDate || adults < 1}
+          // Impede o avanço se a data não estiver selecionada ou não for válida/disponível
+          disabled={!selectedDate || adults < 1 || !filteredDates.find(d => d.available_date === selectedDate)}
           className="w-full bg-foz-azul-escuro text-white py-3 rounded-xl font-semibold hover:bg-foz-azul-claro transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
         >
           <span>Continuar para Observações</span>
