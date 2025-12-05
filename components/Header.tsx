@@ -1,4 +1,3 @@
-// components/Header.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,10 +8,18 @@ import { useCart } from '@/contexts/CartContext';
 import { Locale } from '@/i18n/dictionaries';
 import { SiteLogo } from './SiteLogo';
 
+// Tipagem básica para as props (assumindo que já existe ou foi deduzida)
 interface HeaderProps {
   onCartClick: () => void;
   lang: Locale;
-  navText: any;
+  navText?: {
+    home: string;
+    products: string;
+    combos: string;
+    blog: string;
+    about: string;
+    contact: string;
+  };
 }
 
 export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t }) => {
@@ -22,7 +29,6 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
   const pathname = usePathname();
 
   // Lista de rotas que devem ter o header transparente (overlay)
-  // Adicione aqui qualquer nova página que tenha um banner no topo
   const transparentRoutes = ['', 'tours', 'combos', 'about'];
 
   // Verifica se a rota atual deve ser transparente
@@ -125,7 +131,12 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
           {/* Logo */}
-          <div className={`transition-all duration-500 ${useWhiteStyle ? 'w-36' : 'w-44 md:w-56'} drop-shadow-sm`}>
+          {/* CORREÇÃO APLICADA: Reduz a largura e adiciona margem vertical negativa (-my-8) para puxar o logo para cima no modo transparente, evitando sobreposição com o texto da Hero Section. */}
+          <div className={`transition-all duration-500 drop-shadow-sm ${
+            useWhiteStyle 
+              ? 'w-36' 
+              : 'w-40 md:w-52 -my-8' // Largura ajustada e MARGEM NEGATIVA -my-8
+          }`}>
              <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
 
