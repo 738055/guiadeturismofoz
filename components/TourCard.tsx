@@ -13,16 +13,19 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl?: string;
+  is_women_exclusive?: boolean; // <-- NOVO: Adiciona a flag
 };
 
 interface TourCardProps {
   tour: Tour;
-  dict: { from: string; viewDetails: string; hours: string; };
+  dict: { from: string; viewDetails: string; hours: string; womenExclusiveBadge: string; }; // <-- NOVO: Adiciona o badge no tipo
   lang: Locale;
   query?: string;
 }
 
 export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query = '' }) => {
+  const isExclusive = tour.is_women_exclusive; // Verifica a flag
+
   return (
     <Link
       href={`/${lang}/tour/${tour.id}${query}`}
@@ -49,6 +52,14 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
           <span className="text-xs text-gray-500 block font-semibold">{t.from}</span>
           <span className="text-lg font-bold text-foz-verde">R$ {tour.price.toFixed(2)}</span>
         </div>
+        
+        {/* NOVO: Badge Exclusivo para Mulheres */}
+        {isExclusive && (
+            <div className="absolute top-4 left-4 bg-acento-mulher text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10 uppercase">
+                {t.womenExclusiveBadge}
+            </div>
+        )}
+        
       </div>
 
       {/* Conteúdo */}

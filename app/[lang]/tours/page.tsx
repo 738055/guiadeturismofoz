@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Locale } from '@/i18n/dictionaries';
 import { Search, Loader2, Filter, X } from 'lucide-react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation'; // Importa para pegar o query param
 
 // Tipos
 type Tour = {
@@ -18,6 +19,7 @@ type Tour = {
   location: string;
   imageUrl?: string;
   category_id: string;
+  is_women_exclusive?: boolean; // <-- NOVO: Adiciona a flag
 };
 
 type Category = {
@@ -31,7 +33,12 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
   const [dict, setDict] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // Estados de Filtro
+  // LÓGICA DE FILTRO NOVO
+  const searchParams = useSearchParams();
+  const isWomenExclusiveMode = searchParams?.get('exclusive') === 'women';
+  // Fim Lógica de Filtro Novo
+  
+  // Estados de Filtro (MANTIDOS)
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -56,15 +63,23 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
         setCategories(formattedCats);
 
         // 3. Carrega Passeios
-        const { data: toursData } = await supabase
+        let query = supabase
           .from('tours')
           .select(`
-            id, base_price, duration_hours, location, category_id,
+            id, base_price, duration_hours, location, category_id, is_women_exclusive, 
             tour_translations!left(title, description, language_code),
             tour_images(image_url, display_order)
           `)
           .eq('is_active', true)
           .order('display_order', { referencedTable: 'tour_images', ascending: true });
+          
+        // NOVO: Aplica o filtro de exclusividade se estiver no modo exclusivo
+        if (isWomenExclusiveMode) {
+            query = query.eq('is_women_exclusive', true);
+        }
+
+        const { data: toursData } = await query;
+          
 
         const formattedTours = (toursData || []).map((t: any) => {
            const trans = t.tour_translations.find((tr: any) => tr.language_code === lang) || 
@@ -78,6 +93,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
              duration: t.duration_hours,
              location: t.location,
              category_id: t.category_id,
+             is_women_exclusive: t.is_women_exclusive, // <-- NOVO
              imageUrl: t.tour_images?.[0]?.image_url
            };
         }).filter(Boolean) as Tour[];
@@ -91,7 +107,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       }
     };
     loadData();
-  }, [lang]);
+  }, [lang, isWomenExclusiveMode, searchParams]); // Adiciona a dependência searchParams
 
   const filteredTours = useMemo(() => {
     return tours.filter(tour => {
@@ -107,6 +123,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
 
   const tCommon = dict.common;
   const tTours = dict.tours;
+  const tHero = dict.hero; // Para pegar o título exclusivo
 
   return (
     <div className="min-h-screen bg-foz-bege">
@@ -115,79 +132,83 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
       <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center pt-20">
         <div className="absolute inset-0">
           <Image
-            src="/54.jpg" // Ou a imagem de banner configurada no admin
+            src={isWomenExclusiveMode ? "/54.jpg" : "/54.jpg"} // Manter a mesma imagem por enquanto
             alt="Banner Passeios"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-foz-azul-escuro/60 via-foz-azul-escuro/40 to-foz-bege" />
+          {/* Altera o gradiente do overlay para incluir um toque de rosa no modo exclusivo */}
+          <div className={`absolute inset-0 bg-gradient-to-b ${isWomenExclusiveMode ? 'from-acento-mulher/60 via-acento-mulher/40 to-foz-bege' : 'from-foz-azul-escuro/60 via-foz-azul-escuro/40 to-foz-bege'}`} />
         </div>
 
         <div className="relative z-10 text-center px-4 max-w-4xl mt-10">
-          <h1 className="text-4xl md:text-6xl font-bold text-white font-serif mb-4 drop-shadow-lg animate-fade-in-up">
-            {tTours.title}
+          <h1 className={`text-4xl md:text-6xl font-bold text-white font-serif mb-4 drop-shadow-lg animate-fade-in-up ${isWomenExclusiveMode ? 'text-acento-mulher' : ''}`}>
+            {isWomenExclusiveMode ? tHero.womenExclusiveTitle : tTours.title}
           </h1>
           <p className="text-lg md:text-xl text-white/90 font-light animate-fade-in-up delay-100">
-            {tTours.subtitle}
+            {isWomenExclusiveMode ? 'Experiências inesquecíveis pensadas e executadas por e para mulheres.' : tTours.subtitle}
           </p>
         </div>
       </div>
 
       {/* --- 2. BARRA DE FILTROS "GLASS" (NOVA POSIÇÃO) --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 mb-12">
-        <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-glass p-4 md:p-6 animate-fade-in-up delay-200">
-          
-          <div className="flex flex-col lg:flex-row gap-6 items-center">
-            
-            {/* Input de Busca */}
-            <div className="relative w-full lg:w-1/3 group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-gray-400 group-focus-within:text-foz-azul-claro transition-colors" />
-              </div>
-              <input
-                type="text"
-                placeholder={tCommon.search + "..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white/50 border-2 border-transparent hover:border-white/60 focus:border-foz-azul-claro rounded-2xl outline-none transition-all placeholder-gray-500 text-gray-800 font-medium shadow-inner"
-              />
-            </div>
-
-            {/* Categorias (Scroll Horizontal no Mobile) */}
-            <div className="w-full lg:flex-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2 ${
-                    selectedCategory === 'all'
-                      ? 'bg-foz-azul-escuro text-white shadow-lg scale-105'
-                      : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-escuro'
-                  }`}
-                >
-                  <Filter className="w-4 h-4" />
-                  {dict.categories.all}
-                </button>
+      {/* Oculta os filtros se estiver no modo exclusivo (para simplificar a experiência) */}
+      {!isWomenExclusiveMode && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 mb-12">
+            <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-glass p-4 md:p-6 animate-fade-in-up delay-200">
+              
+              <div className="flex flex-col lg:flex-row gap-6 items-center">
                 
-                {categories.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 ${
-                      selectedCategory === cat.id
-                        ? 'bg-foz-azul-claro text-white shadow-lg scale-105'
-                        : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-claro'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                {/* Input de Busca */}
+                <div className="relative w-full lg:w-1/3 group">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400 group-focus-within:text-foz-azul-claro transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder={tCommon.search + "..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 bg-white/50 border-2 border-transparent hover:border-white/60 focus:border-foz-azul-claro rounded-2xl outline-none transition-all placeholder-gray-500 text-gray-800 font-medium shadow-inner"
+                  />
+                </div>
+
+                {/* Categorias (Scroll Horizontal no Mobile) */}
+                <div className="w-full lg:flex-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setSelectedCategory('all')}
+                      className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2 ${
+                        selectedCategory === 'all'
+                          ? 'bg-foz-azul-escuro text-white shadow-lg scale-105'
+                          : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-escuro'
+                      }`}
+                    >
+                      <Filter className="w-4 h-4" />
+                      {dict.categories.all}
+                    </button>
+                    
+                    {categories.map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all duration-300 ${
+                          selectedCategory === cat.id
+                            ? 'bg-foz-azul-claro text-white shadow-lg scale-105'
+                            : 'bg-white/50 text-gray-600 hover:bg-white hover:text-foz-azul-claro'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
-
           </div>
-        </div>
-      </div>
+      )}
 
       {/* --- 3. GRID DE RESULTADOS --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
@@ -195,7 +216,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
         {/* Contador de Resultados */}
         <div className="mb-8 text-gray-500 font-medium px-2 flex justify-between items-center">
            <span>{filteredTours.length} experiências encontradas</span>
-           {(searchQuery || selectedCategory !== 'all') && (
+           {(searchQuery || selectedCategory !== 'all' || isWomenExclusiveMode) && (
              <button 
                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
                className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"

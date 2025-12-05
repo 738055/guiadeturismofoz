@@ -15,7 +15,9 @@
     "searchRoteiroButton": "Sugerir Itinerario",
     "searchAllButton": "Ver todos los paseos",
     "searchPlaceholder": "¿Qué quieres vivir en Foz?",
-    "searchButton": "Buscar"
+    "searchButton": "Buscar",
+    "womenExclusiveTitle": "Viaje Solo para Mujeres",
+    "womenExclusiveButton": "Ver Paseos Exclusivos"
   },
   "categoriesSection": {
     "title": "Explora por Experiencia",
@@ -48,7 +50,8 @@
     "whatsExcluded": "Qué no incluye",
     "availability": "Disponibilidad",
     "selectDate": "Selecciona una fecha",
-    "addToCart": "Agregar al Itinerario"
+    "addToCart": "Agregar al Itinerario",
+    "womenExclusiveBadge": "Exclusivo Mujeres"
   },
   "categories": {
     "all": "Todos",

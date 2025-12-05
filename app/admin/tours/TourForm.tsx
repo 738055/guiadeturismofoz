@@ -1,3 +1,4 @@
+// guiadeturismofoz/app/admin/tours/TourForm.tsx
 'use client'; // Componente de cliente
 
 import React, { useState, useEffect } from 'react';
@@ -23,6 +24,7 @@ type FormData = {
   durationHours: string;
   location: string;
   isActive: boolean;
+  isWomenExclusive: boolean; // <-- NOVO: Flag de exclusividade
   translations: {
     pt_BR: TranslationData;
     en_US: TranslationData;
@@ -35,6 +37,7 @@ const initialFormData: FormData = {
   durationHours: '',
   location: '',
   isActive: true,
+  isWomenExclusive: false, // <-- NOVO: Padrão como falso
   translations: {
     pt_BR: { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
     en_US: { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
@@ -134,8 +137,12 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       });
 
       setFormData({
-        basePrice: tour.base_price.toString(), durationHours: tour.duration_hours.toString(),
-        location: tour.location, isActive: tour.is_active, translations
+        basePrice: tour.base_price.toString(), 
+        durationHours: tour.duration_hours.toString(),
+        location: tour.location, 
+        isActive: tour.is_active, 
+        isWomenExclusive: tour.is_women_exclusive || false, // <-- NOVO: Carrega o estado
+        translations
       });
 
       setCategoryId(tour.category_id);
@@ -167,6 +174,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         duration_hours: parseInt(formData.durationHours) || 0,
         location: formData.location,
         is_active: formData.isActive,
+        is_women_exclusive: formData.isWomenExclusive, // <-- NOVO: Salva o estado
         category_id: categoryId,
         disabled_week_days: disabledDays,
         disabled_specific_dates: specificDisabledDates
@@ -410,13 +418,23 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-end pb-2">
+                <div className="flex items-end pb-2 space-x-6">
+                  {/* Checkbox Passeio Ativo */}
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                       className="w-4 h-4 text-verde-principal focus:ring-verde-principal border-gray-300 rounded" />
                     <span className="text-sm font-medium text-gray-700">Passeio Ativo</span>
                   </label>
+                  
+                  {/* NOVO: Checkbox Exclusivo Mulheres */}
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" checked={formData.isWomenExclusive}
+                      onChange={(e) => setFormData({ ...formData, isWomenExclusive: e.target.checked })}
+                      className="w-4 h-4 text-acento-mulher focus:ring-acento-mulher border-gray-300 rounded" />
+                    <span className="text-sm font-medium text-acento-mulher">Exclusivo Mulheres</span>
+                  </label>
+                  
                 </div>
               </div>
               {/* Dias da semana */}

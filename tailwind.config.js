@@ -16,6 +16,9 @@ const config: Config = {
         'foz-amarelo': '#FFD100',
         'foz-bege': '#F8F9FA',
         'foz-cinza': '#4A5568',
+        // NOVO: Cor de destaque para o serviço feminino
+        'acento-mulher': '#FF69B4', // Hot Pink
+        'acento-mulher-dark': '#E91E63', // Um tom mais escuro
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],

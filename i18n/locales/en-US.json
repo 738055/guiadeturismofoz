@@ -15,7 +15,9 @@
     "searchRoteiroButton": "Suggest Itinerary",
     "searchAllButton": "See all tours",
     "searchPlaceholder": "What do you want to experience in Foz?",
-    "searchButton": "Search"
+    "searchButton": "Search",
+    "womenExclusiveTitle": "Women-Only Trip", 
+    "womenExclusiveButton": "View Exclusive Tours" 
   },
   "categoriesSection": {
     "title": "Explore by Experience",
@@ -48,7 +50,8 @@
     "whatsExcluded": "What's not included",
     "availability": "Availability",
     "selectDate": "Select a date",
-    "addToCart": "Add to Itinerary"
+    "addToCart": "Add to Itinerary",
+    "womenExclusiveBadge": "Women Exclusive" 
   },
   "categories": {
     "all": "All",

@@ -34,6 +34,11 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
 
       {/* Conteúdo Central */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-4 text-center">
+        {/* NOVO: Destaque visual acima do título principal */}
+        <p className="text-sm md:text-lg text-acento-mulher font-bold mb-3 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+             {t.womenExclusiveTitle}
+        </p>
+        
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white font-serif mb-6 drop-shadow-2xl tracking-tight animate-fade-in-up">
           {t.title}
         </h1>
@@ -46,6 +51,7 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
           className="inline-flex flex-col md:flex-row items-center bg-white/10 backdrop-blur-xl border border-white/30 p-2 rounded-2xl shadow-glass animate-fade-in-up mx-auto max-w-4xl w-full md:w-auto"
           style={{ animationDelay: '0.4s' }}
         >
+          {/* Campo de busca/roteiro */}
           <div className="flex-1 w-full md:w-auto px-6 py-4 border-b md:border-b-0 md:border-r border-white/10 text-left">
              <span className="block text-xs text-foz-amarelo font-bold uppercase tracking-wider mb-1">O que você procura?</span>
              <span className="text-white text-lg font-medium opacity-90">Passeios, Ingressos, Combos...</span>
@@ -60,6 +66,18 @@ export const Hero: React.FC<HeroProps> = ({ dict: t, lang }) => {
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
+          
+          {/* NOVO: Botão Exclusivo para Mulheres */}
+          <div className="p-2 w-full md:w-auto">
+            <Link 
+              href={`/${lang}/tours?exclusive=women`} 
+              className="group flex items-center justify-center gap-3 bg-acento-mulher hover:bg-acento-mulher-dark text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-pink-500/30 w-full md:w-auto"
+            >
+              <span>{t.womenExclusiveButton || "Exclusivo Mulheres"}</span>
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+          
         </div>
       </div>
       

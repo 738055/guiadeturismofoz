@@ -15,6 +15,7 @@ export interface Tour {
   is_active: boolean;
   category_id: string;
   created_at: string;
+  is_women_exclusive: boolean; // <-- NOVO
 }
 
 export interface TourTranslation {
