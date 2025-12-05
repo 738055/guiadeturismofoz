@@ -5,66 +5,56 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Locale } from '@/i18n/dictionaries';
-import { ArrowRight, Droplets, TreePalm, Compass, Landmark, LucideIcon } from 'lucide-react';
+import { ArrowRight, Droplets, TreePalm, Compass, Landmark, LucideIcon, ShoppingBag } from 'lucide-react'; // <-- Importado ShoppingBag
+
+// NOVO TIPO DE CATEGORIA RECEBIDO POR PROP
+export type DynamicCategory = {
+  id: string;
+  key: 'falls' | 'nature' | 'adventure' | 'shopping' | 'cultural'; // Chave para tradução e ícone
+  image_url: string; // URL da imagem de destaque
+};
 
 interface CategoriesProps {
   dict: any;
   lang: Locale;
+  dynamicCategories: DynamicCategory[]; // <-- NOVO: Recebe as categorias
 }
 
-type CategoryItem = {
-  id: string;
-  key: string;
-  image: string;
-  icon: LucideIcon;
+// Mapeamento de Chave de Dicionário para Ícone Lucide
+const categoryIconMap: Record<DynamicCategory['key'], LucideIcon> = {
+    'falls': Droplets,
+    'nature': TreePalm,
+    'adventure': Compass,
+    'cultural': Landmark,
+    'shopping': ShoppingBag, // Mapeia para um ícone existente
 };
 
-export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
-  const [activeId, setActiveId] = useState<string>('cataratas');
+export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang, dynamicCategories: categories }) => {
+  // ATUALIZADO: O ID ativo inicial agora usa o primeiro ID do array dinâmico
+  const [activeId, setActiveId] = useState<string | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  if (!t) return null;
-
-  const categories: CategoryItem[] = [
-    {
-      id: 'cataratas',
-      key: 'falls',
-      image: 'https://images.unsplash.com/photo-1461958508236-9a742665a0d5?q=80&w=1000&auto=format&fit=crop',
-      icon: Droplets,
-    },
-    {
-      id: 'natureza',
-      key: 'nature',
-      image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1000&auto=format&fit=crop',
-      icon: TreePalm,
-    },
-    {
-      id: 'aventura',
-      key: 'adventure',
-      image: 'https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?q=80&w=1000&auto=format&fit=crop',
-      icon: Compass,
-    },
-    {
-      id: 'itaipu',
-      key: 'cultural',
-      image: 'https://images.unsplash.com/photo-1574102225629-6e588f03660c?q=80&w=1000&auto=format&fit=crop',
-      icon: Landmark,
+  // Define o primeiro como ativo ao carregar
+  useEffect(() => {
+    if (categories && categories.length > 0 && activeId === null) {
+        setActiveId(categories[0].id);
     }
-  ];
+  }, [categories, activeId]);
+
+  // Se não houver dados, não renderiza
+  if (!t || categories.length === 0) return null;
 
   // Lógica para detectar o scroll no celular ("roll")
   useEffect(() => {
     const observerOptions = {
       root: null, // usa a viewport
       // Margem negativa define uma "linha de foco" no centro da tela.
-      // O elemento só ativa quando entra nessa faixa central restrita (45% em cima, 45% embaixo).
       rootMargin: '-45% 0px -45% 0px', 
       threshold: 0
     };
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       // Só aplica a lógica de scroll se for mobile (< 768px)
-      // No desktop, o hover continua mandando.
       if (window.innerWidth >= 768) return;
 
       entries.forEach((entry) => {
@@ -85,7 +75,7 @@ export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [categories]); // Dependência atualizada para 'categories'
 
   return (
     <section className="py-24 bg-white overflow-hidden">
@@ -106,7 +96,8 @@ export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
         <div className="flex flex-col md:flex-row gap-4 h-[600px] w-full">
           {categories.map((cat, index) => {
             const isActive = activeId === cat.id;
-            const title = t[cat.key];
+            const title = t[cat.key]; // Busca a tradução usando a chave
+            const Icon = categoryIconMap[cat.key] || Landmark; // Mapeia o ícone
 
             return (
               <div
@@ -127,7 +118,7 @@ export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
                 {/* Imagem de Fundo */}
                 <div className="absolute inset-0 w-full h-full">
                   <Image
-                    src={cat.image}
+                    src={cat.image_url} // <-- AGORA É DINÂMICO
                     alt={title}
                     fill
                     className={`
@@ -151,7 +142,7 @@ export const Categories: React.FC<CategoriesProps> = ({ dict: t, lang }) => {
                     absolute top-6 right-6 bg-white/20 backdrop-blur-md p-3 rounded-full text-white border border-white/30 transition-all duration-500
                     ${isActive ? 'scale-100 opacity-100 rotate-0' : 'scale-75 opacity-80'}
                   `}>
-                    <cat.icon className="w-6 h-6" />
+                    <Icon className="w-6 h-6" />
                   </div>
 
                   <div className="relative overflow-hidden">
