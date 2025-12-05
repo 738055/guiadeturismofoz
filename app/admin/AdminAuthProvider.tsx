@@ -38,8 +38,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Ouve mudanças na autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       
-      // --- CORREÇÃO AQUI ---
-      // O evento 'USER_DELETED' não existe no 'onAuthStateChange', removemos a verificação.
+      // Lógica de redirecionamento baseada no evento de autenticação
       if (event === 'SIGNED_OUT') {
         router.replace('/admin/login');
       } else if (event === 'SIGNED_IN') {

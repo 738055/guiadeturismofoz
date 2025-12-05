@@ -1,3 +1,4 @@
+// app/admin/tours/page.tsx
 'use client'; // Página de cliente
 
 import React, { useState, useEffect } from 'react';
@@ -37,25 +38,30 @@ export default function AdminToursPage() {
           duration_hours,
           location,
           is_active,
-          tour_translations!inner (
+          -- CORREÇÃO: Usa LEFT JOIN para não excluir tours sem tradução em PT-BR
+          tour_translations!left (
             title,
             language_code
           )
         `)
-        // Pega apenas a tradução em PT_BR para a listagem
-        .eq('tour_translations.language_code', 'pt_BR') 
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const formattedTours = data.map((tour: any) => ({
-        id: tour.id,
-        title: tour.tour_translations[0]?.title || 'Sem título',
-        price: tour.base_price,
-        duration: tour.duration_hours,
-        location: tour.location,
-        isActive: tour.is_active
-      }));
+      const formattedTours = data.map((tour: any) => {
+        // Encontra a tradução em PT-BR (ou usa a primeira disponível como fallback)
+        const ptTranslation = tour.tour_translations.find((t: any) => t.language_code === 'pt-BR');
+        
+        return {
+            id: tour.id,
+            // CORREÇÃO: Usa o título em PT-BR, ou 'Sem título' se não existir
+            title: ptTranslation?.title || `ID: ${tour.id.substring(0, 8)} (Sem título PT-BR)`, 
+            price: tour.base_price,
+            duration: tour.duration_hours,
+            location: tour.location,
+            isActive: tour.is_active
+        };
+      });
 
       setTours(formattedTours);
     } catch (error) {
@@ -113,7 +119,7 @@ export default function AdminToursPage() {
   return (
     <div className="min-h-screen">
       {/* Header do Admin */}
-      <div className="bg-white shadow-sm">
+      <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link

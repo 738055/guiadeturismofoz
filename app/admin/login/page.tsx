@@ -1,3 +1,4 @@
+// app/admin/login/page.tsx
 'use client'; // Página de cliente
 
 import React, { useState } from 'react';
@@ -18,6 +19,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
+      // Usando signInWithPassword para autenticação
       const { error } = await supabase.auth.signInWithPassword({
         email: username,
         password: password
@@ -25,11 +27,12 @@ export default function AdminLoginPage() {
 
       if (error) throw error;
 
-      // O AuthProvider cuidará do redirecionamento
-      // router.push('/admin/dashboard'); 
+      // O AuthProvider (ou a detecção de mudança de estado) cuidará do redirecionamento
       
     } catch (err: any) {
-      setError('Credenciais inválidas. Tente novamente.');
+      console.error("Login Error:", err);
+      // Mensagem de erro mais informativa
+      setError('Falha no login: verifique seu email e senha.');
     } finally {
       setLoading(false);
     }

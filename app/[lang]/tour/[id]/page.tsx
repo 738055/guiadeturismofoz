@@ -51,9 +51,12 @@ async function getTourDetail(id: string, lang: Locale) {
     if (tourError) throw tourError;
     if (!tourData) return null;
 
+    // --- CORREÇÃO: Garante que tour_translations é um array (robustez contra null/undefined) ---
+    const translations = tourData.tour_translations || [];
+    
     // --- LÓGICA DE FALLBACK ADICIONADA ---
-    const translation = tourData.tour_translations.find((t: any) => t.language_code === lang) || 
-                        tourData.tour_translations.find((t: any) => t.language_code === 'pt_BR');
+    const translation = translations.find((t: any) => t.language_code === lang) || 
+                        translations.find((t: any) => t.language_code === 'pt-BR');
 
     // Se não houver tradução NENHUMA (nem pt-BR), não encontra o passeio
     if (!translation) {
