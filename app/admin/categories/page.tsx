@@ -50,7 +50,7 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          category_translations!left ( // <-- Linha de comentário removida
+          category_translations!left (
             name,
             slug,
             language_code
