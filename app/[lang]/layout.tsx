@@ -9,15 +9,15 @@ import { Footer } from '@/components/Footer';
 import { CartModal } from '@/components/CartModal';
 
 // Traduções estáticas para componentes de layout (necessário em Client Components)
-// --- CORREÇÃO AQUI: 'subtotal' adicionado ao objeto 'cart' ---
 const translations = {
   'pt-BR': {
-    nav: { home: 'Início', tours: 'Passeios', about: 'Sobre Nós', contact: 'Contato' },
+    nav: { home: 'Início', tours: 'Passeios', combos: 'Combos', blog: 'Dicas', about: 'Sobre Nós', contact: 'Contato' },
     footer: {
-      description: 'Experiências únicas em Foz do Iguaçu desde 2010.',
+      description: 'Especialistas em receptivo em Foz do Iguaçu. Transformando sua viagem em memórias inesquecíveis.',
+      quickLinks: 'Links Rápidos',
       contact: 'Contato',
       rights: 'Todos os direitos reservados',
-      tours: 'Passeios'
+      followUs: 'Siga-nos'
     },
     cart: {
       title: 'Meu Roteiro',
@@ -25,21 +25,25 @@ const translations = {
       date: 'Data',
       adults: 'Adultos',
       children: 'Crianças',
-      subtotal: 'Subtotal', // <-- ADICIONADO
-      name: 'Nome',
-      email: 'Email',
+      subtotal: 'Subtotal',
+      name: 'Nome do Titular', // <-- NOVO
+      hotel: 'Hotel/Hospedagem', // <-- NOVO
+      contact: 'Contato (WhatsApp)', // <-- NOVO
+      email: 'E-mail',
+      notes: 'Observações', // <-- NOVO
       total: 'Total',
       checkoutWhatsapp: 'Finalizar Pedido via WhatsApp',
-      required: 'Por favor, preencha seu nome e email.'
+      required: 'Por favor, preencha todos os campos do formulário para continuarmos.'
     }
   },
   'en-US': {
-    nav: { home: 'Home', tours: 'Tours', about: 'About Us', contact: 'Contact' },
+    nav: { home: 'Home', tours: 'Tours', combos: 'Bundles', blog: 'Tips', about: 'About Us', contact: 'Contact' },
     footer: {
-      description: 'Unique experiences in Foz do Iguaçu since 2010.',
+      description: 'Receptive experts in Foz do Iguaçu. Turning your trip into unforgettable memories.',
+      quickLinks: 'Quick Links',
       contact: 'Contact',
       rights: 'All rights reserved',
-      tours: 'Tours'
+      followUs: 'Follow us'
     },
     cart: {
       title: 'My Itinerary',
@@ -47,21 +51,25 @@ const translations = {
       date: 'Date',
       adults: 'Adults',
       children: 'Children',
-      subtotal: 'Subtotal', // <-- ADICIONADO
-      name: 'Name',
-      email: 'Email',
+      subtotal: 'Subtotal',
+      name: 'Lead Booker Name', // <-- NOVO
+      hotel: 'Hotel/Accommodation', // <-- NOVO
+      contact: 'Contact (WhatsApp)', // <-- NOVO
+      email: 'E-mail',
+      notes: 'Notes', // <-- NOVO
       total: 'Total',
       checkoutWhatsapp: 'Complete Order via WhatsApp',
-      required: 'Please fill in your name and email.'
+      required: 'Please fill in your details to continue.'
     }
   },
   'es-ES': {
-    nav: { home: 'Inicio', tours: 'Tours', about: 'Sobre Nosotros', contact: 'Contacto' },
+    nav: { home: 'Inicio', tours: 'Paseos', combos: 'Combos', blog: 'Consejos', about: 'Nosotros', contact: 'Contacto' },
     footer: {
-      description: 'Experiencias únicas en Foz de Iguazú desde 2010.',
+      description: 'Expertos en receptivo en Foz de Iguazú. Transformando tu viaje en recuerdos inolvidables.',
+      quickLinks: 'Enlaces Rápidos',
       contact: 'Contacto',
       rights: 'Todos los derechos reservados',
-      tours: 'Tours'
+      followUs: 'Síguenos'
     },
     cart: {
       title: 'Mi Itinerario',
@@ -69,12 +77,15 @@ const translations = {
       date: 'Fecha',
       adults: 'Adultos',
       children: 'Niños',
-      subtotal: 'Subtotal', // <-- ADICIONADO
-      name: 'Nombre',
-      email: 'Email',
+      subtotal: 'Subtotal',
+      name: 'Nombre del Titular', // <-- NOVO
+      hotel: 'Hotel/Hospedaje', // <-- NOVO
+      contact: 'Contacto (WhatsApp)', // <-- NOVO
+      email: 'E-mail',
+      notes: 'Observaciones', // <-- NOVO
       total: 'Total',
-      checkoutWhatsapp: 'Completar Pedido vía WhatsApp',
-      required: 'Por favor, complete su nombre y correo electrónico.'
+      checkoutWhatsapp: 'Solicitar Reserva vía WhatsApp',
+      required: 'Por favor, completa tus datos para continuar.'
     }
   },
 };
@@ -90,7 +101,7 @@ export default function LangLayout({
   // Garante que o Header receba um locale válido
   const lang = (params.lang || 'pt-BR') as Locale;
   
-  // --- CORREÇÃO AQUI: Acessa o fallback com colchetes ['pt-BR'] ---
+  // Acessa o fallback com colchetes ['pt-BR']
   const t = translations[lang] || translations['pt-BR'];
 
   return (
