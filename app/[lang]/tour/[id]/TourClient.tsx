@@ -61,6 +61,13 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
       try {
         const dateString = avail.available_date;
         const date = parseISO(dateString);
+        
+        // --- ADIÇÃO DE VALIDAÇÃO DENTRO DO FILTRO ---
+        if (isNaN(date.getTime())) {
+            return false;
+        }
+        // ---------------------------------------------
+        
         const dayOfWeek = getDay(date); // 0 = Dom
         
         // 1. Filtro de Dia da Semana Recorrente
@@ -146,7 +153,12 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
         
         {/* Simulação de Calendário Estilizado (Carrossel de Datas) */}
         <div className="flex overflow-x-auto space-x-3 pb-3 scrollbar-hide mb-6">
-          {previewDates.length > 0 ? previewDates.map((avail) => (
+          {previewDates.length > 0 ? previewDates.map((avail) => {
+            const parsedDate = parseISO(avail.available_date);
+            // --- CORREÇÃO: Adiciona a verificação de data inválida ---
+            if (isNaN(parsedDate.getTime())) return null; 
+            // -----------------------------------------------------
+            return (
             <button
               key={avail.available_date}
               onClick={() => setSelectedDate(avail.available_date)}
@@ -159,16 +171,16 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
               `}
             >
               <span className="block text-xs font-medium uppercase transition-colors">
-                {format(parseISO(avail.available_date), 'EEE', { locale: dateFnsLocale })}
+                {format(parsedDate, 'EEE', { locale: dateFnsLocale })}
               </span>
               <span className="block text-2xl font-bold transition-colors">
-                {format(parseISO(avail.available_date), 'dd')}
+                {format(parsedDate, 'dd')}
               </span>
               <span className="block text-xs opacity-70 transition-colors">
                 {avail.total_spots - avail.spots_booked} vagas
               </span>
             </button>
-          )) : (
+          )}) : (
               <p className="text-gray-500">{tCommon.noResults}</p>
           )}
         </div>
@@ -237,7 +249,8 @@ export const TourClient: React.FC<TourClientProps> = ({ tour, availableDates, di
          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-6">
             <p className="font-bold text-lg text-foz-azul-escuro mb-2">Resumo do Pedido</p>
             <div className="text-sm text-gray-700 space-y-1">
-               <p><span className="font-medium">{c.date}:</span> <span className="font-bold text-verde-principal">{format(parseISO(selectedDate), 'dd/MM/yyyy')}</span></p>
+               {/* Assegura que selectedDate só é usado se for uma string válida */}
+               <p><span className="font-medium">{c.date}:</span> <span className="font-bold text-verde-principal">{selectedDate ? format(parseISO(selectedDate), 'dd/MM/yyyy') : 'Selecione uma data'}</span></p>
                <p><span className="font-medium">{c.adults}:</span> {adults}</p>
                <p><span className="font-medium">{c.children}:</span> {children}</p>
             </div>
