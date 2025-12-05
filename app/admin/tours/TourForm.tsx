@@ -28,12 +28,12 @@ type FormData = {
   durationHours: string;
   location: string;
   isActive: boolean;
-  isWomenExclusive: boolean; // <-- NOVO: Flag de exclusividade
+  isWomenExclusive: boolean; // <-- Flag de exclusividade
   isFeatured: boolean; // <-- NOVO: Flag de destaque
   translations: {
-    'pt-BR': TranslationData; // CORRIGIDO
-    'en-US': TranslationData; // CORRIGIDO
-    'es-ES': TranslationData; // CORRIGIDO
+    'pt-BR': TranslationData;
+    'en-US': TranslationData;
+    'es-ES': TranslationData;
   };
 };
 
@@ -42,19 +42,19 @@ const initialFormData: FormData = {
   durationHours: '',
   location: '',
   isActive: true,
-  isWomenExclusive: false, // <-- NOVO: Padrão como falso
+  isWomenExclusive: false, // <-- Padrão como falso
   isFeatured: false, // <-- NOVO: Padrão como falso
   translations: {
-    'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
-    'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
-    'es-ES': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] } // CORRIGIDO
+    'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
+    'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
+    'es-ES': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }
   }
 };
 
 // Tipo para Categoria
 type CategoryOption = { id: string; name: string; };
 
-// --- NOVO TIPO PARA ITEM DE DISPONIBILIDADE NO ESTADO ---
+// --- TIPO PARA ITEM DE DISPONIBILIDADE NO ESTADO ---
 type AvailabilityStateItem = {
   available_date: string; // Formato 'YYYY-MM-DD'
   total_spots: number;
@@ -67,7 +67,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  // CORREÇÃO: Altera o tipo do useState
+  
   const [activeTab, setActiveTab] = useState<LanguageCode>('pt-BR');
 
   const [images, setImages] = useState<TourImage[]>([]);
@@ -95,14 +95,12 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
 
   const loadCategories = async () => {
     try {
-      // CORREÇÃO: Busca categorias usando o formato de código correto (pt-BR)
       const { data, error } = await supabase
         .from('categories')
         .select(`id, category_translations!inner(name, language_code)`)
         .eq('category_translations.language_code', 'pt-BR'); 
       if (error) throw error;
       if (data) {
-        // CORREÇÃO: Adaptação para o novo formato de language_code
         const categoryOptions = data.map((c: any) => ({ 
              id: c.id, 
              name: c.category_translations.find((t: any) => t.language_code === 'pt-BR')?.name || 'Sem nome'
@@ -123,10 +121,10 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
           tour_translations (*),
           tour_images (*),
           tour_availability (*)
-        `) // <-- BUSCA tour_availability (*)
+        `) 
         .eq('id', tourId)
         .order('display_order', { referencedTable: 'tour_images', ascending: true })
-        .order('available_date', { referencedTable: 'tour_availability', ascending: true }) // Ordena disponibilidade
+        .order('available_date', { referencedTable: 'tour_availability', ascending: true }) 
         .maybeSingle();
 
       if (tourError) throw tourError;
@@ -136,14 +134,14 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         return;
       }
 
-      // Preenche traduções (com verificação de array)
+      // Preenche traduções 
       const translations = { ...initialFormData.translations };
       tour.tour_translations.forEach((t: any) => {
-        // CORREÇÃO: Converte 'pt_BR' para 'pt-BR' em caso de dado legado, e usa os tipos LanguageCode
         const langCode = (t.language_code === 'pt_BR' ? 'pt-BR' : t.language_code) as LanguageCode; 
         if (translations[langCode]) {
-          const included = Array.isArray(t.whats_included) ? t.whats_included : [];
-          const excluded = Array.isArray(t.whats_excluded) ? t.whats_excluded : [];
+          // Garante que whats_included/excluded são arrays
+          const included = Array.isArray(t.whats_included) ? t.whats_included : (t.whats_included ? [t.whats_included] : []);
+          const excluded = Array.isArray(t.whats_excluded) ? t.whats_excluded : (t.whats_excluded ? [t.whats_excluded] : []);
           translations[langCode] = {
             title: t.title, description: t.description, whatsIncluded: included, whatsExcluded: excluded
           };
@@ -156,8 +154,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: tour.location, 
         isActive: tour.is_active, 
         isWomenExclusive: tour.is_women_exclusive || false, 
-        isFeatured: tour.is_featured || false, // <-- NOVO: Carrega o estado de destaque
-        translations: translations as FormData['translations'] // Força o tipo após o preenchimento
+        isFeatured: tour.is_featured || false, // <-- CORREÇÃO: Carrega o estado de destaque
+        translations: translations as FormData['translations'] 
       });
 
       setCategoryId(tour.category_id);
@@ -190,7 +188,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: formData.location,
         is_active: formData.isActive,
         is_women_exclusive: formData.isWomenExclusive, 
-        is_featured: formData.isFeatured, // <-- NOVO: Salva o estado de destaque
+        is_featured: formData.isFeatured, // <-- CORREÇÃO: Salva o estado de destaque
         category_id: categoryId,
         disabled_week_days: disabledDays,
         disabled_specific_dates: specificDisabledDates
@@ -254,7 +252,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     }
   };
 
-  // --- Handlers existentes (sem alteração significativa na lógica) ---
+  // --- Handlers existentes ---
   const updateTranslation = (field: keyof Omit<TranslationData, 'whatsIncluded' | 'whatsExcluded'>, value: string) => {
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: value } } }));
   };
@@ -263,6 +261,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
     const files = Array.from(e.target.files);
+    
     let currentId = tourId;
     if (!currentId) {
         try {
@@ -326,6 +325,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     const field = type === 'include' ? 'whatsIncluded' : 'whatsExcluded';
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: prev.translations[activeTab][field].filter((_, i) => i !== index) } } }));
   };
+
+  // --- FUNÇÕES DE DISPONIBILIDADE ---
   const handleAddAvailability = () => {
     if (availabilityDateInput && availabilitySpotsInput > 0) {
       const existingIndex = availabilityList.findIndex(item => item.available_date === availabilityDateInput);
@@ -443,15 +444,14 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                       className="w-4 h-4 text-acento-mulher focus:ring-acento-mulher border-gray-300 rounded" />
                     <span className="text-sm font-medium text-acento-mulher">Exclusivo Mulheres</span>
                   </label>
-
-                  {/* NOVO: Checkbox Destaque Home */}
+                  
+                  {/* CORREÇÃO: Checkbox Destaque Home */}
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" checked={formData.isFeatured}
                       onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
                       className="w-4 h-4 text-foz-amarelo focus:ring-foz-amarelo border-gray-300 rounded" />
                     <span className="text-sm font-medium text-foz-amarelo">Destaque na Home</span>
                   </label>
-                  
                 </div>
               </div>
               {/* Dias da semana */}
@@ -578,7 +578,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                     <><Upload className="w-8 h-8 text-gray-500 mb-2" /><span className="text-sm text-gray-600">Arraste ou clique para enviar (múltiplas)</span></>
                   )}
                   <input id="imageUpload" type="file" multiple className="opacity-0 absolute inset-0"
-                    onChange={handleImageUpload} disabled={uploading || !tourId && !isEdit} /> {/* Ajuste no disabled */}
+                    onChange={handleImageUpload} disabled={uploading || !tourId && !isEdit} /> 
                 </label>
                  {/* Mensagem ajustada para modo de criação */}
                 {!isEdit && <p className="text-xs text-gray-500 mt-1">Salve o passeio inicial para habilitar o upload de imagens.</p>}
@@ -589,7 +589,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
             <div className="mt-8 border-t pt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Traduções</h3>
               {/* Abas */}
-              {/* CORREÇÃO: Padroniza o código para pt-BR, en-US, es-ES */}
               <div className="flex space-x-2 mb-6 border-b">
                  {[{ code: 'pt-BR' as const, label: 'Português' }, { code: 'en-US' as const, label: 'English' }, { code: 'es-ES' as const, label: 'Español' }]
                  .map(lang => (
