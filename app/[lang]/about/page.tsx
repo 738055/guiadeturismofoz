@@ -3,17 +3,32 @@ import React from 'react';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { MapPin, Heart, Shield } from 'lucide-react';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase'; // Importe o Supabase
+
+// URL padrão para fallback caso o setting falhe
+const DEFAULT_ABOUT_BANNER = "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920";
 
 export default async function AboutPage({ params: { lang } }: { params: { lang: Locale } }) {
-  const dict = await getDictionary(lang);
+  const [dict, bannerData] = await Promise.all([
+    getDictionary(lang),
+    supabase
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'banner_about') // Assume a nova chave
+      .single()
+      .then(res => res.data)
+      .catch(() => null)
+  ]);
+  
+  const bannerUrl = bannerData?.setting_value || DEFAULT_ABOUT_BANNER;
   const t = dict.about;
 
   return (
     <div className="bg-white pt-20">
-      {/* Banner Institucional */}
+      {/* Banner Institucional - AGORA DINÂMICO */}
       <div className="relative h-[400px]">
         <Image
-          src="https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920"
+          src={bannerUrl} // Usa a URL dinâmica ou fallback
           alt="Foz do Iguaçu"
           fill
           className="object-cover"
@@ -26,7 +41,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
            </div>
         </div>
       </div>
-
+      {/* O resto do conteúdo permanece o mesmo */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Missão */}
         <div className="text-center mb-20">
