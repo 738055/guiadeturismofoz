@@ -42,7 +42,7 @@ export default function AdminCategoriesPage() {
     loadCategories();
   }, []);
 
-  const loadCategories = async () => {
+ const loadCategories = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -50,8 +50,7 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          -- CORREÇÃO: Usa LEFT JOIN para não excluir categorias sem tradução
-          category_translations!left (
+          category_translations!left ( // <-- Linha de comentário removida
             name,
             slug,
             language_code

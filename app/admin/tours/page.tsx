@@ -38,8 +38,7 @@ export default function AdminToursPage() {
           duration_hours,
           location,
           is_active,
-          -- CORREÇÃO: Usa LEFT JOIN para não excluir tours sem tradução em PT-BR
-          tour_translations!left (
+          tour_translations!left ( // <-- Linha de comentário removida
             title,
             language_code
           )
