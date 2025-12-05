@@ -11,7 +11,8 @@ import { CartModal } from '@/components/CartModal';
 // Traduções estáticas para componentes de layout (necessário em Client Components)
 const translations = {
   'pt-BR': {
-    nav: { home: 'Início', tours: 'Passeios', combos: 'Combos', blog: 'Dicas', about: 'Sobre Nós', contact: 'Contato' },
+    // CORREÇÃO: 'tours' alterado para 'products'
+    nav: { home: 'Início', products: 'Passeios', combos: 'Combos', blog: 'Dicas', about: 'Sobre Nós', contact: 'Contato' },
     footer: {
       description: 'Especialistas em receptivo em Foz do Iguaçu. Transformando sua viagem em memórias inesquecíveis.',
       quickLinks: 'Links Rápidos',
@@ -37,7 +38,8 @@ const translations = {
     }
   },
   'en-US': {
-    nav: { home: 'Home', tours: 'Tours', combos: 'Bundles', blog: 'Tips', about: 'About Us', contact: 'Contact' },
+    // CORREÇÃO: 'tours' alterado para 'products'
+    nav: { home: 'Home', products: 'Tours', combos: 'Bundles', blog: 'Tips', about: 'About Us', contact: 'Contact' },
     footer: {
       description: 'Receptive experts in Foz do Iguaçu. Turning your trip into unforgettable memories.',
       quickLinks: 'Quick Links',
@@ -63,7 +65,8 @@ const translations = {
     }
   },
   'es-ES': {
-    nav: { home: 'Inicio', tours: 'Paseos', combos: 'Combos', blog: 'Consejos', about: 'Nosotros', contact: 'Contacto' },
+    // CORREÇÃO: 'tours' alterado para 'products'
+    nav: { home: 'Inicio', products: 'Paseos', combos: 'Combos', blog: 'Consejos', about: 'Nosotros', contact: 'Contacto' },
     footer: {
       description: 'Expertos en receptivo en Foz de Iguazú. Transformando tu viaje en recuerdos inolvidables.',
       quickLinks: 'Enlaces Rápidos',
