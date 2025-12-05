@@ -20,7 +20,7 @@ type TranslationData = {
   whatsExcluded: string[];
 };
 
-// CORREÇÃO: Usando o formato padrão com hífen
+// Usando o formato padrão com hífen
 type LanguageCode = 'pt-BR' | 'en-US' | 'es-ES';
 
 type FormData = {
@@ -28,8 +28,8 @@ type FormData = {
   durationHours: string;
   location: string;
   isActive: boolean;
-  isWomenExclusive: boolean; // <-- Flag de exclusividade
-  isFeatured: boolean; // <-- NOVO: Flag de destaque
+  isWomenExclusive: boolean; 
+  isFeatured: boolean; // <--- CAMPO DE DESTAQUE ADICIONADO
   translations: {
     'pt-BR': TranslationData;
     'en-US': TranslationData;
@@ -42,8 +42,8 @@ const initialFormData: FormData = {
   durationHours: '',
   location: '',
   isActive: true,
-  isWomenExclusive: false, // <-- Padrão como falso
-  isFeatured: false, // <-- NOVO: Padrão como falso
+  isWomenExclusive: false,
+  isFeatured: false, // <--- VALOR INICIAL ADICIONADO
   translations: {
     'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
     'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
@@ -154,7 +154,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: tour.location, 
         isActive: tour.is_active, 
         isWomenExclusive: tour.is_women_exclusive || false, 
-        isFeatured: tour.is_featured || false, // <-- CORREÇÃO: Carrega o estado de destaque
+        isFeatured: tour.is_featured || false, // <-- CARREGA isFeatured
         translations: translations as FormData['translations'] 
       });
 
@@ -188,7 +188,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: formData.location,
         is_active: formData.isActive,
         is_women_exclusive: formData.isWomenExclusive, 
-        is_featured: formData.isFeatured, // <-- CORREÇÃO: Salva o estado de destaque
+        is_featured: formData.isFeatured, // <-- SALVA isFeatured
         category_id: categoryId,
         disabled_week_days: disabledDays,
         disabled_specific_dates: specificDisabledDates
@@ -216,16 +216,14 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       const { error: upsertError } = await supabase.from('tour_translations').upsert(translationsToUpsert, { onConflict: 'tour_id, language_code' });
       if (upsertError) throw upsertError;
 
-      // --- 4. GERENCIA DISPONIBILIDADE (APAGA E RECRIA) ---
+      // 4. GERENCIA DISPONIBILIDADE
       if (currentTourId) { 
-        // 4.1 Apaga a disponibilidade antiga
         const { error: deleteError } = await supabase
           .from('tour_availability')
           .delete()
           .eq('tour_id', currentTourId);
         if (deleteError) { console.warn('Could not delete old availability:', deleteError.message); }
 
-        // 4.2 Insere a nova disponibilidade (se houver)
         if (availabilityList.length > 0) {
           const availabilityToInsert = availabilityList.map(item => ({
             tour_id: currentTourId,
@@ -239,20 +237,21 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
           if (insertAvailError) throw insertAvailError;
         }
       }
-      // --- FIM DA LÓGICA DE DISPONIBILIDADE ---
 
       alert('Passeio salvo com sucesso!');
       router.push('/admin/tours');
 
     } catch (error) {
       console.error('Error saving tour:', error);
-      alert('Erro ao salvar passeio. Verifique o console.');
+      // O erro 400 'Error saving tour: Object' geralmente significa que um dado é inválido ou 
+      // há um erro na política RLS.
+      alert('Erro ao salvar passeio. Verifique o console. (Provavelmente erro de dados ou RLS).');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Handlers existentes ---
+  // --- Handlers auxiliares (mantidos) ---
   const updateTranslation = (field: keyof Omit<TranslationData, 'whatsIncluded' | 'whatsExcluded'>, value: string) => {
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: value } } }));
   };
@@ -325,8 +324,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     const field = type === 'include' ? 'whatsIncluded' : 'whatsExcluded';
     setFormData(prev => ({ ...prev, translations: { ...prev.translations, [activeTab]: { ...prev.translations[activeTab], [field]: prev.translations[activeTab][field].filter((_, i) => i !== index) } } }));
   };
-
-  // --- FUNÇÕES DE DISPONIBILIDADE ---
   const handleAddAvailability = () => {
     if (availabilityDateInput && availabilitySpotsInput > 0) {
       const existingIndex = availabilityList.findIndex(item => item.available_date === availabilityDateInput);
@@ -363,7 +360,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
   return (
     <div className="min-h-screen">
       <form onSubmit={handleSave}>
-        {/* Header Fixo */}
+        {/* Header Fixo - ONDE ESTÁ O BOTÃO SALVAR */}
         <div className="bg-white shadow-sm sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
@@ -377,7 +374,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center space-x-2 bg-verde-principal text-white px-4 py-2 rounded-lg hover:bg-verde-secundario transition-colors disabled:opacity-50"
+                // AJUSTE: Adicionada classe shadow-lg para garantir visibilidade contra fundo branco
+                className="flex items-center space-x-2 bg-verde-principal text-white px-4 py-2 rounded-lg hover:bg-verde-secundario transition-colors disabled:opacity-50 shadow-lg"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 <span>Salvar</span>
@@ -445,7 +443,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                     <span className="text-sm font-medium text-acento-mulher">Exclusivo Mulheres</span>
                   </label>
                   
-                  {/* CORREÇÃO: Checkbox Destaque Home */}
+                  {/* Checkbox Destaque Home */}
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" checked={formData.isFeatured}
                       onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
@@ -518,7 +516,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
                       <button type="button" onClick={handleAddAvailability}
                         className="w-full sm:w-auto px-4 py-2 bg-verde-principal text-white rounded-lg font-medium hover:bg-verde-secundario flex items-center justify-center space-x-2">
                          <Plus className="w-5 h-5" />
-                         <span>Adicionar/Atualizar</span> {/* Texto mais curto */}
+                         <span>Adicionar/Atualizar</span>
                       </button>
                    </div>
                 </div>
