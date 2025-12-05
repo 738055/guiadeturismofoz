@@ -4,20 +4,42 @@ import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { MapPin, Heart, Shield } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase'; // Importe o Supabase
+import { Metadata, ResolvingMetadata } from 'next';
 
 // URL padrão para fallback caso o setting falhe
 const DEFAULT_ABOUT_BANNER = "https://images.unsplash.com/photo-1580644236847-230616ba3d9e?q=80&w=1920";
 
+// Geração de Metadados de SEO (Servidor)
+export async function generateMetadata({
+  params: { lang },
+}: {
+  params: { lang: Locale };
+}): Promise<Metadata> {
+  const dict = await getDictionary(lang);
+  return {
+    title: dict.about.title,
+    description: dict.about.subtitle,
+  };
+}
+
 export default async function AboutPage({ params: { lang } }: { params: { lang: Locale } }) {
   const [dict, bannerData] = await Promise.all([
     getDictionary(lang),
-    supabase
-      .from('site_settings')
-      .select('setting_value')
-      .eq('setting_key', 'banner_about') // Assume a nova chave
-      .single()
-      .then(res => res.data)
-      .catch(() => null)
+    // --- CORREÇÃO APLICADA AQUI ---
+    (async () => {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('setting_value')
+          .eq('setting_key', 'banner_about') 
+          .single();
+        
+        if (error) {
+          console.error('Error fetching banner_about:', error);
+          return null;
+        }
+        return data;
+    })(),
+    // --- FIM DA CORREÇÃO ---
   ]);
   
   const bannerUrl = bannerData?.setting_value || DEFAULT_ABOUT_BANNER;
@@ -33,6 +55,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
           fill
           className="object-cover"
           priority
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/40 flex items-center justify-center">
            <div className="text-center text-white px-4">
@@ -41,7 +64,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
            </div>
         </div>
       </div>
-      {/* O resto do conteúdo permanece o mesmo */}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Missão */}
         <div className="text-center mb-20">
