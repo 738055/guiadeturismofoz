@@ -102,7 +102,12 @@
     "subtotal": "Subtotal",
     "total": "Estimated Total",
     "checkoutWhatsapp": "Request Booking via WhatsApp",
-    "required": "Please fill in your details to continue."
+    "required": "Please fill in your details to continue.",
+    "name": "Lead Booker Name",
+    "hotel": "Hotel/Accommodation",
+    "contact": "Contact (WhatsApp)",
+    "email": "E-mail",
+    "notes": "Notes"
   },
   "footer": {
     "description": "Receptive experts in Foz do Iguaçu. Turning your trip into unforgettable memories.",

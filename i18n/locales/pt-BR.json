@@ -102,7 +102,12 @@
     "subtotal": "Subtotal",
     "total": "Total Estimado",
     "checkoutWhatsapp": "Solicitar Reserva via WhatsApp",
-    "required": "Por favor, preencha seus dados para continuarmos."
+    "required": "Por favor, preencha todos os campos do formulário para continuarmos.",
+    "name": "Nome do Titular",
+    "hotel": "Hotel/Hospedagem",
+    "contact": "Contato (WhatsApp)",
+    "email": "E-mail",
+    "notes": "Observações"
   },
   "footer": {
     "description": "Especialistas em receptivo em Foz do Iguaçu. Transformando sua viagem em memórias inesquecíveis.",

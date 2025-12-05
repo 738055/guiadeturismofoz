@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { X, Trash2, ShoppingCart, MessageCircle, User, Hotel, Phone, Mail } from 'lucide-react'; // Ícones adicionados
+import { X, Trash2, ShoppingCart, MessageCircle, User, Hotel, Phone, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface CartModalProps {
@@ -15,15 +15,15 @@ interface CartModalProps {
     date: string;
     adults: string;
     children: string;
-    name: string;      // Titular
-    hotel: string;     // Hotel (NOVO)
-    contact: string;   // Contato (NOVO)
-    email: string;     // Email
+    name: string;
+    hotel: string;     // NOVO
+    contact: string;   // NOVO
+    email: string;
     total: string;
     checkoutWhatsapp: string;
     required: string;
     subtotal: string;
-    notes: string;     // Observações (NOVO)
+    notes: string;     // NOVO
   };
 }
 

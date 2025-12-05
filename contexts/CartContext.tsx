@@ -1,3 +1,4 @@
+// guiadeturismofoz/contexts/CartContext.tsx
 'use client'; // Este componente usa hooks, então precisa ser um Client Component
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -10,6 +11,7 @@ export interface CartItem {
   children: number;
   price: number; // Preço base por adulto
   subtotal: number;
+  notes?: string; // <--- NOVO CAMPO: Observações
 }
 
 interface CartContextType {
@@ -53,7 +55,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Se já existe, atualiza (para caso de adicionar novamente com valores diferentes)
       if (existingIndex >= 0) {
         const updated = [...prev];
-        updated[existingIndex] = item;
+        // Mantém as notas do item anterior se a nota atual for vazia, mas atualiza se houver nota nova
+        updated[existingIndex] = { ...item, notes: item.notes || updated[existingIndex].notes };
         return updated;
       }
       // Se não existe, adiciona
