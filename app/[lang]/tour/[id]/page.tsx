@@ -49,12 +49,14 @@ async function getTourDetail(id: string, lang: Locale) {
       .maybeSingle();
 
     if (tourError) throw tourError;
+    // Se o RLS estiver ativado e negar a leitura do registro principal, tourData será null
     if (!tourData) return null;
 
-    // --- CORREÇÃO: Garante que tour_translations é um array (robustez contra null/undefined) ---
+    // --- CORREÇÃO: Garante que tour_translations é um array (robustez contra null/undefined do LEFT JOIN) ---
     const translations = tourData.tour_translations || [];
     
     // --- LÓGICA DE FALLBACK ADICIONADA ---
+    // Tenta o idioma do usuário, senão tenta pt-BR (pt-BR é o fallback padrão do projeto)
     const translation = translations.find((t: any) => t.language_code === lang) || 
                         translations.find((t: any) => t.language_code === 'pt-BR');
 
@@ -71,8 +73,9 @@ async function getTourDetail(id: string, lang: Locale) {
       ...tourData,
       title: translation?.title || '',
       description: translation?.description || '',
-      whatsIncluded: translation?.whats_included || [], // <-- GARANTE ARRAY
-      whatsExcluded: translation?.whats_excluded || [], // <-- GARANTE ARRAY
+      // CORREÇÃO: Usar um array vazio se os campos de inclusão/exclusão forem nulos
+      whatsIncluded: translation?.whats_included || [], 
+      whatsExcluded: translation?.whats_excluded || [], 
       disabled_week_days: tourData.disabled_week_days || [],
       disabled_specific_dates: tourData.disabled_specific_dates || [],
       isWomenExclusive: tourData.is_women_exclusive || false, // <-- NOVO: Passa a flag
@@ -181,7 +184,7 @@ export default async function TourDetailPage({
                 src={tour.images[0].image_url}
                 alt={tour.images[0].alt_text || tour.title}
                 fill
-                className="w-full h-full object-cover"
+                className="object-cover"
                 priority
               />
             ) : (
@@ -199,7 +202,7 @@ export default async function TourDetailPage({
                     src={image.image_url}
                     alt={image.alt_text || `${tour.title} ${index + 2}`}
                     fill
-                    className="w-full h-full object-cover"
+                    className="object-cover"
                   />
                 </div>
               ))}

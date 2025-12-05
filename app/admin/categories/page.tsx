@@ -50,7 +50,7 @@ export default function AdminCategoriesPage() {
         .select(`
           id,
           created_at,
-          -- Usa LEFT JOIN para não excluir categorias sem tradução
+          -- CORREÇÃO: Usa LEFT JOIN para não excluir categorias sem tradução
           category_translations!left (
             name,
             slug,

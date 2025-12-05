@@ -19,6 +19,10 @@ type TranslationData = {
   whatsIncluded: string[];
   whatsExcluded: string[];
 };
+
+// CORREÇÃO: Usando o formato padrão com hífen
+type LanguageCode = 'pt-BR' | 'en-US' | 'es-ES';
+
 type FormData = {
   basePrice: string;
   durationHours: string;
@@ -26,9 +30,9 @@ type FormData = {
   isActive: boolean;
   isWomenExclusive: boolean; // <-- NOVO: Flag de exclusividade
   translations: {
-    pt_BR: TranslationData;
-    en_US: TranslationData;
-    es_ES: TranslationData;
+    'pt-BR': TranslationData; // CORRIGIDO
+    'en-US': TranslationData; // CORRIGIDO
+    'es-ES': TranslationData; // CORRIGIDO
   };
 };
 
@@ -39,9 +43,9 @@ const initialFormData: FormData = {
   isActive: true,
   isWomenExclusive: false, // <-- NOVO: Padrão como falso
   translations: {
-    pt_BR: { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
-    en_US: { title: '', description: '', whatsIncluded: [], whatsExcluded: [] },
-    es_ES: { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }
+    'pt-BR': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
+    'en-US': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] }, // CORRIGIDO
+    'es-ES': { title: '', description: '', whatsIncluded: [], whatsExcluded: [] } // CORRIGIDO
   }
 };
 
@@ -61,7 +65,8 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [activeTab, setActiveTab] = useState<'pt_BR' | 'en_US' | 'es_ES'>('pt_BR');
+  // CORREÇÃO: Altera o tipo do useState
+  const [activeTab, setActiveTab] = useState<LanguageCode>('pt-BR');
 
   const [images, setImages] = useState<TourImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -88,13 +93,18 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
 
   const loadCategories = async () => {
     try {
+      // CORREÇÃO: Busca categorias usando o formato de código correto (pt-BR)
       const { data, error } = await supabase
         .from('categories')
         .select(`id, category_translations!inner(name, language_code)`)
-        .eq('category_translations.language_code', 'pt_BR');
+        .eq('category_translations.language_code', 'pt-BR'); 
       if (error) throw error;
       if (data) {
-        const categoryOptions = data.map((c: any) => ({ id: c.id, name: c.category_translations[0].name }));
+        // CORREÇÃO: Adaptação para o novo formato de language_code
+        const categoryOptions = data.map((c: any) => ({ 
+             id: c.id, 
+             name: c.category_translations.find((t: any) => t.language_code === 'pt-BR')?.name || 'Sem nome'
+        }));
         setCategories(categoryOptions);
       }
     } catch (error) { console.error('Error loading categories:', error); }
@@ -127,10 +137,12 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       // Preenche traduções (com verificação de array)
       const translations = { ...initialFormData.translations };
       tour.tour_translations.forEach((t: any) => {
-        if (translations[t.language_code as keyof typeof translations]) {
+        // CORREÇÃO: Converte 'pt_BR' para 'pt-BR' em caso de dado legado, e usa os tipos LanguageCode
+        const langCode = (t.language_code === 'pt_BR' ? 'pt-BR' : t.language_code) as LanguageCode; 
+        if (translations[langCode]) {
           const included = Array.isArray(t.whats_included) ? t.whats_included : [];
           const excluded = Array.isArray(t.whats_excluded) ? t.whats_excluded : [];
-          translations[t.language_code as keyof typeof translations] = {
+          translations[langCode] = {
             title: t.title, description: t.description, whatsIncluded: included, whatsExcluded: excluded
           };
         }
@@ -142,7 +154,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         location: tour.location, 
         isActive: tour.is_active, 
         isWomenExclusive: tour.is_women_exclusive || false, // <-- NOVO: Carrega o estado
-        translations
+        translations: translations as FormData['translations'] // Força o tipo após o preenchimento
       });
 
       setCategoryId(tour.category_id);
@@ -279,7 +291,7 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         const currentMaxOrder = images.reduce((max, img) => Math.max(max, img.display_order || 0), 0); // Adicionado || 0
         const { data: newImageData, error: insertError } = await supabase
           .from('tour_images')
-          .insert({ tour_id: currentId, image_url: imageUrl, alt_text: formData.translations.pt_BR.title || 'Imagem', display_order: currentMaxOrder + 1 })
+          .insert({ tour_id: currentId, image_url: imageUrl, alt_text: formData.translations['pt-BR'].title || 'Imagem', display_order: currentMaxOrder + 1 })
           .select().single();
         if (insertError) throw insertError;
         return newImageData as TourImage;
@@ -572,8 +584,9 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
             <div className="mt-8 border-t pt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Traduções</h3>
               {/* Abas */}
+              {/* CORREÇÃO: Padroniza o código para pt-BR, en-US, es-ES */}
               <div className="flex space-x-2 mb-6 border-b">
-                 {[{ code: 'pt_BR' as const, label: 'Português' }, { code: 'en_US' as const, label: 'English' }, { code: 'es_ES' as const, label: 'Español' }]
+                 {[{ code: 'pt-BR' as const, label: 'Português' }, { code: 'en-US' as const, label: 'English' }, { code: 'es-ES' as const, label: 'Español' }]
                  .map(lang => (
                    <button key={lang.code} type="button" onClick={() => setActiveTab(lang.code)}
                      className={`px-4 py-2 font-medium transition-colors ${
