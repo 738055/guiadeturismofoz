@@ -1,7 +1,7 @@
 // components/CartModal.tsx
 'use client'; // Usa hooks (useState, useCart)
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react'; // <<-- Importado useMemo
 import { useCart } from '../contexts/CartContext';
 import { X, Trash2, ShoppingCart, MessageCircle, User, Hotel, Phone, Mail, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
@@ -92,78 +92,80 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, cartText:
     onClose();
   };
 
-  // --- COMPONENTE DE CHECKOUT FORM ---
-  const CheckoutForm = () => (
-    <div className="p-6 border-t bg-gray-50">
-        <h4 className="text-xl font-bold text-verde-principal mb-4">Finalizar Reserva</h4>
-        
-        <div className="space-y-4 mb-6">
-            {/* Nome do Titular */}
-            <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="text"
-                    placeholder={t.name}
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-                    required
-                />
-            </div>
-            {/* Hotel */}
-             <div className="relative">
-                <Hotel className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="text"
-                    placeholder={t.hotel}
-                    value={customerHotel}
-                    onChange={(e) => setCustomerHotel(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-                    required
-                />
-            </div>
-            {/* Contato (WhatsApp) */}
-            <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="tel"
-                    placeholder={t.contact}
-                    value={customerContact}
-                    onChange={(e) => setCustomerContact(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-                    required
-                />
-            </div>
-            {/* Email */}
-            <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="email"
-                    placeholder={t.email}
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
-                    required
-                />
-            </div>
-        </div>
+  // --- COMPONENTE DE CHECKOUT FORM (MEMORIZADO) ---
+  const CheckoutForm = useMemo(() => {
+    return (
+      <div className="p-6 border-t bg-gray-50">
+          <h4 className="text-xl font-bold text-verde-principal mb-4">Finalizar Reserva</h4>
+          
+          <div className="space-y-4 mb-6">
+              {/* Nome do Titular */}
+              <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                      type="text"
+                      placeholder={t.name}
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
+                      required
+                  />
+              </div>
+              {/* Hotel */}
+               <div className="relative">
+                  <Hotel className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                      type="text"
+                      placeholder={t.hotel}
+                      value={customerHotel}
+                      onChange={(e) => setCustomerHotel(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
+                      required
+                  />
+              </div>
+              {/* Contato (WhatsApp) */}
+              <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                      type="tel"
+                      placeholder={t.contact}
+                      value={customerContact}
+                      onChange={(e) => setCustomerContact(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
+                      required
+                  />
+              </div>
+              {/* Email */}
+              <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                      type="email"
+                      placeholder={t.email}
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-verde-principal focus:border-transparent"
+                      required
+                  />
+              </div>
+          </div>
 
-        <button
-            onClick={handleCheckout}
-            className="w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-4 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2"
-        >
-            <MessageCircle className="w-5 h-5" />
-            <span>{t.checkoutWhatsapp}</span>
-        </button>
-         <button 
-            onClick={() => setShowCheckoutForm(false)}
-            className="w-full text-sm text-gray-500 hover:text-foz-azul-escuro transition-colors font-medium mt-3"
-         >
-            Voltar ao carrinho
-         </button>
-    </div>
-  );
-  // --- FIM DO COMPONENTE DE CHECKOUT FORM ---
+          <button
+              onClick={handleCheckout}
+              className="w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-4 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2"
+          >
+              <MessageCircle className="w-5 h-5" />
+              <span>{t.checkoutWhatsapp}</span>
+          </button>
+           <button 
+              onClick={() => setShowCheckoutForm(false)}
+              className="w-full text-sm text-gray-500 hover:text-foz-azul-escuro transition-colors font-medium mt-3"
+           >
+              Voltar ao carrinho
+           </button>
+      </div>
+    );
+  }, [customerName, customerHotel, customerContact, customerEmail, t, handleCheckout]);
+  // --- FIM DO COMPONENTE DE CHECKOUT FORM (MEMORIZADO) ---
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
@@ -279,7 +281,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, cartText:
             
             {/* Se o formulário estiver visível, mostra ele */}
             {showCheckoutForm && (
-                <CheckoutForm />
+                CheckoutForm
             )}
           </>
         )}
