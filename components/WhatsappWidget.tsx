@@ -3,11 +3,33 @@
 
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
+import { usePathname } from 'next/navigation'; // <-- Importado usePathname
 
 export const WhatsAppWidget = () => {
+  const pathname = usePathname();
   // Número do .env ou fallback
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5545999648551';
   const defaultMessage = "Olá! Estou no site da Guia de Turismo Foz e gostaria de ajuda.";
+
+  // --- NOVA LÓGICA DE VISIBILIDADE ---
+  // 1. Rotas onde o widget DEVE ser ocultado (mesmo que seja uma rota base sem o idioma)
+  // Utilizamos includes para pegar qualquer idioma (ex: /pt-BR/contact, /en-US/contact)
+  const pathsToHide = [
+    '/contact',      // Página de Contato (já tem CTA principal)
+    '/tour/',        // Página de Detalhes do Tour (tem CTA de carrinho no final)
+    '/roteiro',      // Página de Roteiro (tem CTA principal de WhatsApp)
+    '/admin'         // Painel administrativo
+  ];
+  
+  // Verifica se o pathname (já localizado) contém qualquer uma das strings a serem ocultadas
+  const isHidden = pathsToHide.some(path => pathname?.includes(path));
+
+  // Se estiver em uma rota para ocultar, não renderiza
+  if (isHidden) {
+      return null;
+  }
+  // --- FIM DA NOVA LÓGICA ---
+
 
   const handleClick = () => {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(defaultMessage)}`, '_blank');
