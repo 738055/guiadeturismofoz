@@ -36,7 +36,7 @@ const STATIC_POSTS = [
   {
     id: '4',
     platform: 'instagram',
-    post_id: 'DEQr4-1Ozzu', // ID do Post Instagram (Exemplo)
+    post_id: 'DJen_Z-NgeM', // ID do Post Instagram (Exemplo)
   },
   {
     id: '5',
