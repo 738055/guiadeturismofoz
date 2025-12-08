@@ -115,7 +115,7 @@ export const SocialFeed: React.FC<SocialFeedProps> = ({ dict: t }) => {
         {/* Botões de Ação */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up delay-200">
           <Link
-             href="https://www.instagram.com/guiadeturismofoz" 
+             href="https://www.instagram.com/guiadeturismo_foz" 
              target="_blank"
              rel="noopener noreferrer"
              className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
