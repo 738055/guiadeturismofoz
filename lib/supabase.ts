@@ -60,3 +60,14 @@ export interface SiteSetting {
   setting_key: string;
   setting_value: string;
 }
+
+// Adicione esta interface junto com as outras
+export interface SocialPost {
+  id: string;
+  platform: 'instagram' | 'tiktok';
+  post_url: string;
+  thumbnail_url: string;
+  type: 'image' | 'video';
+  is_active: boolean;
+  display_order: number;
+}
