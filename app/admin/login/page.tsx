@@ -46,8 +46,7 @@ export default function AdminLoginPage() {
             <MapPin className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-verde-principal font-serif">
-            ARAUCÁRIA TURISMO
-          </h1>
+Guia de Turismo Foz          </h1>
           <p className="text-sm text-gray-600 mt-2">Painel Administrativo</p>
         </div>
 
