@@ -4,7 +4,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Save, Loader2, ArrowLeft, Plus, Trash2, Upload } from 'lucide-react';
+// CORREÇÃO: Adicionado 'Check' aos imports
+import { Save, Loader2, ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
 import Link from 'next/link';
 
 type TranslationData = { title: string; description: string; whatsIncluded: string[]; };
