@@ -1,13 +1,12 @@
 // guiadeturismofoz/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
-// As variáveis de ambiente devem estar no seu arquivo .env.local
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Tipos originais com atualização em TourImage e novos tipos de Combo
+// --- TIPOS DE PASSEIOS ---
 export interface Tour {
   id: string;
   base_price: number;
@@ -38,10 +37,10 @@ export interface TourImage {
   image_url: string;
   alt_text: string;
   display_order: number;
-  is_cover: boolean; // <-- NOVO CAMPO ADICIONADO
+  is_cover: boolean;
 }
 
-// --- NOVAS INTERFACES DE COMBOS ---
+// --- TIPOS DE COMBOS ---
 export interface Combo {
   id: string;
   base_price: number;
@@ -65,8 +64,10 @@ export interface ComboImage {
   combo_id: string;
   image_url: string;
   display_order: number;
+  is_cover: boolean; // <-- ADICIONADO
 }
 
+// --- OUTROS TIPOS ---
 export interface Category {
   id: string;
   created_at: string;
