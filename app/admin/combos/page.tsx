@@ -98,6 +98,10 @@ export default function AdminCombosList() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
+                        {/* LINK DE EDIÇÃO ATUALIZADO */}
+                        <Link href={`/admin/combos/edit/${combo.id}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Editar">
+                          <Edit className="w-5 h-5" />
+                        </Link>
                         <button onClick={() => handleDelete(combo.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Excluir"><Trash2 className="w-5 h-5" /></button>
                       </div>
                     </td>
