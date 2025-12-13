@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-// Importe o ícone de Tags/Categorias
-import { LayoutDashboard, Package, Calendar, Settings, LogOut, MapPin, Tag } from 'lucide-react';
+// Adicionado ícone Layers para Combos
+import { LayoutDashboard, Package, Calendar, Settings, LogOut, MapPin, Tag, Layers } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -40,11 +40,12 @@ export default function AdminDashboardPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     // O AuthProvider cuidará do redirecionamento
+    router.push('/admin/login');
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -107,7 +108,7 @@ export default function AdminDashboardPage() {
             <p className="text-gray-600 text-sm">Criar, editar e excluir passeios</p>
           </button>
           
-          {/* --- NOVO BOTÃO DE CATEGORIAS --- */}
+          {/* BOTÃO DE CATEGORIAS */}
           <button
             onClick={() => router.push('/admin/categories')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
@@ -115,6 +116,16 @@ export default function AdminDashboardPage() {
             <Tag className="w-12 h-12 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">Gerenciar Categorias</h3>
             <p className="text-gray-600 text-sm">Criar e excluir categorias</p>
+          </button>
+
+          {/* NOVO BOTÃO DE COMBOS */}
+          <button
+            onClick={() => router.push('/admin/combos')}
+            className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
+          >
+            <Layers className="w-12 h-12 text-purple-600 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Gerenciar Combos</h3>
+            <p className="text-gray-600 text-sm">Criar pacotes e promoções</p>
           </button>
 
           <button
