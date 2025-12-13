@@ -1,10 +1,9 @@
-// guiadeturismofoz/app/admin/combos/ComboForm.tsx
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-// CORREÇÃO: Adicionado 'Check' aos imports
+// CORREÇÃO FINAL: Adicionado Check aos imports
 import { Save, Loader2, ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
 import Link from 'next/link';
 

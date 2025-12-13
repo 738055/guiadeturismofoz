@@ -1,10 +1,18 @@
-'use client'; // Página de cliente
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-// Adicionado ícone Layers para Combos
-import { LayoutDashboard, Package, Calendar, Settings, LogOut, MapPin, Tag, Layers } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Package, 
+  Calendar, 
+  Settings, 
+  LogOut, 
+  MapPin, 
+  Tag, 
+  Layers 
+} from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -20,7 +28,7 @@ export default function AdminDashboardPage() {
 
   const loadStats = async () => {
     try {
-      // Paraleliza as requisições
+      // Paraleliza as requisições para performance
       const [toursRes, availabilityRes] = await Promise.all([
         supabase.from('tours').select('id, is_active', { count: 'exact' }),
         supabase.from('tour_availability').select('id', { count: 'exact' })
@@ -39,12 +47,12 @@ export default function AdminDashboardPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // O AuthProvider cuidará do redirecionamento
     router.push('/admin/login');
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -66,7 +74,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-verde-principal">
             <div className="flex items-center justify-between">
@@ -108,7 +116,6 @@ export default function AdminDashboardPage() {
             <p className="text-gray-600 text-sm">Criar, editar e excluir passeios</p>
           </button>
           
-          {/* BOTÃO DE CATEGORIAS */}
           <button
             onClick={() => router.push('/admin/categories')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
@@ -118,7 +125,7 @@ export default function AdminDashboardPage() {
             <p className="text-gray-600 text-sm">Criar e excluir categorias</p>
           </button>
 
-          {/* NOVO BOTÃO DE COMBOS */}
+          {/* BOTÃO DE COMBOS (Integrado) */}
           <button
             onClick={() => router.push('/admin/combos')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
@@ -129,7 +136,7 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => alert('Ainda não implementado')}
+            onClick={() => alert('Funcionalidade de disponibilidade em breve')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
           >
             <Calendar className="w-12 h-12 text-verde-secundario mb-4 group-hover:scale-110 transition-transform" />
