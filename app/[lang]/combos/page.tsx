@@ -1,4 +1,4 @@
-// guiadeturismofoz/app/[lang]/combos/page.tsx
+// app/[lang]/combos/page.tsx
 import React from 'react';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 import { PageBanner } from '@/components/PageBanner';
@@ -14,7 +14,6 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
   const { data: bannerData } = await supabase.from('site_settings').select('setting_value').eq('setting_key', 'banner_combos').single();
   const bannerUrl = bannerData?.setting_value || "/54.jpg";
 
-  // Busca Combos, Traduções E Imagens
   const { data: combos } = await supabase
     .from('combos')
     .select(`
@@ -44,10 +43,8 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
             {combos.map((combo: any) => {
                const translation = combo.combo_translations[0];
                
-               // Lógica da Imagem de Capa
                let displayImage = null;
                if (combo.combo_images && combo.combo_images.length > 0) {
-                   // Ordena por capa primeiro, depois ordem
                    const sortedImages = combo.combo_images.sort((a: any, b: any) => {
                        if (a.is_cover && !b.is_cover) return -1;
                        if (!a.is_cover && b.is_cover) return 1;
@@ -56,13 +53,16 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                    displayImage = sortedImages[0].image_url;
                }
 
-               // Parse whats_included
                let features = [];
                try { features = typeof translation.whats_included === 'string' ? JSON.parse(translation.whats_included) : translation.whats_included; } catch {}
                if(!Array.isArray(features)) features = [];
 
                return (
-                 <div key={combo.id} className="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col border border-gray-100 hover:shadow-xl transition-shadow group">
+                 <Link 
+                    key={combo.id} 
+                    href={`/${lang}/combos/${combo.id}`} // LINK PARA DETALHES
+                    className="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col border border-gray-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1"
+                 >
                     <div className="relative h-56 bg-gray-200 overflow-hidden">
                       {displayImage ? (
                         <Image src={displayImage} alt={translation.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -77,7 +77,7 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                     </div>
                     
                     <div className="p-6 flex flex-col flex-1">
-                      <h3 className="text-2xl font-bold text-foz-azul-escuro mb-2 font-serif">{translation.title}</h3>
+                      <h3 className="text-2xl font-bold text-foz-azul-escuro mb-2 font-serif group-hover:text-verde-principal transition-colors">{translation.title}</h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{translation.description}</p>
                       
                       <div className="space-y-2 mb-6 flex-1">
@@ -93,20 +93,16 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                       <div className="mt-auto pt-4 border-t border-gray-100">
                         <div className="flex items-end justify-between mb-4">
                            <div>
-                             {combo.old_price && <span className="text-sm text-gray-400 line-through block">De R$ {combo.old_price}</span>}
-                             <span className="text-2xl font-bold text-verde-principal">Por R$ {combo.base_price}</span>
+                             {combo.old_price && <span className="text-sm text-gray-400 line-through block">De R$ {Number(combo.old_price).toFixed(2)}</span>}
+                             <span className="text-2xl font-bold text-verde-principal">Por R$ {Number(combo.base_price).toFixed(2)}</span>
                            </div>
                         </div>
-                        <Link 
-                           href={`https://wa.me/5545000000000?text=Olá, quero saber mais sobre o combo: ${translation.title}`}
-                           target="_blank"
-                           className="w-full bg-verde-principal text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-verde-secundario transition-colors shadow-lg shadow-verde-principal/20"
-                        >
-                           Reservar Combo <ArrowRight className="w-4 h-4" />
-                        </Link>
+                        <div className="w-full bg-gray-50 text-verde-principal py-3 rounded-xl font-semibold flex items-center justify-center gap-2 group-hover:bg-verde-principal group-hover:text-white transition-colors">
+                           Ver Detalhes <ArrowRight className="w-4 h-4" />
+                        </div>
                       </div>
                     </div>
-                 </div>
+                 </Link>
                )
             })}
           </div>
