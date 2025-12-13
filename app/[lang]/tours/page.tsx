@@ -1,4 +1,3 @@
-// app/[lang]/tours/page.tsx
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -7,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Locale } from '@/i18n/dictionaries';
 import { Search, Loader2, Filter, X } from 'lucide-react';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation'; // <-- Adiciona useRouter
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // Tipos
 type Tour = {
@@ -28,7 +27,7 @@ type Category = {
 };
 
 export default function ToursPage({ params: { lang } }: { params: { lang: Locale } }) {
-  const router = useRouter(); // <-- Inicializa o router
+  const router = useRouter();
   const searchParams = useSearchParams();
   
   const isWomenExclusiveMode = searchParams?.get('exclusive') === 'women';
@@ -38,9 +37,8 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
   const [dict, setDict] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [toursBanner, setToursBanner] = useState('');
-  const [womenExclusiveBanner, setWomenExclusiveBanner] = useState(''); // <-- NOVO: Estado do banner exclusivo
+  const [womenExclusiveBanner, setWomenExclusiveBanner] = useState('');
   
-  // Estados de Filtro (MANTIDOS)
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -48,11 +46,9 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
     const loadData = async () => {
       setLoading(true);
       try {
-        // 1. Carrega Dicionário
         const dictionaryModule = await import(`@/i18n/locales/${lang}.json`);
         setDict(dictionaryModule.default);
 
-        // 1.5. Carrega Configurações (para o banner exclusivo e padrão de tours)
         const { data: settingsData } = await supabase
             .from('site_settings')
             .select('setting_key, setting_value')
@@ -65,8 +61,6 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
             });
         }
 
-
-        // 2. Carrega Categorias (sem alteração)
         const { data: catData } = await supabase
           .from('categories')
           .select('id, category_translations!left(name, language_code)');
@@ -78,29 +72,34 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
         });
         setCategories(formattedCats);
 
-        // 3. Carrega Passeios
+        // --- CORREÇÃO: Selecionando 'is_cover' na query ---
         let query = supabase
           .from('tours')
           .select(`
             id, base_price, duration_hours, location, category_id, is_women_exclusive, 
             tour_translations!left(title, description, language_code),
-            tour_images(image_url, display_order)
+            tour_images(image_url, display_order, is_cover) 
           `)
           .eq('is_active', true)
           .order('display_order', { referencedTable: 'tour_images', ascending: true });
           
-        // Aplica o filtro de exclusividade
         if (isWomenExclusiveMode) {
             query = query.eq('is_women_exclusive', true);
         }
 
         const { data: toursData } = await query;
           
-
         const formattedTours = (toursData || []).map((t: any) => {
            const trans = t.tour_translations.find((tr: any) => tr.language_code === lang) || 
                          t.tour_translations.find((tr: any) => tr.language_code === 'pt_BR');
            if (!trans) return null;
+
+           // --- CORREÇÃO: Lógica para pegar a imagem de capa ---
+           const images = t.tour_images || [];
+           // Tenta achar is_cover=true, senão pega a primeira da lista (que já vem ordenada por display_order)
+           const coverImage = images.find((img: any) => img.is_cover) || images[0];
+           const finalImageUrl = coverImage?.image_url;
+
            return {
              id: t.id,
              title: trans.title,
@@ -110,7 +109,7 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
              location: t.location,
              category_id: t.category_id,
              is_women_exclusive: t.is_women_exclusive, 
-             imageUrl: t.tour_images?.[0]?.image_url
+             imageUrl: finalImageUrl // Usa a URL da capa
            };
         }).filter(Boolean) as Tour[];
 
@@ -133,18 +132,14 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
     });
   }, [tours, searchQuery, selectedCategory]);
   
-  // Lógica de limpar filtros (Point 4)
   const handleClearFilters = () => {
-      // Limpa os estados locais
       setSearchQuery('');
       setSelectedCategory('all');
       
-      // Se estiver no modo exclusivo, volta para a página base /tours, removendo o query param.
       if (isWomenExclusiveMode || searchParams.has('cat') || searchParams.has('search')) {
           router.push(`/${lang}/tours`);
       } 
   };
-
 
   if (loading || !dict) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-foz-azul-claro" /></div>;
@@ -154,26 +149,23 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
   const tTours = dict.tours;
   const tHero = dict.hero; 
   
-  // Seleciona o banner: primeiro o exclusivo, depois o configurado para tours, senão o default.
   const selectedBannerUrl = isWomenExclusiveMode 
       ? womenExclusiveBanner || "/54.jpg" 
       : toursBanner || "/54.jpg";
 
-
   return (
     <div className="min-h-screen bg-foz-bege">
       
-      {/* --- 1. BANNER IMERSIVO --- */}
+      {/* Banner */}
       <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center pt-20">
         <div className="absolute inset-0">
           <Image
-            src={selectedBannerUrl} // <-- Banner Dinâmico
+            src={selectedBannerUrl}
             alt="Banner Passeios"
             fill
             className="object-cover"
             priority
           />
-          {/* Altera o gradiente do overlay para incluir um toque de rosa no modo exclusivo */}
           <div className={`absolute inset-0 bg-gradient-to-b ${isWomenExclusiveMode ? 'from-acento-mulher/60 via-acento-mulher/40 to-foz-bege' : 'from-foz-azul-escuro/60 via-foz-azul-escuro/40 to-foz-bege'}`} />
         </div>
 
@@ -187,15 +179,11 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
         </div>
       </div>
 
-      {/* --- 2. BARRA DE FILTROS "GLASS" (NOVA POSIÇÃO) --- */}
-      {/* Oculta os filtros se estiver no modo exclusivo (para simplificar a experiência) */}
+      {/* Filtros */}
       {!isWomenExclusiveMode && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-0 mb-12">
             <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-glass p-4 md:p-6 animate-fade-in-up delay-200">
-              
               <div className="flex flex-col lg:flex-row gap-6 items-center">
-                
-                {/* Input de Busca */}
                 <div className="relative w-full lg:w-1/3 group">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <Search className="w-5 h-5 text-gray-400 group-focus-within:text-foz-azul-claro transition-colors" />
@@ -209,7 +197,6 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
                   />
                 </div>
 
-                {/* Categorias (Scroll Horizontal no Mobile) */}
                 <div className="w-full lg:flex-1 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
                   <div className="flex gap-3">
                     <button
@@ -239,21 +226,18 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
                     ))}
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
       )}
 
-      {/* --- 3. GRID DE RESULTADOS --- */}
+      {/* Grid de Resultados */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        
-        {/* Contador de Resultados */}
         <div className="mb-8 text-gray-500 font-medium px-2 flex justify-between items-center">
            <span>{filteredTours.length} experiências encontradas</span>
            {(searchQuery || selectedCategory !== 'all' || isWomenExclusiveMode) && (
              <button 
-               onClick={handleClearFilters} // <-- Usa a nova função de limpar
+               onClick={handleClearFilters}
                className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
              >
                <X className="w-4 h-4" /> Limpar filtros
@@ -274,8 +258,8 @@ export default function ToursPage({ params: { lang } }: { params: { lang: Locale
             {filteredTours.map((tour, index) => (
               <div 
                 key={tour.id} 
-                className="animate-fade-in-up h-[450px]" // Altura fixa para consistência
-                style={{ animationDelay: `${index * 100}ms` }} // Efeito cascata
+                className="animate-fade-in-up h-[450px]"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <TourCard
                   tour={tour}

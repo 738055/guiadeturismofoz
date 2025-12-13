@@ -7,6 +7,10 @@ import { Check, ArrowRight, Package, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { ImageGallery } from '@/components/ImageGallery';
 
+// --- CORREÇÃO 1: Evita cache ---
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // --- Função Auxiliar de Parsing ---
 const safeParse = (content: any) => {
     if (!content) return [];
@@ -25,7 +29,6 @@ const safeParse = (content: any) => {
     return [];
 };
 
-// --- Busca de Dados ---
 async function getComboDetail(id: string, lang: Locale) {
   try {
     const { data: combo, error } = await supabase
@@ -42,19 +45,18 @@ async function getComboDetail(id: string, lang: Locale) {
     if (error) throw error;
     if (!combo) return null;
 
-    // Filtra tradução correta
-    const targetLang = lang === 'pt-BR' ? 'pt_BR' : lang; // Ajuste conforme seu banco
+    const targetLang = lang === 'pt-BR' ? 'pt_BR' : lang; // Ajuste se necessário para seu DB
     let translation = combo.combo_translations.find((t: any) => t.language_code === targetLang);
-    // Fallback para pt_BR se não encontrar
-    if (!translation) translation = combo.combo_translations.find((t: any) => t.language_code === 'pt_BR');
+    // Fallback se não encontrar o idioma
+    if (!translation) translation = combo.combo_translations.find((t: any) => t.language_code === 'pt_BR' || t.language_code === 'pt-BR');
     if (!translation) return null;
 
-    // Ordena imagens (Capa primeiro)
-    const sortedImages = (combo.combo_images || [])
+    // --- CORREÇÃO 2: Ordenação segura ---
+    const sortedImages = [...(combo.combo_images || [])] // Cria cópia
       .filter((img: any) => img.image_url)
       .sort((a: any, b: any) => {
-          if (a.is_cover && !b.is_cover) return -1;
-          if (!a.is_cover && b.is_cover) return 1;
+          if (a.is_cover === true && b.is_cover !== true) return -1;
+          if (a.is_cover !== true && b.is_cover === true) return 1;
           return (a.display_order || 0) - (b.display_order || 0);
       });
 
@@ -71,7 +73,6 @@ async function getComboDetail(id: string, lang: Locale) {
   }
 }
 
-// --- Metadados SEO ---
 export async function generateMetadata(
   { params: { id, lang } }: { params: { id: string; lang: Locale } },
   parent: ResolvingMetadata
@@ -93,7 +94,6 @@ export default async function ComboDetailPage({
 }: {
   params: { id: string; lang: Locale };
 }) {
-  const dict = await getDictionary(lang);
   const combo = await getComboDetail(id, lang);
 
   if (!combo) {
@@ -115,19 +115,16 @@ export default async function ComboDetailPage({
         
         {/* Coluna Esquerda: Galeria e Descrição */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Galeria */}
           <div className="rounded-2xl overflow-hidden shadow-sm">
              <ImageGallery images={combo.images} title={combo.title} />
           </div>
 
-          {/* Título Mobile (aparece aqui em telas pequenas) */}
           <div className="lg:hidden">
              <h1 className="text-3xl font-bold text-foz-azul-escuro font-serif mb-2">{combo.title}</h1>
              {combo.old_price && <span className="text-sm text-gray-400 line-through">De R$ {Number(combo.old_price).toFixed(2)}</span>}
              <div className="text-3xl font-bold text-verde-principal">Por R$ {Number(combo.base_price).toFixed(2)}</div>
           </div>
 
-          {/* Descrição */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-verde-principal"/>
@@ -138,7 +135,6 @@ export default async function ComboDetailPage({
             </p>
           </div>
 
-          {/* O que está incluso */}
           {combo.whatsIncluded.length > 0 && (
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
               <h3 className="font-bold text-gray-800 mb-4">O que está incluso:</h3>

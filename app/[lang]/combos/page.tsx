@@ -8,7 +8,10 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Metadados para SEO
+// --- CORREÇÃO 1: Força a página a buscar dados novos sempre (evita cache antigo) ---
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params: { lang } }: { params: { lang: Locale } }): Promise<Metadata> {
   const dict = await getDictionary(lang);
   return {
@@ -21,17 +24,10 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
   const dict = await getDictionary(lang);
   const t = dict.combos;
 
-  // 1. Busca URL do Banner (Configurações do Site)
-  const { data: bannerData } = await supabase
-      .from('site_settings')
-      .select('setting_value')
-      .eq('setting_key', 'banner_combos')
-      .single();
-
+  const { data: bannerData } = await supabase.from('site_settings').select('setting_value').eq('setting_key', 'banner_combos').single();
   const bannerUrl = bannerData?.setting_value || "/54.jpg";
 
-  // 2. Busca Combos Ativos no Banco de Dados
-  // Ajuste Importante: O formulário salva como 'pt-BR', então buscamos exatamente por 'lang'
+  // Busca combos
   const { data: combos, error } = await supabase
     .from('combos')
     .select(`
@@ -40,8 +36,7 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
       combo_images(image_url, is_cover, display_order)
     `)
     .eq('is_active', true)
-    // Filtra pela tradução do idioma atual da página
-    .eq('combo_translations.language_code', lang) 
+    .eq('combo_translations.language_code', lang) // Filtra pelo idioma da URL
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -50,14 +45,9 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
-      <PageBanner 
-        title={t.title} 
-        subtitle={t.subtitle}
-        image={bannerUrl}
-      />
+      <PageBanner title={t.title} subtitle={t.subtitle} image={bannerUrl} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 mt-12">
-        {/* Estado Vazio: Se não houver combos ou der erro */}
         {!combos || combos.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200 shadow-sm">
             <div className="bg-gray-50 p-6 rounded-full mb-6">
@@ -67,23 +57,24 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
             <p className="text-gray-500 text-lg">{t.noCombos}</p>
           </div>
         ) : (
-          /* Grid de Cards */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {combos.map((combo: any) => {
                const translation = combo.combo_translations[0];
                
-               // Lógica para definir a imagem de capa (is_cover = true ou a primeira)
+               // --- CORREÇÃO 2: Lógica Segura de Capa ---
                let displayImage = null;
                if (combo.combo_images && combo.combo_images.length > 0) {
-                   const sortedImages = combo.combo_images.sort((a: any, b: any) => {
-                       if (a.is_cover && !b.is_cover) return -1;
-                       if (!a.is_cover && b.is_cover) return 1;
+                   // Cria uma CÓPIA do array com [...array] antes de ordenar para evitar erros de mutação
+                   const sortedImages = [...combo.combo_images].sort((a: any, b: any) => {
+                       // is_cover === true vem primeiro (-1)
+                       if (a.is_cover === true && b.is_cover !== true) return -1;
+                       if (a.is_cover !== true && b.is_cover === true) return 1;
+                       // Desempate por display_order
                        return (a.display_order || 0) - (b.display_order || 0);
                    });
                    displayImage = sortedImages[0].image_url;
                }
 
-               // Tratamento seguro do campo 'whats_included' (JSON)
                let features = [];
                try { 
                    features = typeof translation.whats_included === 'string' 
@@ -97,10 +88,9 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                return (
                  <Link 
                     key={combo.id} 
-                    href={`/${lang}/combos/${combo.id}`} // Link para a página de detalhes
+                    href={`/${lang}/combos/${combo.id}`}
                     className="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col border border-gray-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1"
                  >
-                    {/* Imagem do Card */}
                     <div className="relative h-56 bg-gray-200 overflow-hidden">
                       {displayImage ? (
                         <Image 
@@ -111,9 +101,7 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          <ImageIcon className="w-12 h-12 opacity-50"/>
-                        </div>
+                        <div className="flex items-center justify-center h-full text-gray-400"><ImageIcon className="w-12 h-12 opacity-50"/></div>
                       )}
                       {combo.old_price && (
                         <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
@@ -122,7 +110,6 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                       )}
                     </div>
                     
-                    {/* Conteúdo do Card */}
                     <div className="p-6 flex flex-col flex-1">
                       <h3 className="text-2xl font-bold text-foz-azul-escuro mb-2 font-serif group-hover:text-verde-principal transition-colors">
                         {translation.title}
@@ -131,7 +118,6 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                         {translation.description}
                       </p>
                       
-                      {/* Lista de Itens Inclusos (Max 3) */}
                       <div className="space-y-2 mb-6 flex-1">
                         {features.slice(0, 3).map((feat: string, i: number) => (
                           <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -144,7 +130,6 @@ export default async function CombosPage({ params: { lang } }: { params: { lang:
                         )}
                       </div>
                       
-                      {/* Rodapé do Card (Preço e Ação) */}
                       <div className="mt-auto pt-4 border-t border-gray-100">
                         <div className="flex items-end justify-between mb-4">
                            <div>

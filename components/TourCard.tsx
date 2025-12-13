@@ -1,4 +1,3 @@
-// components/TourCard.tsx
 import React from 'react';
 import { Clock, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -13,26 +12,27 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl?: string;
-  images?: { image_url: string; is_cover: boolean }[]; // Adicionado array de imagens
+  images?: { image_url: string; is_cover: boolean }[];
   is_women_exclusive?: boolean;
 };
 
 interface TourCardProps {
   tour: Tour;
-  dict: { from: string; viewDetails: string; hours: string; womenExclusiveBadge: string; }; 
+  dict: { from: string; viewDetails: string; hours: string; womenExclusiveBadge: string; };
   lang: Locale;
   query?: string;
 }
 
 export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query = '' }) => {
-  const isExclusive = tour.is_women_exclusive;
-
-  // Lógica para determinar a imagem de exibição
+  // Lógica de fallback robusta:
+  // 1. Usa imageUrl direta (se a página pai já calculou a capa, como no ToursPage corrigido)
+  // 2. Se não tiver, tenta achar a capa no array de imagens
+  // 3. Se não achar, pega a primeira imagem do array
+  
   let displayImage = tour.imageUrl;
-  if (tour.images && tour.images.length > 0) {
-      // Tenta encontrar a imagem marcada como capa
+
+  if (!displayImage && tour.images && tour.images.length > 0) {
       const cover = tour.images.find(img => img.is_cover);
-      // Se achar, usa ela. Se não, usa a primeira do array.
       displayImage = cover ? cover.image_url : tour.images[0].image_url;
   }
 
@@ -41,7 +41,6 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
       href={`/${lang}/tour/${tour.id}${query}`}
       className="group relative bg-white rounded-3xl shadow-sm hover:shadow-card-hover transition-all duration-500 overflow-hidden h-full flex flex-col"
     >
-      {/* Container da Imagem */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-3xl">
         {displayImage ? (
           <Image
@@ -57,22 +56,18 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
           </div>
         )}
         
-        {/* Tag de Preço Flutuante */}
         <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur shadow-lg px-4 py-2 rounded-xl z-10">
           <span className="text-xs text-gray-500 block font-semibold">{t.from}</span>
           <span className="text-lg font-bold text-foz-verde">R$ {tour.price.toFixed(2)}</span>
         </div>
         
-        {/* Badge Exclusivo para Mulheres */}
-        {isExclusive && (
+        {tour.is_women_exclusive && (
             <div className="absolute top-4 left-4 bg-acento-mulher text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10 uppercase">
                 {t.womenExclusiveBadge}
             </div>
         )}
-        
       </div>
 
-      {/* Conteúdo */}
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-center gap-3 text-xs font-bold text-foz-azul-claro mb-3 uppercase tracking-wide">
            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {tour.duration}H</span>

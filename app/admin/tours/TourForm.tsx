@@ -1,4 +1,3 @@
-// guiadeturismofoz/app/admin/tours/TourForm.tsx
 'use client'; 
 
 import React, { useState, useEffect } from 'react';
@@ -137,7 +136,17 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
       });
 
       setCategoryId(tour.category_id);
-      setImages(tour.tour_images || []);
+      
+      // Ordena imagens: Capa primeiro, depois ordem normal
+      if (tour.tour_images) {
+          const sortedImgs = tour.tour_images.sort((a: any, b: any) => {
+              if (a.is_cover && !b.is_cover) return -1;
+              if (!a.is_cover && b.is_cover) return 1;
+              return (a.display_order || 0) - (b.display_order || 0);
+          });
+          setImages(sortedImgs);
+      }
+      
       setDisabledDays(tour.disabled_week_days || []);
       setSpecificDisabledDates(tour.disabled_specific_dates || []);
 
@@ -195,25 +204,37 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
     }
   };
 
-  // --- Handlers Auxiliares ---
-
+  // --- Função Corrigida de Definir Capa ---
   const handleSetCover = async (image: TourImage) => {
-    // 1. Atualização Otimista
+    if (!tourId) return;
+
+    // 1. Atualização Otimista na UI
     const updatedImages = images.map(img => ({
         ...img,
-        is_cover: img.id === image.id
+        is_cover: img.id === image.id // Apenas a clicada vira true
     }));
-    setImages(updatedImages);
+    // Reordena para a capa ir para o início
+    setImages(updatedImages.sort((a, b) => (a.is_cover === b.is_cover ? 0 : a.is_cover ? -1 : 1)));
 
-    // 2. Atualização no Banco
+    // 2. Atualização no Banco de Dados
     try {
-        // Remove capa de todos deste tour
-        await supabase.from('tour_images').update({ is_cover: false }).eq('tour_id', tourId);
-        // Define nova capa
-        await supabase.from('tour_images').update({ is_cover: true }).eq('id', image.id);
+        // Primeiro, remove a capa de todas as imagens deste passeio
+        await supabase.from('tour_images')
+            .update({ is_cover: false })
+            .eq('tour_id', tourId);
+            
+        // Depois, define a nova capa
+        const { error } = await supabase.from('tour_images')
+            .update({ is_cover: true })
+            .eq('id', image.id);
+
+        if (error) throw error;
+        
     } catch (err) {
-        console.error("Erro ao definir capa", err);
-        alert("Erro ao salvar capa no banco.");
+        console.error("Erro ao definir capa no banco:", err);
+        alert("Erro ao salvar a capa no banco de dados.");
+        // Reverte em caso de erro (opcional, mas recomendado recarregar)
+        loadTour();
     }
   };
 
@@ -237,10 +258,15 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
         const imageUrl = publicUrlData.publicUrl;
         const currentMaxOrder = images.reduce((max, img) => Math.max(max, img.display_order || 0), 0); 
         
-        // Define is_cover: false no insert
         const { data: newImageData, error: insertError } = await supabase
           .from('tour_images')
-          .insert({ tour_id: currentId, image_url: imageUrl, alt_text: formData.translations['pt-BR'].title || 'Imagem', display_order: currentMaxOrder + 1, is_cover: false })
+          .insert({ 
+              tour_id: currentId, 
+              image_url: imageUrl, 
+              alt_text: formData.translations['pt-BR'].title || 'Imagem', 
+              display_order: currentMaxOrder + 1, 
+              is_cover: false // Novas imagens não são capa por padrão
+          })
           .select().single();
         if (insertError) throw insertError;
         return newImageData as TourImage;
@@ -307,7 +333,6 @@ export const AdminTourForm: React.FC<{ tourId?: string }> = ({ tourId }) => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-xl shadow-md p-8">
-            {/* Informações Gerais */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações Gerais</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
