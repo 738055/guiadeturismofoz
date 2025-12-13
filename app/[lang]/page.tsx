@@ -9,7 +9,7 @@ import { ServicesTabs } from '@/components/ServicesTabs';
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
-// O tipo 'Tour' local (CORRIGIDO: is_women_exclusive não é mais opcional)
+// Tipo Tour atualizado
 type Tour = {
   id: string;
   title: string;
@@ -18,15 +18,24 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl: string | undefined; 
-  is_women_exclusive: boolean; // <-- CORREÇÃO APLICADA: Removido o '?'
+  is_women_exclusive: boolean;
 };
 
-// NOVO TIPO PARA CATEGORIAS DINÂMICAS
+// Tipo Categoria
 type DynamicCategory = {
   id: string;
-  key: 'falls' | 'nature' | 'adventure' | 'shopping' | 'cultural'; // Chave para tradução e ícone
-  image_url: string; // URL da imagem de destaque
+  key: 'falls' | 'nature' | 'adventure' | 'shopping' | 'cultural';
+  image_url: string;
 };
+
+// --- FUNÇÃO AUXILIAR PARA LIMPAR URLS ---
+function getValidImageUrl(url: string | null | undefined): string {
+  // Se não existir, ou for um placeholder inválido, retorna imagem padrão
+  if (!url || url.includes('placeholder') || !url.startsWith('http')) {
+    return '/54.jpg'; // Imagem de fallback local
+  }
+  return url;
+}
 
 async function getPopularTours(lang: Locale) {
   try {
@@ -38,7 +47,7 @@ async function getPopularTours(lang: Locale) {
         tour_images (image_url, display_order)
       `)
       .eq('is_active', true)
-      .eq('is_featured', true) // <-- AGORA FILTRA PELO DESTAQUE
+      .eq('is_featured', true)
       .order('display_order', { referencedTable: 'tour_images', ascending: true })
       .limit(6);
 
@@ -48,6 +57,11 @@ async function getPopularTours(lang: Locale) {
         const translation = tour.tour_translations.find((t: any) => t.language_code === lang) ||
                             tour.tour_translations.find((t: any) => t.language_code === 'pt-BR');
         if (!translation) return null;
+        
+        // CORREÇÃO: Aplica a validação de URL aqui
+        const rawImage = tour.tour_images?.[0]?.image_url;
+        const validImage = getValidImageUrl(rawImage);
+
         return {
           id: tour.id,
           title: translation.title || '',
@@ -55,13 +69,12 @@ async function getPopularTours(lang: Locale) {
           price: tour.base_price,
           duration: tour.duration_hours,
           location: tour.location,
-          is_women_exclusive: tour.is_women_exclusive || false, // Passa a flag
-          imageUrl: tour.tour_images?.[0]?.image_url
+          is_women_exclusive: tour.is_women_exclusive || false,
+          imageUrl: validImage // Usa a URL validada
         };
       });
       
     return tours.filter((tour): tour is Tour => tour !== null);
-    // ^ ESTA LINHA AGORA COMPILA CORRETAMENTE
 
   } catch (error) {
     console.error('Error loading popular tours:', error);
@@ -69,10 +82,8 @@ async function getPopularTours(lang: Locale) {
   }
 }
 
-// NOVA FUNÇÃO PARA BUSCAR CATEGORIAS DINAMICAMENTE
 async function getDynamicCategories(lang: Locale): Promise<DynamicCategory[]> {
   try {
-    // Buscamos o ID, a URL da imagem e a chave de tradução (que será o slug/key)
     const { data, error } = await supabase
       .from('categories')
       .select(`
@@ -80,44 +91,36 @@ async function getDynamicCategories(lang: Locale): Promise<DynamicCategory[]> {
         image_url,
         category_translations!inner(slug, language_code)
       `)
-      // Garantimos que a categoria tenha pelo menos a tradução na língua local (ou pt-BR)
       .in('category_translations.language_code', [lang, 'pt-BR'])
-      .not('image_url', 'is', null) // Garante que apenas categorias com imagem sejam mostradas
-      .limit(4); // Limita a 4 categorias como o design original
+      .not('image_url', 'is', null)
+      .limit(4);
 
     if (error) throw error;
     
-    // Mapeamos para o formato esperado
     const dynamicCategories = (data || []).map((cat: any) => {
         const translation = cat.category_translations.find((t: any) => t.language_code === lang) ||
                             cat.category_translations.find((t: any) => t.language_code === 'pt-BR');
 
-        // Usa o slug como a 'key' de tradução (falls, nature, adventure, etc.)
         const keyMap: Record<string, DynamicCategory['key']> = {
             'cataratas': 'falls',
             'natureza': 'nature',
             'aventura': 'adventure',
             'cultural': 'cultural',
             'shopping': 'shopping' 
-            // Adicione outros slugs conforme necessário
         };
         
-        // Tentamos mapear o slug do banco para a chave de tradução hardcoded no JSON
         const dictKey = translation?.slug ? keyMap[translation.slug] : null; 
 
-        if (!dictKey) {
-            console.warn(`Category slug '${translation?.slug}' not mapped to a dictionary key. Skipping.`);
-            return null;
-        }
+        if (!dictKey) return null;
 
+        // CORREÇÃO: Valida imagem da categoria também
         return {
             id: cat.id,
             key: dictKey,
-            image_url: cat.image_url || '/54.jpg', // Fallback
+            image_url: getValidImageUrl(cat.image_url),
         };
     }).filter(Boolean) as DynamicCategory[];
     
-    // Se não houver 4 categorias no DB, mantemos o que foi encontrado.
     return dynamicCategories; 
 
   } catch (error) {
@@ -130,18 +133,13 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
   const [tours, dict, dynamicCategories] = await Promise.all([
     getPopularTours(lang),
     getDictionary(lang),
-    getDynamicCategories(lang), // <-- NOVO: Busca categorias dinâmicas
+    getDynamicCategories(lang),
   ]);
-
-  // --- DEBUG ---
-  console.log('CHAVES DO DICIONÁRIO CARREGADO:', Object.keys(dict)); 
-  // --- FIM DO DEBUG ---
 
   return (
     <>
       <Hero dict={dict.hero} lang={lang} />
       
-      {/* ATUALIZADO: Passa as categorias dinâmicas */}
       <Categories 
         dict={dict.categoriesSection} 
         lang={lang} 
@@ -161,8 +159,6 @@ export default async function Home({ params: { lang } }: { params: { lang: Local
       
       <UmbrellaCuriosity dict={dict.umbrellaSection} lang={lang} />
       
-      {/* Passando a seção do dicionário. Se ela foi carregada (após reiniciar),
-          o componente irá renderizar. */}
       <ServicesTabs dict={dict.servicesSection} />
       
       <TripAdvisor dict={dict.tripadvisor} />
