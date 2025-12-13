@@ -7,7 +7,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Tipos (do seu arquivo original)
+// Tipos originais com atualização em TourImage e novos tipos de Combo
 export interface Tour {
   id: string;
   base_price: number;
@@ -18,8 +18,8 @@ export interface Tour {
   created_at: string;
   is_women_exclusive: boolean; 
   is_featured: boolean; 
-  disabled_week_days: number[]; // <-- INCLUÍDO
-  disabled_specific_dates: string[]; // <-- INCLUÍDO
+  disabled_week_days: number[];
+  disabled_specific_dates: string[];
 }
 
 export interface TourTranslation {
@@ -38,9 +38,34 @@ export interface TourImage {
   image_url: string;
   alt_text: string;
   display_order: number;
+  is_cover: boolean; // <-- NOVO CAMPO ADICIONADO
 }
 
-// TourAvailability REMOVIDA
+// --- NOVAS INTERFACES DE COMBOS ---
+export interface Combo {
+  id: string;
+  base_price: number;
+  old_price?: number;
+  is_active: boolean;
+  is_featured: boolean;
+  created_at: string;
+}
+
+export interface ComboTranslation {
+  id: string;
+  combo_id: string;
+  language_code: string;
+  title: string;
+  description: string;
+  whats_included: string[]; 
+}
+
+export interface ComboImage {
+  id: string;
+  combo_id: string;
+  image_url: string;
+  display_order: number;
+}
 
 export interface Category {
   id: string;
@@ -61,7 +86,6 @@ export interface SiteSetting {
   setting_value: string;
 }
 
-// Adicione esta interface junto com as outras
 export interface SocialPost {
   id: string;
   platform: 'instagram' | 'tiktok';

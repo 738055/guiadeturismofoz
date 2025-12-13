@@ -13,30 +13,39 @@ type Tour = {
   duration: number;
   location: string;
   imageUrl?: string;
-  is_women_exclusive?: boolean; // <-- NOVO: Adiciona a flag
+  images?: { image_url: string; is_cover: boolean }[]; // Adicionado array de imagens
+  is_women_exclusive?: boolean;
 };
 
 interface TourCardProps {
   tour: Tour;
-  dict: { from: string; viewDetails: string; hours: string; womenExclusiveBadge: string; }; // <-- NOVO: Adiciona o badge no tipo
+  dict: { from: string; viewDetails: string; hours: string; womenExclusiveBadge: string; }; 
   lang: Locale;
   query?: string;
 }
 
 export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query = '' }) => {
-  const isExclusive = tour.is_women_exclusive; // Verifica a flag
+  const isExclusive = tour.is_women_exclusive;
+
+  // Lógica para determinar a imagem de exibição
+  let displayImage = tour.imageUrl;
+  if (tour.images && tour.images.length > 0) {
+      // Tenta encontrar a imagem marcada como capa
+      const cover = tour.images.find(img => img.is_cover);
+      // Se achar, usa ela. Se não, usa a primeira do array.
+      displayImage = cover ? cover.image_url : tour.images[0].image_url;
+  }
 
   return (
     <Link
-      // Garante que o link aponta para a página de detalhes com ou sem a query de datas
       href={`/${lang}/tour/${tour.id}${query}`}
       className="group relative bg-white rounded-3xl shadow-sm hover:shadow-card-hover transition-all duration-500 overflow-hidden h-full flex flex-col"
     >
       {/* Container da Imagem */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-3xl">
-        {tour.imageUrl ? (
+        {displayImage ? (
           <Image
-            src={tour.imageUrl}
+            src={displayImage}
             alt={tour.title}
             fill
             className="object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
@@ -54,7 +63,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, dict: t, lang, query =
           <span className="text-lg font-bold text-foz-verde">R$ {tour.price.toFixed(2)}</span>
         </div>
         
-        {/* NOVO: Badge Exclusivo para Mulheres */}
+        {/* Badge Exclusivo para Mulheres */}
         {isExclusive && (
             <div className="absolute top-4 left-4 bg-acento-mulher text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10 uppercase">
                 {t.womenExclusiveBadge}

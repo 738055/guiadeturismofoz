@@ -6,35 +6,25 @@ import { Metadata, ResolvingMetadata } from 'next';
 import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { TourClient } from './TourClient';
-import { parseISO, addDays, format, differenceInDays } from 'date-fns';
+import { parseISO, addDays, format } from 'date-fns';
+import { ImageGallery } from '@/components/ImageGallery';
 
-// --- Tipo de Retorno da Busca ---
-type TourDetailData = Awaited<ReturnType<typeof getTourDetail>>;
-
-// --- FUNÇÃO AUXILIAR DE PARSING SEGURO (CORRIGIDA PARA ROBUSTZ) ---
+// --- FUNÇÃO AUXILIAR DE PARSING SEGURO ---
 const safeParse = (content: any) => {
     if (!content) return [];
     try {
         if (typeof content === 'string') {
-            // Tenta fazer o parse. Se for uma string vazia, retorna array vazio.
             if (content.trim() === '') return []; 
-            
             const parsed = JSON.parse(content);
-            
-            // Se o resultado do parse é um array, filtra itens vazios
             if (Array.isArray(parsed)) {
                  return parsed.filter(item => typeof item === 'string' && item.trim() !== '');
             }
-            // Tenta tratar um único item parseado como string e retorna em um array.
             return [String(parsed)].filter(item => typeof item === 'string' && item.trim() !== '');
         }
         if (Array.isArray(content)) {
-            // Se já é um array, apenas garante que os itens são strings e não estão vazios
             return content.filter(item => typeof item === 'string' && item.trim() !== '');
         }
     } catch (e) {
-        // Em caso de falha no JSON.parse (ex: campo tem texto simples, não JSON),
-        // tenta retornar o conteúdo como um array de string se não for vazio.
         if (typeof content === 'string' && content.trim() !== '') {
              return [content.trim()];
         }
@@ -43,8 +33,7 @@ const safeParse = (content: any) => {
     return [];
 };
 
-
-// --- Busca de Dados no Servidor (AJUSTADA: REMOVIDA tour_availability) ---
+// --- Busca de Dados no Servidor ---
 async function getTourDetail(id: string, lang: Locale) {
   try {
     const selectQuery = `
@@ -65,17 +54,16 @@ async function getTourDetail(id: string, lang: Locale) {
         tour_images (
           image_url,
           alt_text,
-          display_order
+          display_order,
+          is_cover
         )
       `;
       
-    // 1. Executa a consulta
     const { data: tourData, error: tourError } = await supabase
       .from('tours')
       .select(selectQuery)
       .eq('id', id)
       .eq('is_active', true) 
-      .order('display_order', { referencedTable: 'tour_images', ascending: true })
       .maybeSingle();
 
     if (tourError) {
@@ -86,22 +74,25 @@ async function getTourDetail(id: string, lang: Locale) {
 
     const translations = tourData.tour_translations || [];
     
-    // Lógica de Fallback de Tradução
     let translation = translations.find((t: any) => t.language_code === lang);
     if (!translation) translation = translations.find((t: any) => t.language_code === 'pt-BR');
     if (!translation) translation = translations.find((t: any) => t.language_code === 'pt_BR');
 
     if (!translation) {
-      console.error(`Tour ${id} found, but no usable translation available.`);
       return null;
     }
     
-    // --- FILTRAR IMAGENS INVÁLIDAS (PLACEHOLDER) ---
+    // --- FILTRAR E ORDENAR IMAGENS ---
     const rawImages = tourData.tour_images || [];
     const validImages = rawImages.filter((img: any) => 
         img.image_url && !img.image_url.includes('placeholder')
-    );
-    // --- FIM DO FILTRO ---
+    ).sort((a: any, b: any) => {
+        // Prioridade 1: Capa
+        if (a.is_cover && !b.is_cover) return -1;
+        if (!a.is_cover && b.is_cover) return 1;
+        // Prioridade 2: Ordem
+        return (a.display_order || 0) - (b.display_order || 0);
+    });
 
     return {
       ...tourData,
@@ -112,7 +103,7 @@ async function getTourDetail(id: string, lang: Locale) {
       disabled_week_days: tourData.disabled_week_days || [],
       disabled_specific_dates: tourData.disabled_specific_dates || [], 
       isWomenExclusive: tourData.is_women_exclusive || false,
-      images: validImages, // Usa apenas imagens válidas
+      images: validImages,
     };
   } catch (error) {
     console.error('GENERIC ERROR IN getTourDetail:', error);
@@ -120,7 +111,7 @@ async function getTourDetail(id: string, lang: Locale) {
   }
 }
 
-// --- Geração de Metadados de SEO (Servidor) ---
+// --- Geração de Metadados de SEO ---
 export async function generateMetadata(
   { params: { id, lang } }: { params: { id: string; lang: Locale } },
   parent: ResolvingMetadata
@@ -145,33 +136,11 @@ export async function generateMetadata(
         },
       ],
     },
-    other: {
-      'application/ld+json': JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: tour.title,
-        description: tour.description,
-        image: tour.images[0]?.image_url,
-        sku: tour.id,
-        offers: {
-          '@type': 'Offer',
-          price: tour.base_price,
-          priceCurrency: 'BRL',
-          // Atualizado para refletir o agendamento no app
-          availability: 'https://schema.org/InStoreOnly',
-          url: `https://destino.co/${lang}/tour/${tour.id}`, 
-          seller: {
-            '@type': 'Organization',
-            name: 'Araucária Turismo Receptivo',
-          },
-        },
-      }),
-    },
   };
 }
 
 
-// --- A Página (Servidor) - Lógica de Geração de Datas ---
+// --- A Página (Servidor) ---
 export default async function TourDetailPage({
   params: { id, lang },
   searchParams,
@@ -179,16 +148,12 @@ export default async function TourDetailPage({
   params: { id: string; lang: Locale };
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const startDate = searchParams.start as string | null;
-  const endDate = searchParams.end as string | null;
-
   const [tour, dict] = await Promise.all([
     getTourDetail(id, lang),
     getDictionary(lang),
   ]);
 
   if (!tour) {
-    // Se o tour não for encontrado ou falhar, exibe o erro
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center min-h-[60vh]">
         <p className="text-gray-500">{dict.common.error}</p>
@@ -196,31 +161,15 @@ export default async function TourDetailPage({
     );
   }
 
-  // --- NOVA LÓGICA: SIMULAR DISPONIBILIDADE FUTURA ---
+  // Simulação de Disponibilidade
   const fixedSpots = 50; 
   const numDaysToGenerate = 90; 
-  
   let simulatedAvailability = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0); 
   
   let startGen = addDays(today, 1);
   let endGen = addDays(today, numDaysToGenerate);
-
-  // Se houver datas na URL de roteiro, o range se ajusta.
-  if (startDate && endDate) {
-    const searchStart = parseISO(startDate);
-    const searchEnd = parseISO(endDate);
-
-    // Começa a gerar a partir da data de início da pesquisa (se for futura)
-    if (searchStart > startGen) startGen = searchStart;
-    
-    // O final da geração é o final da pesquisa, se for mais tarde que a geração padrão.
-    if (searchEnd > endGen) endGen = searchEnd;
-  }
-  
-  // Se o start for maior que o end, ajusta o start para o dia seguinte ao atual.
-  if (startGen > endGen) startGen = addDays(today, 1);
 
   for (let d = startGen; d <= endGen; d = addDays(d, 1)) {
       simulatedAvailability.push({
@@ -231,49 +180,15 @@ export default async function TourDetailPage({
   }
   
   const availableDates = simulatedAvailability; 
-  // --- FIM DA NOVA LÓGICA ---
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-20">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Parte de Imagens (Servidor) */}
-        <div>
-          <div className="relative h-96 rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-verde-principal to-verde-secundario">
-            {/* Agora ele só renderiza se houver pelo menos uma imagem VÁLIDA */}
-            {tour.images[0] ? (
-              <Image
-                src={tour.images[0].image_url}
-                alt={tour.images[0].alt_text || tour.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="50vw"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <MapPin className="w-24 h-24 text-white opacity-50" />
-              </div>
-            )}
-          </div>
+        
+        {/* Lado Esquerdo: Nova Galeria de Imagens */}
+        <ImageGallery images={tour.images} title={tour.title} />
 
-          {tour.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-2">
-              {tour.images.slice(1, 5).map((image: any, index: number) => (
-                <div key={index} className="relative h-24 rounded-lg overflow-hidden">
-                  <Image
-                    src={image.image_url}
-                    alt={image.alt_text || `${tour.title} ${index + 2}`}
-                    fill
-                    className="object-cover"
-                    sizes="20vw"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Parte de Conteúdo (Servidor) */}
+        {/* Lado Direito: Conteúdo */}
         <div>
           <div className="flex items-center gap-4 mb-2">
              <h1
@@ -282,7 +197,6 @@ export default async function TourDetailPage({
               >
                 {tour.title}
               </h1>
-              {/* NOVO: Badge Exclusivo */}
               {tour.isWomenExclusive && (
                   <span className="bg-acento-mulher text-white px-3 py-1 rounded-full text-sm font-bold shadow-md uppercase tracking-wider whitespace-nowrap">
                       {dict.tours.womenExclusiveBadge}
@@ -309,7 +223,7 @@ export default async function TourDetailPage({
             {tour.description}
           </p>
 
-          {/* --- Componente de Cliente para Interação --- */}
+          {/* Componente de Cliente para Interação */}
           <TourClient 
             tour={{
                 id: tour.id,
@@ -318,12 +232,11 @@ export default async function TourDetailPage({
                 disabled_week_days: tour.disabled_week_days,
                 disabled_specific_dates: tour.disabled_specific_dates,
             }} 
-            availableDates={availableDates} // Passa a lista simulada
-            dict={dict} // Passa o dicionário completo
+            availableDates={availableDates} 
+            dict={dict} 
             lang={lang} 
           />
 
-          {/* --- ÁREA DE INCLUÍDO / NÃO INCLUÍDO --- */}
           <div className="space-y-6 mt-8">
             {tour.whatsIncluded && tour.whatsIncluded.length > 0 && (
               <div>
