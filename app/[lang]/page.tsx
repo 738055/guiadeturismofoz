@@ -9,7 +9,7 @@ import { ServicesTabs } from '@/components/ServicesTabs';
 import { supabase } from '@/lib/supabase';
 import { Locale, getDictionary } from '@/i18n/dictionaries';
 
-// Tipo Tour atualizado
+// CORREÇÃO: imageUrl agora é string obrigatória, pois getValidImageUrl garante isso
 type Tour = {
   id: string;
   title: string;
@@ -17,7 +17,7 @@ type Tour = {
   price: number;
   duration: number;
   location: string;
-  imageUrl: string | undefined; 
+  imageUrl: string; // <-- Mudou de 'string | undefined' para 'string'
   is_women_exclusive: boolean;
 };
 
@@ -58,7 +58,6 @@ async function getPopularTours(lang: Locale) {
                             tour.tour_translations.find((t: any) => t.language_code === 'pt-BR');
         if (!translation) return null;
         
-        // CORREÇÃO: Aplica a validação de URL aqui
         const rawImage = tour.tour_images?.[0]?.image_url;
         const validImage = getValidImageUrl(rawImage);
 
@@ -70,10 +69,11 @@ async function getPopularTours(lang: Locale) {
           duration: tour.duration_hours,
           location: tour.location,
           is_women_exclusive: tour.is_women_exclusive || false,
-          imageUrl: validImage // Usa a URL validada
+          imageUrl: validImage // Garantido como string
         };
       });
       
+    // Agora a tipagem bate: o objeto tem imageUrl string e o tipo Tour também
     return tours.filter((tour): tour is Tour => tour !== null);
 
   } catch (error) {
@@ -113,7 +113,6 @@ async function getDynamicCategories(lang: Locale): Promise<DynamicCategory[]> {
 
         if (!dictKey) return null;
 
-        // CORREÇÃO: Valida imagem da categoria também
         return {
             id: cat.id,
             key: dictKey,
