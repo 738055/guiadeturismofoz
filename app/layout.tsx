@@ -1,8 +1,8 @@
-// app/layout.tsx
 import './globals.css';
 import { Inter, Merriweather } from 'next/font/google';
 import { CartProvider } from '@/contexts/CartContext';
 import { WhatsAppWidget } from '@/components/WhatsappWidget';
+import Analytics from '@/components/Analytics';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -32,6 +32,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${inter.variable} ${merriweather.variable} scroll-smooth`}>
       <body className="font-sans bg-gray-50">
         <CartProvider>
+          <Analytics />
           {children}
           <WhatsAppWidget /> {/* Widget fixo em todas as páginas */}
         </CartProvider>
