@@ -34,20 +34,17 @@ export default async function InformacaoDetalhePage({ params: { lang, slug } }: 
     notFound();
   }
 
-  // Função simples para processar quebras de linha se o conteúdo não for HTML rico
-  const renderContent = (content: string) => {
-    return content.split('\n').map((str, index) => (
-      <p key={index} className="mb-4 min-h-[1em]">{str}</p>
-    ));
-  };
+  // Correção do erro de build: Tratar post.posts como array ou objeto de forma segura
+  // O Supabase pode retornar um array em joins, mesmo sendo relacionamento 1:1 dependendo da inferência
+  const postData = Array.isArray(post.posts) ? post.posts[0] : post.posts;
 
   return (
     <div className="min-h-screen bg-white">
       {/* Banner / Header */}
       <div className="relative h-[40vh] md:h-[50vh] w-full bg-gray-900">
-         {post.posts.image_url && (
+         {postData?.image_url && (
             <Image 
-              src={post.posts.image_url} 
+              src={postData.image_url} 
               alt={post.title} 
               fill 
               className="object-cover opacity-60"
@@ -66,7 +63,7 @@ export default async function InformacaoDetalhePage({ params: { lang, slug } }: 
                <div className="flex items-center text-white/70 space-x-6 text-sm md:text-base">
                   <span className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {new Date(post.posts.created_at).toLocaleDateString(lang)}
+                    {postData?.created_at ? new Date(postData.created_at).toLocaleDateString(lang) : ''}
                   </span>
                   <span className="flex items-center">
                     <User className="w-4 h-4 mr-2" />
@@ -79,7 +76,7 @@ export default async function InformacaoDetalhePage({ params: { lang, slug } }: 
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <article className="prose prose-lg prose-green max-w-none text-gray-700 leading-relaxed">
-          {/* Renderização do conteúdo - Se estiver usando um editor HTML no futuro, usar dangerouslySetInnerHTML */}
+          {/* Renderização do conteúdo */}
           <div className="whitespace-pre-wrap font-sans text-lg">
              {post.content}
           </div>
