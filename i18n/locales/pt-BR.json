@@ -3,7 +3,7 @@
     "home": "Início",
     "products": "Passeios",
     "combos": "Combos",
-    "blog": "Dicas",
+    "blog": "Informações",
     "about": "Sobre Nós",
     "contact": "Contato"
   },
@@ -66,9 +66,9 @@
     "noCombos": "Nenhum combo disponível no momento."
   },
   "blog": {
-    "title": "Dicas & Curiosidades",
-    "subtitle": "Tudo o que você precisa saber para aproveitar Foz ao máximo",
-    "noPosts": "Em breve, muitas dicas por aqui!"
+    "title": "Informações & Novidades",
+    "subtitle": "Fique por dentro de tudo o que acontece em Foz do Iguaçu",
+    "noPosts": "Em breve, novas informações por aqui!"
   },
   "about": {
     "title": "Sobre a Guia de Turismo Foz",

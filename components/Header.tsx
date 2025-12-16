@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
     { href: `/${lang}`, label: t?.home || 'Início' },
     { href: `/${lang}/tours`, label: t?.products || 'Passeios' },
     { href: `/${lang}/combos`, label: t?.combos || 'Combos' },
-    { href: `/${lang}/blog`, label: t?.blog || 'Dicas' },
+    { href: `/${lang}/informacoes`, label: t?.blog || 'Informações' }, // Link alterado
     { href: `/${lang}/about`, label: t?.about || 'Sobre Nós' },
     { href: `/${lang}/contact`, label: t?.contact || 'Contato' },
   ];
@@ -132,11 +132,10 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, lang, navText: t })
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           
           {/* Logo */}
-          {/* AJUSTE APLICADO: A largura é definida para 'w-24' (menor) no mobile para evitar a sobreposição, independentemente do scroll. */}
           <div className={`transition-all duration-500 drop-shadow-sm ${
             useWhiteStyle 
-              ? 'w-24 md:w-36' // Scrolled: w-24 no mobile, w-36 no desktop
-              : 'w-24 md:w-52 md:-my-8' // Transparente: w-24 no mobile, w-52 com margem negativa no desktop
+              ? 'w-24 md:w-36' 
+              : 'w-24 md:w-52 md:-my-8'
           }`}>
              <SiteLogo lang={lang} className="w-full h-auto" />
           </div>
