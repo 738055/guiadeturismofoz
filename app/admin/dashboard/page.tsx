@@ -11,7 +11,8 @@ import {
   LogOut, 
   MapPin, 
   Tag, 
-  Layers 
+  Layers,
+  BookOpen // Adicionado ícone para o Blog
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -125,7 +126,6 @@ export default function AdminDashboardPage() {
             <p className="text-gray-600 text-sm">Criar e excluir categorias</p>
           </button>
 
-          {/* BOTÃO DE COMBOS (Integrado) */}
           <button
             onClick={() => router.push('/admin/combos')}
             className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
@@ -133,6 +133,16 @@ export default function AdminDashboardPage() {
             <Layers className="w-12 h-12 text-purple-600 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">Gerenciar Combos</h3>
             <p className="text-gray-600 text-sm">Criar pacotes e promoções</p>
+          </button>
+
+          {/* NOVO BOTÃO: GERENCIAR INFORMAÇÕES (BLOG) */}
+          <button
+            onClick={() => router.push('/admin/posts')}
+            className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition-shadow group text-left"
+          >
+            <BookOpen className="w-12 h-12 text-orange-500 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Gerenciar Informações</h3>
+            <p className="text-gray-600 text-sm">Blog, notícias e dicas</p>
           </button>
 
           <button
